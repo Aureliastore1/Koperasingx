@@ -590,3 +590,96 @@ img {
     padding: 12px 14px;
     margin-top: 12px;
 }
+
+/* ===== Upload Bukti Transfer ===== */
+.ngx-upload-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1.5px dashed rgba(15, 118, 110, 0.3);
+    border-radius: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    background: rgba(15, 118, 110, 0.02);
+}
+.ngx-upload-box:hover {
+    border-color: #0F766E;
+    background: rgba(15, 118, 110, 0.05);
+}
+.ngx-upload-box.terisi {
+    border-style: solid;
+    border-color: rgba(15, 118, 110, 0.25);
+}
+
+.ngx-upload-thumb {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid rgba(15, 118, 110, 0.15);
+}
+
+.ngx-upload-text {
+    font-size: 12px;
+    color: #6B7280;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ngx-upload-box.terisi .ngx-upload-text {
+    color: #0F766E;
+    font-weight: 600;
+}
+
+/* ===== Kartu Info Rekening Tujuan ===== */
+.ngx-rekening-card {
+    background: linear-gradient(135deg, #0F766E, #134E4A);
+    border-radius: 24px;
+    padding: 24px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+}
+.ngx-rekening-card::before {
+    content: "";
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 140px;
+    height: 140px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+}
+.ngx-rekening-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+}
+.ngx-rekening-nomor {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    font-variant-numeric: tabular-nums;
+}
+.ngx-rekening-copy {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.ngx-rekening-copy:hover {
+    background: rgba(255,255,255,0.2);
+}
