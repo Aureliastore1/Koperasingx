@@ -1,15 +1,17 @@
 // Initialize Lucide Icons
 lucide.createIcons();
 
-// Navbar scroll effect
+// Navbar scroll effect (hanya berlaku di halaman yang punya #navbar, mis. beranda)
 const navbar = document.getElementById('navbar');
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 60) {
-        navbar.classList.add('scrolled');
-    } else {
-        navbar.classList.remove('scrolled');
-    }
-});
+if (navbar) {
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 60) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+}
 
 // Reveal on scroll using Intersection Observer
 const revealElements = document.querySelectorAll('.reveal');
@@ -490,5 +492,116 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
     var btnRefresh = document.getElementById("infoKasRefreshBtn");
     if (btnRefresh) {
         btnRefresh.addEventListener("click", muatInformasiKas);
+    }
+})();
+
+/* =========================================================
+   TABEL IURAN BULANAN — per anggota (Januari s.d Desember + Total)
+   Hanya aktif kalau elemen #iuranKasBody ada di halaman (mis. /informasi-kas)
+   ========================================================= */
+(function () {
+    var loadingBox = document.getElementById("iuranKasLoading");
+    var errorBox = document.getElementById("iuranKasError");
+    var errorText = document.getElementById("iuranKasErrorText");
+    var wrapper = document.getElementById("iuranKasWrapper");
+    var theadRow = document.getElementById("iuranKasHeadRow");
+    var tbody = document.getElementById("iuranKasBody");
+    var kelompokBox = document.getElementById("iuranKasKelompok");
+    var countBadge = document.getElementById("iuranKasCount");
+
+    if (!tbody || !theadRow) return;
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+    }
+
+    function inisial(nama) {
+        var kata = String(nama || "").trim().split(/\s+/);
+        var a = kata[0] ? kata[0][0] : "";
+        var b = kata[1] ? kata[1][0] : "";
+        return (a + b).toUpperCase();
+    }
+
+    function renderBarisAnggota(entry, isKelompok) {
+        var selBulan = entry.bulan.map(function (b) {
+            return '<td class="ngx-iuran-cell">' + (b.nominal > 0 ? b.nominalFormat.replace("Rp ", "") : '<span class="ngx-iuran-kosong">&mdash;</span>') + '</td>';
+        }).join("");
+
+        var namaCol = isKelompok
+            ? ('<div class="flex items-center gap-2.5">' +
+                '<div class="ngx-iuran-avatar ngx-iuran-avatar-kelompok"><i data-lucide="users" class="w-3.5 h-3.5"></i></div>' +
+                '<span class="font-bold text-kop-800">' + escapeHtml(entry.nama) + '</span>' +
+               '</div>')
+            : ('<div class="flex items-center gap-2.5">' +
+                '<div class="ngx-iuran-avatar">' + escapeHtml(inisial(entry.nama)) + '</div>' +
+                '<span class="font-semibold text-gray-700 whitespace-nowrap">' + escapeHtml(entry.nama) + '</span>' +
+               '</div>');
+
+        return (
+            '<tr class="' + (isKelompok ? "ngx-iuran-row-kelompok" : "ngx-iuran-row") + '">' +
+                '<td class="ngx-iuran-cell-nama">' + namaCol + '</td>' +
+                selBulan +
+                '<td class="ngx-iuran-cell ngx-iuran-total">' + entry.totalFormat.replace("Rp ", "") + '</td>' +
+            '</tr>'
+        );
+    }
+
+    function muatIuranKas() {
+
+        loadingBox.classList.remove("hidden");
+        errorBox.classList.add("hidden");
+        wrapper.classList.add("hidden");
+
+        fetch(NGX_API_BASE_URL + "?action=iuranKas")
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+
+                loadingBox.classList.add("hidden");
+
+                if (!data || data.success !== true) {
+                    if (errorText) errorText.textContent = (data && data.message) ? data.message : "Gagal memuat data iuran.";
+                    errorBox.classList.remove("hidden");
+                    return;
+                }
+
+                // Header bulan (dinamis sesuai label dari sheet)
+                theadRow.innerHTML =
+                    '<th class="ngx-iuran-th ngx-iuran-th-nama">Nama</th>' +
+                    data.labelBulan.map(function (l) {
+                        return '<th class="ngx-iuran-th">' + escapeHtml(String(l).slice(0, 3)) + '</th>';
+                    }).join("") +
+                    '<th class="ngx-iuran-th ngx-iuran-th-total">Total</th>';
+
+                // Baris anggota
+                var rows = data.anggota.map(function (entry) {
+                    return renderBarisAnggota(entry, false);
+                }).join("");
+
+                if (data.kelompok) {
+                    rows += renderBarisAnggota(data.kelompok, true);
+                }
+
+                tbody.innerHTML = rows || '<tr><td colspan="' + (data.labelBulan.length + 2) + '" class="text-center py-8 text-xs text-gray-400">Belum ada data iuran</td></tr>';
+
+                if (countBadge) countBadge.textContent = data.jumlahAnggota + " Anggota";
+
+                wrapper.classList.remove("hidden");
+                if (window.lucide) lucide.createIcons();
+
+            })
+            .catch(function () {
+                loadingBox.classList.add("hidden");
+                if (errorText) errorText.textContent = "Gagal terhubung ke server.";
+                errorBox.classList.remove("hidden");
+            });
+    }
+
+    muatIuranKas();
+
+    var btnRefresh = document.getElementById("iuranKasRefreshBtn");
+    if (btnRefresh) {
+        btnRefresh.addEventListener("click", muatIuranKas);
     }
 })();
