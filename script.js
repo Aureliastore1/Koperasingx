@@ -13,6 +13,43 @@ if (navbar) {
     });
 }
 
+/* =========================================================
+   JAM REAL-TIME (WIB) — tampil di hero beranda
+   Selalu pakai zona Asia/Jakarta supaya konsisten buat semua
+   pengunjung, apapun zona waktu perangkat mereka.
+   ========================================================= */
+(function () {
+    var elTime = document.getElementById("liveClockTime");
+    var elDate = document.getElementById("liveClockDate");
+
+    if (!elTime || !elDate) return;
+
+    var formatJam = new Intl.DateTimeFormat("id-ID", {
+        timeZone: "Asia/Jakarta",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+    });
+
+    var formatTanggal = new Intl.DateTimeFormat("id-ID", {
+        timeZone: "Asia/Jakarta",
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+    });
+
+    function perbaruiJam() {
+        var now = new Date();
+        elTime.textContent = formatJam.format(now) + " WIB";
+        elDate.textContent = formatTanggal.format(now);
+    }
+
+    perbaruiJam();
+    setInterval(perbaruiJam, 1000);
+})();
+
 // Reveal on scroll using Intersection Observer
 const revealElements = document.querySelectorAll('.reveal');
 const observer = new IntersectionObserver((entries) => {
