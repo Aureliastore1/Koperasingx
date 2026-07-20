@@ -605,3 +605,117 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
         btnRefresh.addEventListener("click", muatIuranKas);
     }
 })();
+
+/* =========================================================
+   RINCIAN PENGELUARAN PER BULAN — accordion
+   Hanya aktif kalau elemen #pengeluaranAccordion ada di halaman
+   ========================================================= */
+(function () {
+    var loadingBox = document.getElementById("pengeluaranLoading");
+    var errorBox = document.getElementById("pengeluaranError");
+    var errorText = document.getElementById("pengeluaranErrorText");
+    var wrapper = document.getElementById("pengeluaranWrapper");
+    var accordion = document.getElementById("pengeluaranAccordion");
+    var grandTotalEl = document.getElementById("pengeluaranGrandTotal");
+
+    if (!accordion) return;
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+    }
+
+    function renderBulan(bulan) {
+
+        var isKosong = bulan.jumlahItem === 0;
+
+        var isiList = bulan.items.map(function (it) {
+
+            var chips = it.rincian.map(function (r) {
+                return '<span class="ngx-accordion-chip">' + escapeHtml(r.label) + ' ' + r.nominalFormat.replace("Rp ", "") + '</span>';
+            }).join("");
+
+            return (
+                '<div class="ngx-accordion-row">' +
+                    '<span class="ngx-accordion-row-nama">' + escapeHtml(it.item) + '</span>' +
+                    '<span class="ngx-accordion-row-nominal">' + chips + '<span class="ngx-accordion-total">' + it.totalFormat + '</span></span>' +
+                '</div>'
+            );
+        }).join("");
+
+        var body = isKosong
+            ? '<div class="ngx-accordion-empty">Belum ada data pengeluaran bulan ini</div>'
+            : '<div class="ngx-accordion-list">' + isiList + '</div>';
+
+        return (
+            '<div class="ngx-accordion-item' + (isKosong ? " kosong" : "") + '" data-bulan="' + escapeHtml(bulan.label) + '">' +
+                '<button type="button" class="ngx-accordion-header"' + (isKosong ? " disabled" : "") + '>' +
+                    '<div class="flex items-center gap-3 min-w-0">' +
+                        '<span class="font-bold text-gray-800 text-sm">' + escapeHtml(capitalize(bulan.label)) + '</span>' +
+                        '<span class="ngx-badge-count">' + bulan.jumlahItem + ' item</span>' +
+                    '</div>' +
+                    '<div class="flex items-center gap-3 flex-shrink-0">' +
+                        '<span class="font-bold text-kop-800 text-sm">' + bulan.totalFormat + '</span>' +
+                        (isKosong ? '' : '<i data-lucide="chevron-down" class="w-4 h-4 ngx-accordion-chevron"></i>') +
+                    '</div>' +
+                '</button>' +
+                '<div class="ngx-accordion-body">' + body + '</div>' +
+            '</div>'
+        );
+    }
+
+    function capitalize(s) {
+        s = String(s || "").toLowerCase();
+        return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+
+    function muatPengeluaran() {
+
+        loadingBox.classList.remove("hidden");
+        errorBox.classList.add("hidden");
+        wrapper.classList.add("hidden");
+
+        fetch(NGX_API_BASE_URL + "?action=rincianPengeluaran")
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+
+                loadingBox.classList.add("hidden");
+
+                if (!data || data.success !== true) {
+                    if (errorText) errorText.textContent = (data && data.message) ? data.message : "Gagal memuat data pengeluaran.";
+                    errorBox.classList.remove("hidden");
+                    return;
+                }
+
+                accordion.innerHTML = data.bulan.map(renderBulan).join("");
+
+                if (grandTotalEl) grandTotalEl.textContent = data.grandTotalFormat;
+
+                wrapper.classList.remove("hidden");
+                if (window.lucide) lucide.createIcons();
+
+                // Pasang klik expand/collapse
+                var items = accordion.querySelectorAll(".ngx-accordion-item:not(.kosong)");
+                items.forEach(function (el) {
+                    var header = el.querySelector(".ngx-accordion-header");
+                    header.addEventListener("click", function () {
+                        el.classList.toggle("open");
+                    });
+                });
+
+            })
+            .catch(function () {
+                loadingBox.classList.add("hidden");
+                if (errorText) errorText.textContent = "Gagal terhubung ke server.";
+                errorBox.classList.remove("hidden");
+            });
+    }
+
+    muatPengeluaran();
+
+    var btnRefresh = document.getElementById("pengeluaranRefreshBtn");
+    if (btnRefresh) {
+        btnRefresh.addEventListener("click", muatPengeluaran);
+    }
+})();
