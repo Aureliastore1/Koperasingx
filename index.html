@@ -8,11 +8,11 @@
     <link rel="shortcut icon" href="/favicon.png.png">
     <link rel="apple-touch-icon" href="/favicon.png.png">
 
-    <title>Informasi Kas | Koperasi Simpan Pinjam NGX</title>
-    <meta name="description" content="Ringkasan kas dan tabel iuran bulanan anggota Koperasi Simpan Pinjam NGX, diperbarui otomatis secara real-time.">
-    <meta property="og:title" content="Informasi Kas | KAS NGX">
-    <meta property="og:description" content="Transparansi kas koperasi secara real-time.">
-    <meta property="og:url" content="https://koperasingx.web.id/informasi-kas">
+    <title>Cek Tagihan | Koperasi Simpan Pinjam NGX</title>
+    <meta name="description" content="Cek status tagihan dan riwayat pinjaman Anda di Koperasi Simpan Pinjam NGX.">
+    <meta property="og:title" content="Cek Tagihan | KAS NGX">
+    <meta property="og:description" content="Cek status tagihan dan riwayat pinjaman Anda secara real-time.">
+    <meta property="og:url" content="https://koperasingx.web.id/cek-tagihan">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -55,112 +55,54 @@
     </nav>
 
     <!-- Hero halaman -->
-    <section class="ngx-page-hero pt-16 pb-16 px-4 sm:px-6">
-        <div class="max-w-5xl mx-auto text-center pt-10">
+    <section class="ngx-page-hero pt-16 pb-24 px-4 sm:px-6">
+        <div class="max-w-2xl mx-auto text-center pt-10">
             <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 mb-5">
-                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-kop-200"></i>
-                <span class="text-white/90 text-xs font-medium">Transparansi Real-Time</span>
+                <i data-lucide="search-check" class="w-3.5 h-3.5 text-kop-200"></i>
+                <span class="text-white/90 text-xs font-medium">Cek Status Anggota</span>
             </div>
             <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3 drop-shadow-lg">
-                Informasi Kas
+                Cek Tagihan
             </h1>
-            <p class="text-white/70 text-sm sm:text-base max-w-xl mx-auto">
-                Ringkasan kondisi kas koperasi dan rekap iuran bulanan setiap anggota, terhubung langsung ke data internal.
+            <p class="text-white/70 text-sm sm:text-base max-w-lg mx-auto">
+                Masukkan nama lengkap Anda sesuai data anggota untuk melihat status pinjaman dan riwayat transaksi.
             </p>
         </div>
     </section>
 
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 -mt-8 pb-24">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 -mt-14 pb-24">
 
-        <!-- Ringkasan Kas -->
-        <div id="infoKasLoading" class="flex flex-col items-center justify-center gap-3 py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
-            <div class="ngx-spinner"></div>
-            <p class="text-sm text-gray-500">Memuat data kas...</p>
-        </div>
-
-        <div id="infoKasError" class="hidden text-center py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
-            <i data-lucide="wifi-off" class="w-8 h-8 text-red-500 mx-auto mb-3"></i>
-            <p class="text-sm font-semibold text-gray-800 mb-1">Gagal memuat data kas</p>
-            <p class="text-xs text-gray-500 mb-4" id="infoKasErrorText">Silakan coba lagi beberapa saat lagi.</p>
-            <button id="infoKasRefreshBtn" type="button" class="inline-flex items-center gap-2 bg-kop-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg hover:bg-kop-800 transition">
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-                Coba Lagi
-            </button>
-        </div>
-
-        <div id="infoKasGrid" class="hidden grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div class="ngx-hasil-card rounded-3xl p-6">
-                <div class="w-12 h-12 bg-kop-700 rounded-2xl flex items-center justify-center mb-4 shadow-md">
-                    <i data-lucide="piggy-bank" class="w-6 h-6 text-white"></i>
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-xl shadow-kop-900/5">
+            <form id="cekTagihanForm" class="flex flex-col sm:flex-row gap-3" autocomplete="off">
+                <div class="relative flex-1">
+                    <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+                    <input
+                        type="text"
+                        id="cekTagihanNama"
+                        required
+                        autocomplete="off"
+                        placeholder="Contoh: ADDIN MAS AMBAR"
+                        class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-kop-500 focus:border-transparent bg-white"
+                    >
+                    <div id="cekTagihanSuggest" class="ngx-suggest hidden"></div>
                 </div>
-                <p class="text-xs text-gray-500 mb-1">Total Kas Masuk</p>
-                <p id="infoKasTotal" class="text-xl font-extrabold text-kop-800">Rp 0</p>
-            </div>
-            <div class="ngx-hasil-card rounded-3xl p-6">
-                <div class="w-12 h-12 bg-red-500 rounded-2xl flex items-center justify-center mb-4 shadow-md">
-                    <i data-lucide="trending-down" class="w-6 h-6 text-white"></i>
-                </div>
-                <p class="text-xs text-gray-500 mb-1">Total Pengeluaran</p>
-                <p id="infoKasPengeluaran" class="text-xl font-extrabold text-red-600">Rp 0</p>
-            </div>
-            <div class="ngx-hasil-card rounded-3xl p-6">
-                <div class="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center mb-4 shadow-md">
-                    <i data-lucide="banknote" class="w-6 h-6 text-white"></i>
-                </div>
-                <p class="text-xs text-gray-500 mb-1">Total Pinjaman Beredar</p>
-                <p id="infoKasPinjaman" class="text-xl font-extrabold text-amber-600">Rp 0</p>
-            </div>
-            <div class="ngx-hasil-card rounded-3xl p-6">
-                <div class="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center mb-4 shadow-md">
-                    <i data-lucide="wallet" class="w-6 h-6 text-white"></i>
-                </div>
-                <p class="text-xs text-gray-500 mb-1">Sisa Kas</p>
-                <p id="infoKasSisa" class="text-xl font-extrabold text-emerald-700">Rp 0</p>
-            </div>
-        </div>
-
-        <p id="infoKasUpdated" class="hidden text-center text-xs text-gray-400 mt-5"></p>
-
-        <!-- Tabel Iuran Bulanan -->
-        <div class="mt-14">
-            <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
-                <div>
-                    <h2 class="text-xl font-extrabold text-gray-900">Iuran Bulanan Anggota</h2>
-                    <p class="text-xs text-gray-500 mt-1">Rekap setoran iuran setiap anggota per bulan berjalan</p>
-                </div>
-                <span id="iuranKasCount" class="ngx-badge-count">&nbsp;</span>
-            </div>
-
-            <div id="iuranKasLoading" class="flex flex-col items-center justify-center gap-3 py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
-                <div class="ngx-spinner"></div>
-                <p class="text-sm text-gray-500">Memuat tabel iuran...</p>
-            </div>
-
-            <div id="iuranKasError" class="hidden text-center py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
-                <i data-lucide="table" class="w-8 h-8 text-red-500 mx-auto mb-3"></i>
-                <p class="text-sm font-semibold text-gray-800 mb-1">Gagal memuat tabel iuran</p>
-                <p class="text-xs text-gray-500 mb-4" id="iuranKasErrorText">Silakan coba lagi beberapa saat lagi.</p>
-                <button id="iuranKasRefreshBtn" type="button" class="inline-flex items-center gap-2 bg-kop-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg hover:bg-kop-800 transition">
-                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-                    Coba Lagi
+                <button
+                    type="submit"
+                    id="cekTagihanBtn"
+                    class="inline-flex items-center justify-center gap-2 bg-kop-700 text-white text-sm font-bold px-6 py-3.5 rounded-xl hover:bg-kop-800 transition shadow-md whitespace-nowrap"
+                >
+                    <i data-lucide="search-check" class="w-4 h-4"></i>
+                    <span>Cek Sekarang</span>
                 </button>
-            </div>
-
-            <div id="iuranKasWrapper" class="hidden">
-                <div class="ngx-iuran-scroll">
-                    <table class="ngx-iuran-table">
-                        <thead>
-                            <tr id="iuranKasHeadRow"></tr>
-                        </thead>
-                        <tbody id="iuranKasBody"></tbody>
-                    </table>
-                </div>
-                <p class="text-xs text-gray-400 mt-3 flex items-center gap-1.5">
-                    <i data-lucide="info" class="w-3.5 h-3.5"></i>
-                    Geser tabel ke kanan untuk melihat bulan lainnya
-                </p>
-            </div>
+            </form>
+            <p id="cekTagihanError" class="hidden text-xs text-red-600 mt-3 flex items-center gap-1.5">
+                <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+                <span id="cekTagihanErrorText">Nama tidak boleh kosong.</span>
+            </p>
         </div>
+
+        <!-- Hasil Cek Tagihan -->
+        <div id="cekTagihanResult" class="mt-6"></div>
     </div>
 
     <!-- Footer -->
