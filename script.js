@@ -243,6 +243,48 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         if (window.lucide) lucide.createIcons();
     }
 
+    function renderRiwayat(n) {
+        var riwayat = Array.isArray(n.riwayat) ? n.riwayat : [];
+        var jumlah = n.jumlahPinjam != null ? n.jumlahPinjam : riwayat.length;
+
+        var isiList;
+        if (riwayat.length === 0) {
+            isiList =
+                '<div class="text-center py-8">' +
+                    '<i data-lucide="inbox" class="w-7 h-7 text-gray-300 mx-auto mb-2"></i>' +
+                    '<p class="text-xs text-gray-400">Belum ada riwayat transaksi tercatat</p>' +
+                '</div>';
+        } else {
+            isiList = riwayat.map(function (r) {
+                return (
+                    '<div class="ngx-riwayat-item">' +
+                        '<div class="ngx-riwayat-dot"></div>' +
+                        '<div class="flex-1 min-w-0 flex items-center justify-between gap-3">' +
+                            '<div class="min-w-0">' +
+                                '<p class="text-sm font-semibold text-gray-800">Pengajuan Pinjaman</p>' +
+                                '<p class="text-xs text-gray-400">' + r.tanggalFormat + '</p>' +
+                            '</div>' +
+                            '<span class="text-sm font-bold text-kop-800 whitespace-nowrap">' + r.nominalFormat + '</span>' +
+                        '</div>' +
+                    '</div>'
+                );
+            }).join("");
+        }
+
+        return (
+            '<div class="ngx-hasil-card hasil-fade-in rounded-3xl p-6 sm:p-8 mt-4">' +
+                '<div class="flex items-center justify-between mb-5">' +
+                    '<div class="flex items-center gap-2.5">' +
+                        '<i data-lucide="history" class="w-5 h-5 text-kop-700"></i>' +
+                        '<h3 class="text-sm font-bold text-gray-900">Riwayat Transaksi Pinjaman</h3>' +
+                    '</div>' +
+                    '<span class="ngx-badge-count">' + jumlah + 'x Pinjam</span>' +
+                '</div>' +
+                '<div class="ngx-riwayat-list">' + isiList + '</div>' +
+            '</div>'
+        );
+    }
+
     function renderHasil(n) {
         var isLunas = n.status === "LUNAS";
         var badgeClass = isLunas ? "ngx-badge-lunas" : "ngx-badge-belum";
@@ -291,7 +333,8 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                     '<i data-lucide="' + badgeIcon + '" class="w-3.5 h-3.5"></i>' +
                     n.status +
                 '</div>' +
-            '</div>';
+            '</div>' +
+            renderRiwayat(n);
 
         if (window.lucide) lucide.createIcons();
 
