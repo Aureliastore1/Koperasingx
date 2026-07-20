@@ -52,8 +52,150 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     var errorMsg = document.getElementById("cekTagihanError");
     var errorText = document.getElementById("cekTagihanErrorText");
     var resultBox = document.getElementById("cekTagihanResult");
+    var suggestBox = document.getElementById("cekTagihanSuggest");
 
     if (!form || !input || !resultBox) return;
+
+    /* ===== Autocomplete Nama ===== */
+    var daftarNama = [];
+    var daftarNamaSiap = false;
+    var suggestActiveIndex = -1;
+    var suggestItems = [];
+    var debounceTimer = null;
+
+    function muatDaftarNama() {
+        fetch(CEK_TAGIHAN_BASE_URL + "?action=daftarNama")
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data && data.success && Array.isArray(data.daftarNama)) {
+                    daftarNama = data.daftarNama;
+                }
+                daftarNamaSiap = true;
+            })
+            .catch(function () {
+                daftarNamaSiap = true; // gagal diam-diam, form tetap bisa dipakai manual
+            });
+    }
+    muatDaftarNama();
+
+    function escapeHtml(s) {
+        return s.replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+    }
+
+    function highlightMatch(nama, query) {
+        var idx = nama.toUpperCase().indexOf(query.toUpperCase());
+        if (idx === -1) return escapeHtml(nama);
+        var before = escapeHtml(nama.slice(0, idx));
+        var match = escapeHtml(nama.slice(idx, idx + query.length));
+        var after = escapeHtml(nama.slice(idx + query.length));
+        return before + "<mark>" + match + "</mark>" + after;
+    }
+
+    function closeSuggest() {
+        suggestBox.classList.add("hidden");
+        suggestBox.innerHTML = "";
+        suggestItems = [];
+        suggestActiveIndex = -1;
+    }
+
+    function setActiveSuggest(i) {
+        suggestItems.forEach(function (el) { el.classList.remove("active"); });
+        if (suggestItems[i]) {
+            suggestItems[i].classList.add("active");
+            suggestItems[i].scrollIntoView({ block: "nearest" });
+        }
+        suggestActiveIndex = i;
+    }
+
+    function pilihNama(nama) {
+        input.value = nama;
+        closeSuggest();
+        hideError();
+        input.focus();
+    }
+
+    function tampilkanSuggest(query) {
+        if (!query) {
+            closeSuggest();
+            return;
+        }
+
+        var hasil = daftarNama
+            .filter(function (n) { return n.toUpperCase().indexOf(query.toUpperCase()) !== -1; })
+            .slice(0, 8);
+
+        if (hasil.length === 0) {
+            suggestBox.innerHTML = daftarNamaSiap
+                ? '<div class="ngx-suggest-empty">Nama tidak ditemukan</div>'
+                : '<div class="ngx-suggest-empty">Memuat daftar nama...</div>';
+            suggestBox.classList.remove("hidden");
+            suggestItems = [];
+            suggestActiveIndex = -1;
+            return;
+        }
+
+        suggestBox.innerHTML = hasil.map(function (nama) {
+            return '<div class="ngx-suggest-item" data-nama="' + escapeHtml(nama) + '">' +
+                '<i data-lucide="user-round" class="w-3.5 h-3.5 text-kop-500 flex-shrink-0"></i>' +
+                '<span>' + highlightMatch(nama, query) + '</span>' +
+                '</div>';
+        }).join("");
+
+        suggestBox.classList.remove("hidden");
+        if (window.lucide) lucide.createIcons();
+
+        suggestItems = Array.prototype.slice.call(suggestBox.querySelectorAll(".ngx-suggest-item"));
+        suggestActiveIndex = -1;
+
+        suggestItems.forEach(function (el) {
+            el.addEventListener("mousedown", function (e) {
+                e.preventDefault();
+                pilihNama(el.getAttribute("data-nama"));
+            });
+        });
+    }
+
+    input.addEventListener("input", function () {
+        hideError();
+        var query = input.value.trim();
+
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function () {
+            tampilkanSuggest(query);
+        }, 120);
+    });
+
+    input.addEventListener("focus", function () {
+        var query = input.value.trim();
+        if (query) tampilkanSuggest(query);
+    });
+
+    input.addEventListener("keydown", function (e) {
+        if (suggestBox.classList.contains("hidden") || suggestItems.length === 0) return;
+
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setActiveSuggest(Math.min(suggestActiveIndex + 1, suggestItems.length - 1));
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setActiveSuggest(Math.max(suggestActiveIndex - 1, 0));
+        } else if (e.key === "Enter") {
+            if (suggestActiveIndex >= 0 && suggestItems[suggestActiveIndex]) {
+                e.preventDefault();
+                pilihNama(suggestItems[suggestActiveIndex].getAttribute("data-nama"));
+            }
+        } else if (e.key === "Escape") {
+            closeSuggest();
+        }
+    });
+
+    document.addEventListener("click", function (e) {
+        if (!suggestBox.contains(e.target) && e.target !== input) {
+            closeSuggest();
+        }
+    });
 
     function showError(msg) {
         errorText.textContent = msg || "Nama tidak boleh kosong.";
@@ -166,6 +308,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
     form.addEventListener("submit", function (e) {
         e.preventDefault();
+        closeSuggest();
         var nama = input.value.trim();
 
         if (!nama) {
@@ -204,9 +347,5 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 setLoadingBtn(false);
                 renderNetworkError();
             });
-    });
-
-    input.addEventListener("input", function () {
-        hideError();
     });
 })();
