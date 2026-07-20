@@ -756,3 +756,389 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
         btnRefresh.addEventListener("click", muatPengeluaran);
     }
 })();
+
+/* =========================================================
+   PELUNASAN — cari nasabah, tampilkan pinjaman aktif, proses bayar
+   Hanya aktif kalau elemen #pelunasanForm ada di halaman (/pelunasan)
+   ========================================================= */
+(function () {
+    var form = document.getElementById("pelunasanForm");
+    var input = document.getElementById("pelunasanNama");
+    var btn = document.getElementById("pelunasanBtn");
+    var errorMsg = document.getElementById("pelunasanError");
+    var errorText = document.getElementById("pelunasanErrorText");
+    var resultBox = document.getElementById("pelunasanResult");
+    var suggestBox = document.getElementById("pelunasanSuggest");
+
+    if (!form || !input || !resultBox) return;
+
+    /* ---- Autocomplete nama (pola sama seperti Cek Tagihan) ---- */
+    var daftarNama = [];
+    var daftarNamaSiap = false;
+    var suggestActiveIndex = -1;
+    var suggestItems = [];
+    var debounceTimer = null;
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+    }
+
+    function muatDaftarNama() {
+        fetch(NGX_API_BASE_URL + "?action=daftarNama")
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data && data.success && Array.isArray(data.daftarNama)) {
+                    daftarNama = data.daftarNama;
+                }
+                daftarNamaSiap = true;
+            })
+            .catch(function () { daftarNamaSiap = true; });
+    }
+    muatDaftarNama();
+
+    function highlightMatch(nama, query) {
+        var idx = nama.toUpperCase().indexOf(query.toUpperCase());
+        if (idx === -1) return escapeHtml(nama);
+        return escapeHtml(nama.slice(0, idx)) + "<mark>" + escapeHtml(nama.slice(idx, idx + query.length)) + "</mark>" + escapeHtml(nama.slice(idx + query.length));
+    }
+
+    function closeSuggest() {
+        suggestBox.classList.add("hidden");
+        suggestBox.innerHTML = "";
+        suggestItems = [];
+        suggestActiveIndex = -1;
+    }
+
+    function setActiveSuggest(i) {
+        suggestItems.forEach(function (el) { el.classList.remove("active"); });
+        if (suggestItems[i]) {
+            suggestItems[i].classList.add("active");
+            suggestItems[i].scrollIntoView({ block: "nearest" });
+        }
+        suggestActiveIndex = i;
+    }
+
+    function pilihNama(nama) {
+        input.value = nama;
+        closeSuggest();
+        hideError();
+        input.focus();
+    }
+
+    function tampilkanSuggest(query) {
+        if (!query) { closeSuggest(); return; }
+
+        var hasil = daftarNama.filter(function (n) {
+            return n.toUpperCase().indexOf(query.toUpperCase()) !== -1;
+        }).slice(0, 8);
+
+        if (hasil.length === 0) {
+            suggestBox.innerHTML = daftarNamaSiap
+                ? '<div class="ngx-suggest-empty">Nama tidak ditemukan</div>'
+                : '<div class="ngx-suggest-empty">Memuat daftar nama...</div>';
+            suggestBox.classList.remove("hidden");
+            suggestItems = [];
+            suggestActiveIndex = -1;
+            return;
+        }
+
+        suggestBox.innerHTML = hasil.map(function (nama) {
+            return '<div class="ngx-suggest-item" data-nama="' + escapeHtml(nama) + '">' +
+                '<i data-lucide="user-round" class="w-3.5 h-3.5 text-kop-500 flex-shrink-0"></i>' +
+                '<span>' + highlightMatch(nama, query) + '</span>' +
+                '</div>';
+        }).join("");
+
+        suggestBox.classList.remove("hidden");
+        if (window.lucide) lucide.createIcons();
+
+        suggestItems = Array.prototype.slice.call(suggestBox.querySelectorAll(".ngx-suggest-item"));
+        suggestActiveIndex = -1;
+
+        suggestItems.forEach(function (el) {
+            el.addEventListener("mousedown", function (e) {
+                e.preventDefault();
+                pilihNama(el.getAttribute("data-nama"));
+            });
+        });
+    }
+
+    input.addEventListener("input", function () {
+        hideError();
+        var query = input.value.trim();
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function () { tampilkanSuggest(query); }, 120);
+    });
+
+    input.addEventListener("focus", function () {
+        var query = input.value.trim();
+        if (query) tampilkanSuggest(query);
+    });
+
+    input.addEventListener("keydown", function (e) {
+        if (suggestBox.classList.contains("hidden") || suggestItems.length === 0) return;
+
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setActiveSuggest(Math.min(suggestActiveIndex + 1, suggestItems.length - 1));
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setActiveSuggest(Math.max(suggestActiveIndex - 1, 0));
+        } else if (e.key === "Enter") {
+            if (suggestActiveIndex >= 0 && suggestItems[suggestActiveIndex]) {
+                e.preventDefault();
+                pilihNama(suggestItems[suggestActiveIndex].getAttribute("data-nama"));
+            }
+        } else if (e.key === "Escape") {
+            closeSuggest();
+        }
+    });
+
+    document.addEventListener("click", function (e) {
+        if (!suggestBox.contains(e.target) && e.target !== input) closeSuggest();
+    });
+
+    function showError(msg) {
+        errorText.textContent = msg || "Nama tidak boleh kosong.";
+        errorMsg.classList.remove("hidden");
+    }
+    function hideError() { errorMsg.classList.add("hidden"); }
+
+    function setLoadingBtn(isLoading) {
+        if (!btn) return;
+        btn.disabled = isLoading;
+        btn.innerHTML = isLoading
+            ? '<span class="ngx-spinner" style="width:16px;height:16px;border-width:2px;"></span><span>Mencari...</span>'
+            : '<i data-lucide="search-check" class="w-4 h-4"></i><span>Cari</span>';
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function renderLoading() {
+        resultBox.innerHTML =
+            '<div class="flex flex-col items-center justify-center gap-3 py-10">' +
+                '<div class="ngx-spinner"></div>' +
+                '<p class="text-sm text-gray-500">Mengambil data pinjaman...</p>' +
+            '</div>';
+    }
+
+    function renderNetworkError() {
+        resultBox.innerHTML =
+            '<div class="ngx-hasil-card hasil-fade-in rounded-3xl p-6 sm:p-8 text-center">' +
+                '<i data-lucide="wifi-off" class="w-8 h-8 text-red-500 mx-auto mb-3"></i>' +
+                '<p class="text-sm font-semibold text-gray-800 mb-1">Gagal terhubung ke server</p>' +
+                '<p class="text-xs text-gray-500">Silakan coba lagi beberapa saat lagi.</p>' +
+            '</div>';
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function renderKosong(nama) {
+        resultBox.innerHTML =
+            '<div class="ngx-hasil-card hasil-fade-in rounded-3xl p-6 sm:p-8 text-center">' +
+                '<i data-lucide="inbox" class="w-8 h-8 text-gray-300 mx-auto mb-3"></i>' +
+                '<p class="text-sm font-semibold text-gray-800 mb-1">Tidak ada pinjaman aktif</p>' +
+                '<p class="text-xs text-gray-500">"' + escapeHtml(nama) + '" tidak memiliki data pinjaman tercatat.</p>' +
+            '</div>';
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function kartuPinjaman(p, nama) {
+
+        var isLunas = p.status === "LUNAS";
+        var badgeClass = isLunas ? "ngx-badge-lunas" : "ngx-badge-belum";
+        var badgeIcon = isLunas ? "check-circle-2" : "clock";
+
+        var formBayar = isLunas ? "" : (
+            '<div class="ngx-bayar-row">' +
+                '<input type="text" inputmode="numeric" class="ngx-bayar-input ngx-bayar-input-nominal" value="' + p.sisa + '" data-row="' + p.rowNumber + '">' +
+                '<button type="button" class="ngx-btn-bayar inline-flex items-center justify-center gap-2 bg-kop-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-kop-800 transition whitespace-nowrap" data-row="' + p.rowNumber + '">' +
+                    '<i data-lucide="wallet" class="w-4 h-4"></i> Bayar Sekarang' +
+                '</button>' +
+            '</div>' +
+            '<div class="ngx-bayar-confirm-slot" data-row="' + p.rowNumber + '"></div>'
+        );
+
+        return (
+            '<div class="ngx-pinjaman-card' + (isLunas ? " lunas" : "") + '" data-row="' + p.rowNumber + '" data-nama="' + escapeHtml(nama) + '">' +
+                '<div class="ngx-pinjaman-head">' +
+                    '<div>' +
+                        '<p class="text-sm font-bold text-gray-900">' + escapeHtml(p.timestampFormat) + '</p>' +
+                        '<p class="text-xs text-gray-500 mt-0.5">' + escapeHtml(p.alasan) + '</p>' +
+                    '</div>' +
+                    '<span class="inline-flex items-center gap-1.5 ' + badgeClass + ' text-xs font-bold px-3 py-1.5 rounded-full whitespace-nowrap">' +
+                        '<i data-lucide="' + badgeIcon + '" class="w-3.5 h-3.5"></i>' + p.status +
+                    '</span>' +
+                '</div>' +
+                '<div class="ngx-pinjaman-grid">' +
+                    '<div class="ngx-pinjaman-grid-item"><div class="ngx-pinjaman-grid-label">Pinjaman</div><div class="ngx-pinjaman-grid-value">' + p.nominalFormat + '</div></div>' +
+                    '<div class="ngx-pinjaman-grid-item"><div class="ngx-pinjaman-grid-label">Sudah Dibayar</div><div class="ngx-pinjaman-grid-value pelunasan-value">' + p.pelunasanFormat + '</div></div>' +
+                    '<div class="ngx-pinjaman-grid-item"><div class="ngx-pinjaman-grid-label">Sisa</div><div class="ngx-pinjaman-grid-value text-kop-800 sisa-value">' + p.sisaFormat + '</div></div>' +
+                '</div>' +
+                formBayar +
+            '</div>'
+        );
+    }
+
+    function renderHasil(data) {
+
+        var nama = data.nama;
+
+        var kartuHtml = data.pinjaman.map(function (p) { return kartuPinjaman(p, nama); }).join("");
+
+        resultBox.innerHTML =
+            '<div class="hasil-fade-in space-y-4">' +
+                '<div class="flex items-center justify-between px-1">' +
+                    '<p class="text-sm font-bold text-gray-900">' + escapeHtml(nama) + '</p>' +
+                    '<span class="ngx-badge-count">' + data.jumlahPinjaman + ' pinjaman</span>' +
+                '</div>' +
+                kartuHtml +
+            '</div>';
+
+        if (window.lucide) lucide.createIcons();
+        pasangEventBayar();
+    }
+
+    function pasangEventBayar() {
+
+        var tombolBayar = resultBox.querySelectorAll(".ngx-btn-bayar");
+
+        tombolBayar.forEach(function (tombol) {
+
+            tombol.addEventListener("click", function () {
+
+                var rowNumber = tombol.getAttribute("data-row");
+                var card = resultBox.querySelector('.ngx-pinjaman-card[data-row="' + rowNumber + '"]');
+                var inputNominal = card.querySelector(".ngx-bayar-input-nominal");
+                var slot = card.querySelector('.ngx-bayar-confirm-slot[data-row="' + rowNumber + '"]');
+
+                var jumlah = parseFloat(String(inputNominal.value).replace(/[^0-9.-]/g, ""));
+
+                if (!jumlah || jumlah <= 0) {
+                    slot.innerHTML = '<p class="text-xs text-red-600 mt-2">Masukkan jumlah pembayaran yang valid.</p>';
+                    return;
+                }
+
+                var namaFormat = jumlah.toLocaleString("id-ID");
+
+                slot.innerHTML =
+                    '<div class="ngx-bayar-confirm">' +
+                        '<p class="text-xs text-gray-700 mb-2.5">Konfirmasi pembayaran sebesar <strong>Rp ' + namaFormat + '</strong> untuk pinjaman ini?</p>' +
+                        '<div class="flex gap-2">' +
+                            '<button type="button" class="ngx-btn-ya-bayar flex-1 bg-kop-700 text-white text-xs font-bold py-2 rounded-lg hover:bg-kop-800 transition">Ya, Konfirmasi</button>' +
+                            '<button type="button" class="ngx-btn-batal-bayar flex-1 bg-gray-100 text-gray-600 text-xs font-bold py-2 rounded-lg hover:bg-gray-200 transition">Batal</button>' +
+                        '</div>' +
+                    '</div>';
+
+                slot.querySelector(".ngx-btn-batal-bayar").addEventListener("click", function () {
+                    slot.innerHTML = "";
+                });
+
+                slot.querySelector(".ngx-btn-ya-bayar").addEventListener("click", function () {
+                    kirimPembayaran(card, rowNumber, jumlah, slot);
+                });
+
+            });
+
+        });
+
+    }
+
+    function kirimPembayaran(card, rowNumber, jumlah, slot) {
+
+        var nama = card.getAttribute("data-nama");
+
+        slot.innerHTML = '<div class="flex items-center gap-2 mt-2"><span class="ngx-spinner" style="width:16px;height:16px;border-width:2px;"></span><span class="text-xs text-gray-500">Memproses pembayaran...</span></div>';
+
+        var body = new URLSearchParams();
+        body.append("action", "bayarPelunasan");
+        body.append("rowNumber", rowNumber);
+        body.append("nama", nama);
+        body.append("jumlah", jumlah);
+
+        fetch(NGX_API_BASE_URL, { method: "POST", body: body })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+
+                if (!data || data.success !== true) {
+                    slot.innerHTML = '<p class="text-xs text-red-600 mt-2">' + escapeHtml(data && data.message ? data.message : "Gagal memproses pembayaran.") + '</p>';
+                    return;
+                }
+
+                // Update kartu secara langsung tanpa reload
+                card.querySelector(".pelunasan-value").textContent = data.pelunasanFormat;
+                card.querySelector(".sisa-value").textContent = data.sisaFormat;
+
+                var pesanLebih = data.kelebihan > 0
+                    ? ('<p class="text-[11px] text-amber-600 mt-1">Catatan: kelebihan bayar Rp ' + data.kelebihan.toLocaleString("id-ID") + ' tidak diproses karena melebihi sisa tagihan.</p>')
+                    : '';
+
+                if (data.status === "LUNAS") {
+
+                    var badge = card.querySelector(".ngx-badge-belum, .ngx-badge-lunas");
+                    if (badge) {
+                        badge.className = "inline-flex items-center gap-1.5 ngx-badge-lunas text-xs font-bold px-3 py-1.5 rounded-full whitespace-nowrap";
+                        badge.innerHTML = '<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> LUNAS';
+                    }
+
+                    card.classList.add("lunas");
+
+                    var bayarRow = card.querySelector(".ngx-bayar-row");
+                    if (bayarRow) bayarRow.remove();
+
+                    slot.innerHTML = '<p class="text-xs text-emerald-700 font-semibold mt-2">✓ Pembayaran berhasil, pinjaman ini sudah lunas!</p>' + pesanLebih;
+
+                } else {
+
+                    slot.innerHTML = '<p class="text-xs text-emerald-700 font-semibold mt-2">✓ Pembayaran Rp ' + data.jumlahDiterima.toLocaleString("id-ID") + ' berhasil dicatat.</p>' + pesanLebih;
+
+                }
+
+                if (window.lucide) lucide.createIcons();
+
+            })
+            .catch(function () {
+                slot.innerHTML = '<p class="text-xs text-red-600 mt-2">Gagal terhubung ke server, coba lagi.</p>';
+            });
+
+    }
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        closeSuggest();
+        var nama = input.value.trim();
+
+        if (!nama) {
+            showError("Nama tidak boleh kosong.");
+            input.focus();
+            return;
+        }
+        hideError();
+
+        setLoadingBtn(true);
+        renderLoading();
+
+        fetch(NGX_API_BASE_URL + "?action=pinjamanAktif&nama=" + encodeURIComponent(nama))
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                setLoadingBtn(false);
+
+                if (!data || data.success !== true) {
+                    showError(data && data.message ? data.message : "Terjadi kesalahan, coba lagi.");
+                    resultBox.innerHTML = "";
+                    return;
+                }
+
+                if (!data.pinjaman || data.pinjaman.length === 0) {
+                    renderKosong(nama);
+                    return;
+                }
+
+                renderHasil(data);
+            })
+            .catch(function () {
+                setLoadingBtn(false);
+                renderNetworkError();
+            });
+    });
+})();
