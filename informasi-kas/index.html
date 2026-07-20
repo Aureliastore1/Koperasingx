@@ -3,18 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <meta name="theme-color" content="#0F766E">
-    <link rel="icon" type="image/png" href="/favicon.png.png">
-    <link rel="shortcut icon" href="/favicon.png.png">
-    <link rel="apple-touch-icon" href="/favicon.png.png">
+    <link rel="icon" type="image/png" href="favicon.png.png">
 
-    <title>Informasi Kas | Koperasi Simpan Pinjam NGX</title>
-    <meta name="description" content="Ringkasan kas dan tabel iuran bulanan anggota Koperasi Simpan Pinjam NGX, diperbarui otomatis secara real-time.">
-    <meta property="og:title" content="Informasi Kas | KAS NGX">
-    <meta property="og:description" content="Transparansi kas koperasi secara real-time.">
-    <meta property="og:url" content="https://koperasingx.web.id/informasi-kas">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="shortcut icon" href="favicon.png.png">
+<link rel="apple-touch-icon" href="favicon.png.png">
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>SIMPAN PINJAM KAS NGX | Koperasi Simpan Pinjam NGX</title>
+
+    <meta name="description" content="SIMPAN PINJAM KAS NGX adalah koperasi simpan pinjam untuk anggota dengan layanan simpanan, pinjaman, dan dana darurat yang mudah, aman, dan terpercaya.">
+
+    <meta property="og:title" content="SIMPAN PINJAM KAS NGX">
+    <meta property="og:description" content="Koperasi Simpan Pinjam NGX">
+    <meta property="og:image" content="https://koperasingx.web.id/banner-ngx.png">
+    <meta property="og:url" content="https://koperasingx.web.id">
+
+<script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/style.css">
     <script>
@@ -36,181 +42,401 @@
 </head>
 <body class="font-inter bg-gray-50 antialiased overflow-x-hidden">
 
-    <!-- Nav ringkas -->
-    <nav class="ngx-page-nav">
+    <!-- Navbar -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500">
         <div class="max-w-6xl mx-auto px-4 sm:px-6">
             <div class="flex items-center justify-between h-16">
-                <a href="/" class="flex items-center gap-2">
+                <a href="#beranda" class="flex items-center gap-2">
                     <div class="w-9 h-9 bg-white/10 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/20">
                         <i data-lucide="landmark" class="w-4 h-4 text-white"></i>
                     </div>
                     <span class="text-white font-bold text-sm tracking-wide">KAS NGX</span>
                 </a>
-                <a href="/" class="ngx-back-link">
-                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-                    Kembali ke Beranda
-                </a>
+                <div class="hidden md:flex items-center gap-1">
+                    <a href="#beranda" class="text-white/80 text-sm hover:text-white transition px-3 py-2 rounded-lg hover:bg-white/10">Beranda</a>
+                    <a href="/cek-tagihan/" class="text-white/80 text-sm hover:text-white transition px-3 py-2 rounded-lg hover:bg-white/10">Cek Tagihan</a>
+                    <a href="/informasi-kas/" class="text-white/80 text-sm hover:text-white transition px-3 py-2 rounded-lg hover:bg-white/10">Info Kas</a>
+                    <a href="#visi-misi" class="text-white/80 text-sm hover:text-white transition px-3 py-2 rounded-lg hover:bg-white/10">Visi & Misi</a>
+                    <a href="#motto" class="text-white/80 text-sm hover:text-white transition px-3 py-2 rounded-lg hover:bg-white/10">Motto</a>
+                    <a href="#layanan" class="text-white/80 text-sm hover:text-white transition px-3 py-2 rounded-lg hover:bg-white/10">Layanan</a>
+                    <a href="#sk" class="text-white/80 text-sm hover:text-white transition px-3 py-2 rounded-lg hover:bg-white/10">S&K</a>
+                </div>
+                <a href="#layanan" class="bg-white/15 backdrop-blur-md border border-white/20 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-white/25 transition">Mulai</a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero halaman -->
-    <section class="ngx-page-hero pt-16 pb-16 px-4 sm:px-6">
-        <div class="max-w-5xl mx-auto text-center pt-10">
-            <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 mb-5">
-                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-kop-200"></i>
-                <span class="text-white/90 text-xs font-medium">Transparansi Real-Time</span>
+    <!-- Hero / Sampul -->
+    <section id="beranda" class="relative min-h-screen flex items-end justify-center overflow-hidden">
+        <!-- Background Image -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://img.lightshot.app/-zbxltJDS4e6HkMZHUF5_A.png" alt="Sampul KAS NGX" class="w-full h-full object-cover">
+            <!-- Overlay tipis agar gambar tetap terlihat jelas -->
+            <div class="absolute inset-0 bg-gradient-to-b from-kop-900/40 via-transparent to-kop-900/85"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="relative z-10 w-full max-w-3xl mx-auto px-4 pb-16 pt-24 text-center">
+            <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 mb-6 reveal">
+                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                <span class="text-white/90 text-xs font-medium">Koperasi Simpan Pinjam Digital</span>
             </div>
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3 drop-shadow-lg">
-                Informasi Kas
+
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight mb-4 drop-shadow-2xl reveal" style="transition-delay: 0.1s;">
+                SIMPAN PINJAM<br>
+                <span class="text-kop-300">KAS NGX</span>
             </h1>
-            <p class="text-white/70 text-sm sm:text-base max-w-xl mx-auto">
-                Ringkasan kondisi kas koperasi dan rekap iuran bulanan setiap anggota, terhubung langsung ke data internal.
+
+            <p class="text-lg sm:text-xl text-white/90 mb-2 font-semibold drop-shadow-lg reveal" style="transition-delay: 0.2s;">
+                Nyaman &mdash; Sejahtera
+            </p>
+            <p class="text-sm sm:text-base text-white/70 mb-10 italic max-w-xl mx-auto drop-shadow reveal" style="transition-delay: 0.3s;">
+                "Bersama NGX &mdash; Kita Simpan, Kita Pinjam, Kita Sejahtera"
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-3 justify-center reveal" style="transition-delay: 0.4s;">
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLScuihnrRw4xIvWH_nmBMuEgqx_bURXrKA3voWvNHMVfD2DPtg/viewform?usp=publish-editor"
+                   target="_blank" rel="noopener"
+                   class="inline-flex items-center justify-center gap-2 bg-white text-kop-800 text-sm font-bold px-8 py-3.5 rounded-xl hover:bg-kop-50 transition shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+                    <i data-lucide="piggy-bank" class="w-5 h-5"></i>
+                    Simpan
+                </a>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSf6HEeC8EQUB38QOqpBABWILjWidesvPnhM4GW01194hVvWTQ/viewform"
+                   target="_blank" rel="noopener"
+                   class="inline-flex items-center justify-center gap-2 bg-kop-600/90 backdrop-blur border border-kop-400/30 text-white text-sm font-bold px-8 py-3.5 rounded-xl hover:bg-kop-600 transition shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+                    <i data-lucide="banknote" class="w-5 h-5"></i>
+                    Pinjam
+                </a>
+            </div>
+        </div>
+
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 animate-bounce">
+            <i data-lucide="chevron-down" class="w-6 h-6 text-white/50"></i>
+        </div>
+    </section>
+
+    <!-- Quick Info Bar -->
+    <section class="bg-white border-b border-gray-100">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+            <div class="grid grid-cols-3 gap-4 text-center">
+                <div class="reveal">
+                    <div class="flex items-center justify-center mb-1.5">
+                        <i data-lucide="users" class="w-5 h-5 text-kop-600"></i>
+                    </div>
+                    <p class="text-base sm:text-lg font-bold text-gray-800">Khusus</p>
+                    <p class="text-xs text-gray-500">Rekan Kerja NGX</p>
+                </div>
+                <div class="border-x border-gray-100 reveal" style="transition-delay: 0.1s;">
+                    <div class="flex items-center justify-center mb-1.5">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-kop-600"></i>
+                    </div>
+                    <p class="text-base sm:text-lg font-bold text-gray-800">Terpercaya</p>
+                    <p class="text-xs text-gray-500">Transparan & Aman</p>
+                </div>
+                <div class="reveal" style="transition-delay: 0.2s;">
+                    <div class="flex items-center justify-center mb-1.5">
+                        <i data-lucide="zap" class="w-5 h-5 text-kop-600"></i>
+                    </div>
+                    <p class="text-base sm:text-lg font-bold text-gray-800">Mudah</p>
+                    <p class="text-xs text-gray-500">Proses Cepat</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cek Tagihan -->
+    <section id="cek-tagihan" class="py-20 px-4 sm:px-6 bg-white">
+        <div class="max-w-2xl mx-auto">
+            <div class="text-center mb-10">
+                <span class="inline-block text-xs font-semibold text-kop-600 bg-kop-50 px-3 py-1 rounded-full mb-3 reveal">CEK STATUS</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3 reveal" style="transition-delay: 0.1s;">Cek Tagihan</h2>
+                <p class="text-gray-500 text-sm max-w-xl mx-auto reveal" style="transition-delay: 0.2s;">Lihat status pinjaman dan riwayat transaksi Anda kapan saja, secara real-time</p>
+            </div>
+
+            <a href="/cek-tagihan/"
+               class="group block bg-gradient-to-br from-kop-50 to-kop-100 rounded-3xl p-8 border border-kop-100 hover:shadow-xl transition reveal" style="transition-delay: 0.1s;">
+                <div class="flex items-center gap-5">
+                    <div class="w-16 h-16 bg-kop-700 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-105 transition">
+                        <i data-lucide="search-check" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-base font-bold text-gray-900 mb-1">Buka Halaman Cek Tagihan</h3>
+                        <p class="text-gray-500 text-xs leading-relaxed">Masukkan nama Anda untuk melihat sisa pinjaman, progres pelunasan, dan riwayat lengkap</p>
+                    </div>
+                    <i data-lucide="arrow-right" class="w-5 h-5 text-kop-600 flex-shrink-0 group-hover:translate-x-1 transition"></i>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Informasi Kas (teaser) -->
+    <section id="informasi-kas" class="py-20 px-4 sm:px-6 bg-gradient-to-br from-kop-50 to-white">
+        <div class="max-w-2xl mx-auto">
+            <div class="text-center mb-10">
+                <span class="inline-block text-xs font-semibold text-kop-600 bg-kop-50 px-3 py-1 rounded-full mb-3 reveal">TRANSPARANSI</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3 reveal" style="transition-delay: 0.1s;">Informasi Kas</h2>
+                <p class="text-gray-500 text-sm max-w-xl mx-auto reveal" style="transition-delay: 0.2s;">Ringkasan kondisi kas koperasi dan rekap iuran bulanan setiap anggota</p>
+            </div>
+
+            <a href="/informasi-kas/"
+               class="group block bg-white rounded-3xl p-8 border border-gray-200 shadow-sm hover:shadow-xl transition reveal" style="transition-delay: 0.1s;">
+                <div class="flex items-center gap-5">
+                    <div class="w-16 h-16 bg-gradient-to-br from-kop-500 to-kop-700 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-105 transition">
+                        <i data-lucide="wallet" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-base font-bold text-gray-900 mb-1">Buka Halaman Informasi Kas</h3>
+                        <p class="text-gray-500 text-xs leading-relaxed">Lihat total kas masuk, pengeluaran, pinjaman beredar, dan tabel iuran bulanan anggota</p>
+                    </div>
+                    <i data-lucide="arrow-right" class="w-5 h-5 text-kop-600 flex-shrink-0 group-hover:translate-x-1 transition"></i>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Visi & Misi -->
+    <section id="visi-misi" class="py-20 px-4 sm:px-6 bg-white">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-12">
+                <span class="inline-block text-xs font-semibold text-kop-600 bg-kop-50 px-3 py-1 rounded-full mb-3 reveal">TENTANG KAMI</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3 reveal" style="transition-delay: 0.1s;">Visi & Misi</h2>
+                <p class="text-gray-500 text-sm max-w-xl mx-auto reveal" style="transition-delay: 0.2s;">Wadah simpan pinjam yang dikelola oleh dan untuk rekan kerja NGX</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Visi -->
+                <div class="bg-gradient-to-br from-kop-50 to-kop-100 rounded-3xl p-8 border border-kop-100 reveal">
+                    <div class="w-14 h-14 bg-kop-700 rounded-2xl flex items-center justify-center mb-5 shadow-lg">
+                        <i data-lucide="eye" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-kop-900 mb-3">Visi</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">Menjadi wadah simpan pinjam yang <span class="font-semibold text-kop-800">tepercaya dan nyaman</span> bagi seluruh rekan kerja NGX untuk mewujudkan kesejahteraan finansial bersama.</p>
+                </div>
+
+                <!-- Misi -->
+                <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm reveal" style="transition-delay: 0.15s;">
+                    <div class="w-14 h-14 bg-kop-700 rounded-2xl flex items-center justify-center mb-5 shadow-lg">
+                        <i data-lucide="target" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Misi</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-2.5">
+                            <div class="w-5 h-5 bg-kop-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i data-lucide="check" class="w-3 h-3 text-kop-700"></i>
+                            </div>
+                            <span class="text-gray-600 text-sm leading-relaxed">Menyediakan layanan simpan pinjam yang mudah, cepat, dan transparan</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <div class="w-5 h-5 bg-kop-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i data-lucide="check" class="w-3 h-3 text-kop-700"></i>
+                            </div>
+                            <span class="text-gray-600 text-sm leading-relaxed">Membangun kepercayaan dan kenyamanan antar rekan kerja</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <div class="w-5 h-5 bg-kop-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i data-lucide="check" class="w-3 h-3 text-kop-700"></i>
+                            </div>
+                            <span class="text-gray-600 text-sm leading-relaxed">Mengelola dana secara profesional dan akuntabel</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <div class="w-5 h-5 bg-kop-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i data-lucide="check" class="w-3 h-3 text-kop-700"></i>
+                            </div>
+                            <span class="text-gray-600 text-sm leading-relaxed">Mendorong budaya menabung untuk kesejahteraan finansial</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Motto -->
+    <section id="motto" class="py-20 px-4 sm:px-6 bg-kop-900 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-72 h-72 bg-kop-600/30 rounded-full -mr-36 -mt-36 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-72 h-72 bg-kop-500/20 rounded-full -ml-36 -mb-36 blur-3xl"></div>
+
+        <div class="max-w-3xl mx-auto text-center relative z-10">
+            <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-6 reveal">
+                <i data-lucide="quote" class="w-4 h-4 text-kop-300"></i>
+                <span class="text-white/90 text-xs font-semibold tracking-wider">MOTTO KAMI</span>
+            </div>
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight reveal" style="transition-delay: 0.1s;">
+                "Kita Simpan,<br>
+                Kita Pinjam,<br>
+                <span class="text-kop-300">Kita Sejahtera"</span>
+            </h2>
+            <p class="text-white/60 text-sm sm:text-base max-w-lg mx-auto reveal" style="transition-delay: 0.2s;">
+                Bersama saling mendukung untuk mencapai kesejahteraan finansial seluruh rekan kerja NGX.
             </p>
         </div>
     </section>
 
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 -mt-8 pb-24">
-
-        <!-- Ringkasan Kas -->
-        <div id="infoKasLoading" class="flex flex-col items-center justify-center gap-3 py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
-            <div class="ngx-spinner"></div>
-            <p class="text-sm text-gray-500">Memuat data kas...</p>
-        </div>
-
-        <div id="infoKasError" class="hidden text-center py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
-            <i data-lucide="wifi-off" class="w-8 h-8 text-red-500 mx-auto mb-3"></i>
-            <p class="text-sm font-semibold text-gray-800 mb-1">Gagal memuat data kas</p>
-            <p class="text-xs text-gray-500 mb-4" id="infoKasErrorText">Silakan coba lagi beberapa saat lagi.</p>
-            <button id="infoKasRefreshBtn" type="button" class="inline-flex items-center gap-2 bg-kop-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg hover:bg-kop-800 transition">
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-                Coba Lagi
-            </button>
-        </div>
-
-        <div id="infoKasGrid" class="hidden grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div class="ngx-hasil-card rounded-3xl p-6">
-                <div class="w-12 h-12 bg-kop-700 rounded-2xl flex items-center justify-center mb-4 shadow-md">
-                    <i data-lucide="piggy-bank" class="w-6 h-6 text-white"></i>
-                </div>
-                <p class="text-xs text-gray-500 mb-1">Total Kas Masuk</p>
-                <p id="infoKasTotal" class="text-xl font-extrabold text-kop-800">Rp 0</p>
+    <!-- Layanan -->
+    <section id="layanan" class="py-20 px-4 sm:px-6 bg-gray-50">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <span class="inline-block text-xs font-semibold text-kop-600 bg-kop-50 px-3 py-1 rounded-full mb-3 reveal">LAYANAN</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3 reveal" style="transition-delay: 0.1s;">Mulai Sekarang</h2>
+                <p class="text-gray-500 text-sm max-w-xl mx-auto reveal" style="transition-delay: 0.2s;">Pilih layanan simpan atau pinjam dengan mudah melalui formulir online</p>
             </div>
-            <div class="ngx-hasil-card rounded-3xl p-6">
-                <div class="w-12 h-12 bg-red-500 rounded-2xl flex items-center justify-center mb-4 shadow-md">
-                    <i data-lucide="trending-down" class="w-6 h-6 text-white"></i>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Simpan -->
+                <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm hover:shadow-xl transition group reveal">
+                    <div class="w-16 h-16 bg-gradient-to-br from-kop-500 to-kop-700 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-105 transition shadow-lg">
+                        <i data-lucide="piggy-bank" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Simpan</h3>
+                    <p class="text-gray-500 text-sm mb-6 leading-relaxed">Mulai menabung untuk masa depan. Simpanan Anda dikelola dengan aman dan transparan untuk kesejahteraan bersama.</p>
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLScuihnrRw4xIvWH_nmBMuEgqx_bURXrKA3voWvNHMVfD2DPtg/viewform?usp=publish-editor"
+                       target="_blank" rel="noopener"
+                       class="inline-flex items-center justify-center gap-2 w-full bg-kop-700 text-white text-sm font-bold py-3.5 rounded-xl hover:bg-kop-800 transition shadow-md">
+                        Formulir Simpan
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
                 </div>
-                <p class="text-xs text-gray-500 mb-1">Total Pengeluaran</p>
-                <p id="infoKasPengeluaran" class="text-xl font-extrabold text-red-600">Rp 0</p>
-            </div>
-            <div class="ngx-hasil-card rounded-3xl p-6">
-                <div class="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center mb-4 shadow-md">
-                    <i data-lucide="banknote" class="w-6 h-6 text-white"></i>
+
+                <!-- Pinjam -->
+                <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm hover:shadow-xl transition group reveal" style="transition-delay: 0.15s;">
+                    <div class="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-105 transition shadow-lg">
+                        <i data-lucide="banknote" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Pinjam</h3>
+                    <p class="text-gray-500 text-sm mb-6 leading-relaxed">Ajukan pinjaman dengan proses cepat dan mudah untuk berbagai kebutuhan Anda, dengan cicilan yang ringan.</p>
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSf6HEeC8EQUB38QOqpBABWILjWidesvPnhM4GW01194hVvWTQ/viewform"
+                       target="_blank" rel="noopener"
+                       class="inline-flex items-center justify-center gap-2 w-full bg-amber-600 text-white text-sm font-bold py-3.5 rounded-xl hover:bg-amber-700 transition shadow-md">
+                        Formulir Pinjam
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
                 </div>
-                <p class="text-xs text-gray-500 mb-1">Total Pinjaman Beredar</p>
-                <p id="infoKasPinjaman" class="text-xl font-extrabold text-amber-600">Rp 0</p>
-            </div>
-            <div class="ngx-hasil-card rounded-3xl p-6">
-                <div class="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center mb-4 shadow-md">
-                    <i data-lucide="wallet" class="w-6 h-6 text-white"></i>
-                </div>
-                <p class="text-xs text-gray-500 mb-1">Sisa Kas</p>
-                <p id="infoKasSisa" class="text-xl font-extrabold text-emerald-700">Rp 0</p>
             </div>
         </div>
+    </section>
 
-        <p id="infoKasUpdated" class="hidden text-center text-xs text-gray-400 mt-5"></p>
-
-        <!-- Tabel Iuran Bulanan -->
-        <div class="mt-14">
-            <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
-                <div>
-                    <h2 class="text-xl font-extrabold text-gray-900">Iuran Bulanan Anggota</h2>
-                    <p class="text-xs text-gray-500 mt-1">Rekap setoran iuran setiap anggota per bulan berjalan</p>
-                </div>
-                <span id="iuranKasCount" class="ngx-badge-count">&nbsp;</span>
+    <!-- S&K -->
+    <section id="sk" class="py-20 px-4 sm:px-6 bg-white">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <span class="inline-block text-xs font-semibold text-kop-600 bg-kop-50 px-3 py-1 rounded-full mb-3 reveal">KETENTUAN</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3 reveal" style="transition-delay: 0.1s;">Syarat & Ketentuan</h2>
+                <p class="text-gray-500 text-sm max-w-xl mx-auto reveal" style="transition-delay: 0.2s;">Pelajari ketentuan sebelum menggunakan layanan simpan atau pinjam</p>
             </div>
 
-            <div id="iuranKasLoading" class="flex flex-col items-center justify-center gap-3 py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
-                <div class="ngx-spinner"></div>
-                <p class="text-sm text-gray-500">Memuat tabel iuran...</p>
-            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- S&K Pinjam -->
+                <a href="https://docs.google.com/document/d/1JlvdOKDolM-Nz39GJ6Pwf8gZlEx9pNdsrpV3y8bQLaw/edit?usp=sharing"
+                   target="_blank" rel="noopener"
+                   class="block bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100 hover:shadow-lg transition group reveal">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center shadow-md">
+                            <i data-lucide="file-text" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <i data-lucide="external-link" class="w-5 h-5 text-amber-400 group-hover:translate-x-1 group-hover:-translate-y-1 transition"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 mb-1">S&K Pinjam</h3>
+                    <p class="text-gray-500 text-xs leading-relaxed">Ketentuan dan syarat pengajuan pinjaman KAS NGX</p>
+                </a>
 
-            <div id="iuranKasError" class="hidden text-center py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
-                <i data-lucide="table" class="w-8 h-8 text-red-500 mx-auto mb-3"></i>
-                <p class="text-sm font-semibold text-gray-800 mb-1">Gagal memuat tabel iuran</p>
-                <p class="text-xs text-gray-500 mb-4" id="iuranKasErrorText">Silakan coba lagi beberapa saat lagi.</p>
-                <button id="iuranKasRefreshBtn" type="button" class="inline-flex items-center gap-2 bg-kop-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg hover:bg-kop-800 transition">
-                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-                    Coba Lagi
-                </button>
+                <!-- S&K Simpan -->
+                <a href="https://docs.google.com/document/d/1_SSGnXniFUpb19VQOF6NmJ4OfWM6GqMW8pr-r5QEVaE/edit?usp=sharing"
+                   target="_blank" rel="noopener"
+                   class="block bg-gradient-to-br from-kop-50 to-teal-50 rounded-2xl p-6 border border-kop-100 hover:shadow-lg transition group reveal" style="transition-delay: 0.15s;">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 bg-kop-700 rounded-xl flex items-center justify-center shadow-md">
+                            <i data-lucide="file-text" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <i data-lucide="external-link" class="w-5 h-5 text-kop-400 group-hover:translate-x-1 group-hover:-translate-y-1 transition"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 mb-1">S&K Simpan</h3>
+                    <p class="text-gray-500 text-xs leading-relaxed">Ketentuan dan syarat penyimpanan dana KAS NGX</p>
+                </a>
             </div>
+        </div>
+    </section>
 
-            <div id="iuranKasWrapper" class="hidden">
-                <div class="ngx-iuran-scroll">
-                    <table class="ngx-iuran-table">
-                        <thead>
-                            <tr id="iuranKasHeadRow"></tr>
-                        </thead>
-                        <tbody id="iuranKasBody"></tbody>
-                    </table>
-                </div>
-                <p class="text-xs text-gray-400 mt-3 flex items-center gap-1.5">
-                    <i data-lucide="info" class="w-3.5 h-3.5"></i>
-                    Geser tabel ke kanan untuk melihat bulan lainnya
+    <!-- Keyakinan & Kenyamanan -->
+    <section id="keyakinan" class="py-20 px-4 sm:px-6 bg-kop-900 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-80 h-80 bg-kop-600/20 rounded-full -ml-40 -mt-40 blur-3xl"></div>
+        <div class="absolute bottom-0 right-0 w-80 h-80 bg-kop-500/15 rounded-full -mr-40 -mb-40 blur-3xl"></div>
+
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="text-center mb-12">
+                <span class="inline-block text-xs font-semibold text-kop-300 bg-white/10 px-3 py-1 rounded-full mb-3 reveal">KEYAKINAN & KENYAMANAN</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-4 reveal" style="transition-delay: 0.1s;">Fasilitasi yang Penuh Kepercayaan</h2>
+                <p class="text-white/60 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed reveal" style="transition-delay: 0.2s;">
+                    KAS NGX hadir untuk memfasilitasi kebutuhan finansial para rekan kerja dengan landasan keyakinan dan kenyamanan. Setiap transaksi dijamin transparan, aman, dan mudah&mdash;karena kepercayaan Anda adalah prioritas utama kami.
                 </p>
             </div>
-        </div>
-        <!-- Rincian Pengeluaran per Bulan -->
-        <div class="mt-14">
-            <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
-                <div>
-                    <h2 class="text-xl font-extrabold text-gray-900">Rincian Pengeluaran per Bulan</h2>
-                    <p class="text-xs text-gray-500 mt-1">Klik salah satu bulan untuk melihat daftar pengeluarannya</p>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Card 1 -->
+                <div class="bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition reveal">
+                    <div class="w-14 h-14 bg-kop-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <i data-lucide="shield-check" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-white mb-2">Transparan</h3>
+                    <p class="text-white/50 text-xs leading-relaxed">Setiap transaksi tercatat dan dapat dipantau kapan saja</p>
                 </div>
-                <div class="text-right">
-                    <p class="text-[11px] text-gray-400">Total Keseluruhan</p>
-                    <p id="pengeluaranGrandTotal" class="text-lg font-extrabold text-kop-800">Rp 0</p>
+                <!-- Card 2 -->
+                <div class="bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition reveal" style="transition-delay: 0.1s;">
+                    <div class="w-14 h-14 bg-kop-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <i data-lucide="lock" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-white mb-2">Aman</h3>
+                    <p class="text-white/50 text-xs leading-relaxed">Data dan dana Anda terjaga kerahasiaannya</p>
+                </div>
+                <!-- Card 3 -->
+                <div class="bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition reveal" style="transition-delay: 0.2s;">
+                    <div class="w-14 h-14 bg-kop-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <i data-lucide="handshake" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-white mb-2">Bersama</h3>
+                    <p class="text-white/50 text-xs leading-relaxed">Dari, oleh, dan untuk rekan kerja NGX</p>
+                </div>
+                <!-- Card 4 -->
+                <div class="bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition reveal" style="transition-delay: 0.3s;">
+                    <div class="w-14 h-14 bg-kop-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <i data-lucide="heart-handshake" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-white mb-2">Nyaman</h3>
+                    <p class="text-white/50 text-xs leading-relaxed">Layanan ramah dan proses tanpa ribet</p>
                 </div>
             </div>
-
-            <div id="pengeluaranLoading" class="flex flex-col items-center justify-center gap-3 py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
-                <div class="ngx-spinner"></div>
-                <p class="text-sm text-gray-500">Memuat rincian pengeluaran...</p>
-            </div>
-
-            <div id="pengeluaranError" class="hidden text-center py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
-                <i data-lucide="receipt" class="w-8 h-8 text-red-500 mx-auto mb-3"></i>
-                <p class="text-sm font-semibold text-gray-800 mb-1">Gagal memuat rincian pengeluaran</p>
-                <p class="text-xs text-gray-500 mb-4" id="pengeluaranErrorText">Silakan coba lagi beberapa saat lagi.</p>
-                <button id="pengeluaranRefreshBtn" type="button" class="inline-flex items-center gap-2 bg-kop-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg hover:bg-kop-800 transition">
-                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-                    Coba Lagi
-                </button>
-            </div>
-
-            <div id="pengeluaranWrapper" class="hidden">
-                <div id="pengeluaranAccordion" class="ngx-accordion"></div>
-            </div>
         </div>
-    </div>
+    </section>
 
     <!-- Footer -->
     <footer class="bg-kop-950 text-white py-10 px-4 sm:px-6">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 bg-kop-700 rounded-xl flex items-center justify-center">
-                    <i data-lucide="landmark" class="w-5 h-5 text-white"></i>
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 bg-kop-700 rounded-xl flex items-center justify-center">
+                        <i data-lucide="landmark" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold">SIMPAN PINJAM KAS NGX</h3>
+                        <p class="text-xs text-white/40">Nyaman &mdash; Sejahtera</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="text-sm font-bold">SIMPAN PINJAM KAS NGX</h3>
-                    <p class="text-xs text-white/40">Nyaman &mdash; Sejahtera</p>
+                <div class="flex flex-wrap items-center justify-center gap-4 text-xs text-white/60">
+                    <a href="#beranda" class="hover:text-white transition">Beranda</a>
+                    <a href="/cek-tagihan/" class="hover:text-white transition">Cek Tagihan</a>
+                    <a href="/informasi-kas/" class="hover:text-white transition">Info Kas</a>
+                    <a href="#visi-misi" class="hover:text-white transition">Visi & Misi</a>
+                    <a href="#motto" class="hover:text-white transition">Motto</a>
+                    <a href="#layanan" class="hover:text-white transition">Layanan</a>
+                    <a href="#sk" class="hover:text-white transition">S&K</a>
                 </div>
             </div>
-            <a href="/" class="text-xs text-white/60 hover:text-white transition">&larr; Kembali ke Beranda</a>
+            <div class="mt-8 pt-6 border-t border-white/10 text-center">
+                <p class="text-xs text-white/40">&copy; 2025 Simpan Pinjam KAS NGX. Bersama NGX &mdash; Kita Simpan, Kita Pinjam, Kita Sejahtera.</p>
+            </div>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="/script.js"></script>
 </body>
