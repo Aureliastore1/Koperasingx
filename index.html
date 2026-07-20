@@ -60,7 +60,7 @@
                     <a href="#layanan" class="text-white/80 text-sm hover:text-white transition px-3 py-2 rounded-lg hover:bg-white/10">Layanan</a>
                     <a href="#sk" class="text-white/80 text-sm hover:text-white transition px-3 py-2 rounded-lg hover:bg-white/10">S&K</a>
                 </div>
-                <a href="#cek-tagihan" class="bg-white/15 backdrop-blur-md border border-white/20 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-white/25 transition">Cek Tagihan</a>
+                <a href="#layanan" class="bg-white/15 backdrop-blur-md border border-white/20 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-white/25 transition">Mulai</a>
             </div>
         </div>
     </nav>
@@ -75,7 +75,7 @@
         </div>
 
         <!-- Content -->
-        <div class="relative z-10 w-full max-w-3xl mx-auto px-4 pb-24 pt-24 text-center">
+        <div class="relative z-10 w-full max-w-3xl mx-auto px-4 pb-16 pt-24 text-center">
             <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 mb-6 reveal">
                 <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                 <span class="text-white/90 text-xs font-medium">Koperasi Simpan Pinjam Digital</span>
@@ -115,45 +115,8 @@
         </div>
     </section>
 
-    <!-- Cek Tagihan (kartu mengambang di atas batas Hero) -->
-    <section id="cek-tagihan" class="relative z-20 px-4 sm:px-6">
-        <div class="max-w-xl mx-auto -mt-16 sm:-mt-20 reveal">
-            <div class="bg-white rounded-3xl shadow-2xl shadow-kop-900/20 border border-gray-100 p-6 sm:p-8">
-                <div class="flex items-center gap-3 mb-5">
-                    <div class="w-11 h-11 bg-kop-700 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <i data-lucide="search" class="w-5 h-5 text-white"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-bold text-gray-900">Cek Tagihan Anda</h3>
-                        <p class="text-xs text-gray-500">Masukkan nama sesuai data keanggotaan</p>
-                    </div>
-                </div>
-
-                <form id="cekTagihanForm" class="flex flex-col sm:flex-row gap-2.5">
-                    <input
-                        id="cekNamaInput"
-                        type="text"
-                        required
-                        autocomplete="name"
-                        placeholder="Contoh: ADDIN MAS AMBAR"
-                        class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-kop-500 focus:border-transparent transition"
-                    >
-                    <button
-                        type="submit"
-                        id="cekTagihanBtn"
-                        class="inline-flex items-center justify-center gap-2 bg-kop-700 text-white text-sm font-bold px-6 py-3 rounded-xl hover:bg-kop-800 transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed flex-shrink-0"
-                    >
-                        <span id="cekTagihanBtnText">Cek Sekarang</span>
-                        <i data-lucide="arrow-right" class="w-4 h-4" id="cekTagihanBtnIcon"></i>
-                    </button>
-                </form>
-                <p id="cekTagihanError" class="hidden text-xs text-red-500 mt-2.5"></p>
-            </div>
-        </div>
-    </section>
-
     <!-- Quick Info Bar -->
-    <section class="bg-white border-b border-gray-100 mt-8 sm:mt-10">
+    <section class="bg-white border-b border-gray-100">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
             <div class="grid grid-cols-3 gap-4 text-center">
                 <div class="reveal">
@@ -177,6 +140,43 @@
                     <p class="text-base sm:text-lg font-bold text-gray-800">Mudah</p>
                     <p class="text-xs text-gray-500">Proses Cepat</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cek Tagihan -->
+    <section id="cek-tagihan" class="py-20 px-4 sm:px-6 bg-white">
+        <div class="max-w-2xl mx-auto">
+            <div class="text-center mb-10">
+                <span class="inline-block text-xs font-semibold text-kop-600 bg-kop-50 px-3 py-1 rounded-full mb-3 reveal">CEK STATUS</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3 reveal" style="transition-delay: 0.1s;">Cek Tagihan</h2>
+                <p class="text-gray-500 text-sm max-w-xl mx-auto reveal" style="transition-delay: 0.2s;">Masukkan nama lengkap Anda sesuai data anggota untuk melihat status tagihan/simpanan</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-kop-50 to-kop-100 rounded-3xl p-6 sm:p-8 border border-kop-100 reveal" style="transition-delay: 0.1s;">
+                <form id="cekTagihanForm" class="flex flex-col sm:flex-row gap-3" autocomplete="off">
+                    <div class="relative flex-1">
+                        <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+                        <input
+                            type="text"
+                            id="cekTagihanNama"
+                            required
+                            placeholder="Contoh: ADDIN MAS AMBAR"
+                            class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-kop-500 focus:border-transparent bg-white"
+                        >
+                    </div>
+                    <button
+                        type="submit"
+                        class="inline-flex items-center justify-center gap-2 bg-kop-700 text-white text-sm font-bold px-6 py-3.5 rounded-xl hover:bg-kop-800 transition shadow-md whitespace-nowrap"
+                    >
+                        <i data-lucide="search-check" class="w-4 h-4"></i>
+                        Cek Sekarang
+                    </button>
+                </form>
+                <p id="cekTagihanError" class="hidden text-xs text-red-600 mt-3 flex items-center gap-1.5">
+                    <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+                    Nama tidak boleh kosong.
+                </p>
             </div>
         </div>
     </section>
@@ -421,153 +421,38 @@
         </div>
     </footer>
 
-    <!-- Modal: Hasil Pencarian Tidak Ditemukan / Gagal -->
-    <div id="notFoundModal" class="fixed inset-0 z-[100] hidden">
-        <div class="absolute inset-0 bg-kop-950/60 backdrop-blur-sm" onclick="closeNotFoundModal()"></div>
-        <div class="relative min-h-full flex items-center justify-center p-4">
-            <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-7 text-center">
-                <div id="notFoundIconWrap" class="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                    <i data-lucide="search-x" class="w-8 h-8 text-red-500"></i>
-                </div>
-                <h3 id="notFoundTitle" class="text-lg font-bold text-gray-900 mb-2">Data Tidak Ditemukan</h3>
-                <p id="notFoundMsg" class="text-sm text-gray-500 mb-6 leading-relaxed"></p>
-                <button onclick="closeNotFoundModal()" class="w-full bg-kop-700 text-white text-sm font-bold py-3 rounded-xl hover:bg-kop-800 transition">
-                    Tutup
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Scripts -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="script.js"></script>
-
-    <!-- Fitur Cek Tagihan: cek nama via JSONP ke Apps Script, lalu redirect atau tampilkan popup -->
     <script>
-    (function () {
-        // Ganti hanya bagian .../exec ini jika suatu saat URL deployment Apps Script berubah
-        var GAS_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9CkSgx27TEjbovKO46dQepkwQ0nlXJ39f17MmAjTvw3ZQ8je9T7BTH/exec";
-        var JSONP_TIMEOUT = 12000; // 12 detik, beri toleransi cold-start Apps Script
+        (function () {
+            var CEK_TAGIHAN_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9CkSgx27TEjbovKO46dQepkwQ0nlXJ39f17MmAjTvw3ZQ8je9T7BTH/exec";
 
-        var form = document.getElementById('cekTagihanForm');
-        var input = document.getElementById('cekNamaInput');
-        var btn = document.getElementById('cekTagihanBtn');
-        var btnText = document.getElementById('cekTagihanBtnText');
-        var btnIcon = document.getElementById('cekTagihanBtnIcon');
-        var errorEl = document.getElementById('cekTagihanError');
+            var form = document.getElementById("cekTagihanForm");
+            var input = document.getElementById("cekTagihanNama");
+            var errorMsg = document.getElementById("cekTagihanError");
 
-        var modal = document.getElementById('notFoundModal');
-        var modalIconWrap = document.getElementById('notFoundIconWrap');
-        var modalTitle = document.getElementById('notFoundTitle');
-        var modalMsg = document.getElementById('notFoundMsg');
+            if (form && input) {
+                form.addEventListener("submit", function (e) {
+                    e.preventDefault();
+                    var nama = input.value.trim();
 
-        if (!form) return;
+                    if (!nama) {
+                        errorMsg.classList.remove("hidden");
+                        input.focus();
+                        return;
+                    }
+                    errorMsg.classList.add("hidden");
 
-        var jsonpCounter = 0;
+                    var url = CEK_TAGIHAN_BASE_URL + "?nama=" + encodeURIComponent(nama);
+                    window.open(url, "_blank", "noopener");
+                });
 
-        function escapeHtml(str) {
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
-        }
-
-        function cekNamaJSONP(nama) {
-            return new Promise(function (resolve, reject) {
-                jsonpCounter++;
-                var callbackName = 'cekTagihanCb_' + jsonpCounter + '_' + Date.now();
-                var script = document.createElement('script');
-                var done = false;
-
-                var timer = setTimeout(function () {
-                    if (done) return;
-                    done = true;
-                    cleanup();
-                    reject(new Error('timeout'));
-                }, JSONP_TIMEOUT);
-
-                function cleanup() {
-                    clearTimeout(timer);
-                    try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
-                    if (script.parentNode) script.parentNode.removeChild(script);
-                }
-
-                window[callbackName] = function (data) {
-                    if (done) return;
-                    done = true;
-                    cleanup();
-                    resolve(data);
-                };
-
-                var url = GAS_BASE_URL
-                    + '?cek=1'
-                    + '&nama=' + encodeURIComponent(nama)
-                    + '&callback=' + callbackName;
-
-                script.src = url;
-                script.onerror = function () {
-                    if (done) return;
-                    done = true;
-                    cleanup();
-                    reject(new Error('network'));
-                };
-
-                document.body.appendChild(script);
-            });
-        }
-
-        function setLoading(loading) {
-            btn.disabled = loading;
-            input.disabled = loading;
-            btnText.textContent = loading ? 'Memeriksa...' : 'Cek Sekarang';
-            if (btnIcon) btnIcon.style.display = loading ? 'none' : '';
-            errorEl.classList.add('hidden');
-        }
-
-        function openModal(kind, nama) {
-            if (kind === 'notfound') {
-                modalIconWrap.className = 'w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-5';
-                modalIconWrap.innerHTML = '<i data-lucide="search-x" class="w-8 h-8 text-red-500"></i>';
-                modalTitle.textContent = 'Data Tidak Ditemukan';
-                modalMsg.innerHTML = 'Nama "<span class="font-semibold text-gray-700">' + escapeHtml(nama) + '</span>" belum terdaftar sebagai anggota. Periksa kembali ejaan nama Anda.';
-            } else {
-                modalIconWrap.className = 'w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-5';
-                modalIconWrap.innerHTML = '<i data-lucide="wifi-off" class="w-8 h-8 text-amber-500"></i>';
-                modalTitle.textContent = 'Gagal Memeriksa Data';
-                modalMsg.textContent = 'Terjadi kendala koneksi ke server. Silakan periksa jaringan Anda lalu coba lagi.';
+                input.addEventListener("input", function () {
+                    errorMsg.classList.add("hidden");
+                });
             }
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-            if (window.lucide) lucide.createIcons();
-        }
-
-        window.closeNotFoundModal = function () {
-            modal.classList.add('hidden');
-            document.body.style.overflow = '';
-        };
-
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            var nama = input.value.trim();
-            if (!nama) return;
-
-            setLoading(true);
-
-            cekNamaJSONP(nama).then(function (data) {
-                setLoading(false);
-                if (data && data.found) {
-                    var url = GAS_BASE_URL + '?nama=' + encodeURIComponent(nama);
-                    window.location.href = url;
-                } else {
-                    openModal('notfound', nama);
-                }
-            }).catch(function () {
-                setLoading(false);
-                openModal('error', nama);
-            });
-        });
-    })();
+        })();
     </script>
 </body>
 </html>
