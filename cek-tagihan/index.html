@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0F766E">
+    <link rel="icon" type="image/png" href="/favicon.png.png">
+    <link rel="shortcut icon" href="/favicon.png.png">
+    <link rel="apple-touch-icon" href="/favicon.png.png">
+
+    <title>Cek Tagihan | Koperasi Simpan Pinjam NGX</title>
+    <meta name="description" content="Cek status tagihan dan riwayat pinjaman Anda di Koperasi Simpan Pinjam NGX.">
+    <meta property="og:title" content="Cek Tagihan | KAS NGX">
+    <meta property="og:description" content="Cek status tagihan dan riwayat pinjaman Anda secara real-time.">
+    <meta property="og:url" content="https://koperasingx.web.id/cek-tagihan">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 'inter': ['Inter', 'sans-serif'] },
+                    colors: {
+                        'kop': {
+                            50: '#F0FDFA', 100: '#CCFBF1', 200: '#99F6E4', 300: '#5EEAD4',
+                            400: '#2DD4BF', 500: '#14B8A6', 600: '#0D9488', 700: '#0F766E',
+                            800: '#115E59', 900: '#134E4A', 950: '#042F2E',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-inter bg-gray-50 antialiased overflow-x-hidden">
+
+    <!-- Nav ringkas -->
+    <nav class="ngx-page-nav">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-16">
+                <a href="/" class="flex items-center gap-2">
+                    <div class="w-9 h-9 bg-white/10 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/20">
+                        <i data-lucide="landmark" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span class="text-white font-bold text-sm tracking-wide">KAS NGX</span>
+                </a>
+                <a href="/" class="ngx-back-link">
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                    Kembali ke Beranda
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero halaman -->
+    <section class="ngx-page-hero pt-16 pb-24 px-4 sm:px-6">
+        <div class="max-w-2xl mx-auto text-center pt-10">
+            <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 mb-5">
+                <i data-lucide="search-check" class="w-3.5 h-3.5 text-kop-200"></i>
+                <span class="text-white/90 text-xs font-medium">Cek Status Anggota</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3 drop-shadow-lg">
+                Cek Tagihan
+            </h1>
+            <p class="text-white/70 text-sm sm:text-base max-w-lg mx-auto">
+                Masukkan nama lengkap Anda sesuai data anggota untuk melihat status pinjaman dan riwayat transaksi.
+            </p>
+        </div>
+    </section>
+
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 -mt-14 pb-24">
+
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-xl shadow-kop-900/5">
+            <form id="cekTagihanForm" class="flex flex-col sm:flex-row gap-3" autocomplete="off">
+                <div class="relative flex-1">
+                    <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+                    <input
+                        type="text"
+                        id="cekTagihanNama"
+                        required
+                        autocomplete="off"
+                        placeholder="Contoh: ADDIN MAS AMBAR"
+                        class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-kop-500 focus:border-transparent bg-white"
+                    >
+                    <div id="cekTagihanSuggest" class="ngx-suggest hidden"></div>
+                </div>
+                <button
+                    type="submit"
+                    id="cekTagihanBtn"
+                    class="inline-flex items-center justify-center gap-2 bg-kop-700 text-white text-sm font-bold px-6 py-3.5 rounded-xl hover:bg-kop-800 transition shadow-md whitespace-nowrap"
+                >
+                    <i data-lucide="search-check" class="w-4 h-4"></i>
+                    <span>Cek Sekarang</span>
+                </button>
+            </form>
+            <p id="cekTagihanError" class="hidden text-xs text-red-600 mt-3 flex items-center gap-1.5">
+                <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+                <span id="cekTagihanErrorText">Nama tidak boleh kosong.</span>
+            </p>
+        </div>
+
+        <!-- Hasil Cek Tagihan -->
+        <div id="cekTagihanResult" class="mt-6"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-kop-950 text-white py-10 px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 bg-kop-700 rounded-xl flex items-center justify-center">
+                    <i data-lucide="landmark" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold">SIMPAN PINJAM KAS NGX</h3>
+                    <p class="text-xs text-white/40">Nyaman &mdash; Sejahtera</p>
+                </div>
+            </div>
+            <a href="/" class="text-xs text-white/60 hover:text-white transition">&larr; Kembali ke Beranda</a>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/script.js"></script>
+</body>
+</html>
