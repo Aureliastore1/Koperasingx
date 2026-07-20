@@ -1051,8 +1051,8 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
 
                 if (!file) return;
 
-                if (file.size > 5 * 1024 * 1024) {
-                    textEl.textContent = "Ukuran foto maksimal 5MB, pilih foto lain.";
+                if (file.size > 15 * 1024 * 1024) {
+                    textEl.textContent = "Ukuran foto maksimal 15MB, pilih foto lain.";
                     delete fotoTersimpan[rowNumber];
                     box.classList.remove("terisi");
                     return;
