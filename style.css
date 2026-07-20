@@ -509,3 +509,84 @@ img {
     font-size: 12px;
     color: #9CA3AF;
 }
+
+/* =========================================================
+   PELUNASAN — kartu pinjaman aktif & form bayar
+   ========================================================= */
+.ngx-pinjaman-card {
+    background: #fff;
+    border: 1px solid rgba(15, 118, 110, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 6px 20px -10px rgba(15, 118, 110, 0.15);
+}
+.ngx-pinjaman-card.lunas {
+    opacity: 0.75;
+}
+
+.ngx-pinjaman-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.ngx-pinjaman-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+}
+.ngx-pinjaman-grid-item {
+    background: rgba(15, 118, 110, 0.04);
+    border-radius: 12px;
+    padding: 10px 12px;
+}
+.ngx-pinjaman-grid-label {
+    font-size: 10px;
+    color: #9CA3AF;
+    margin-bottom: 2px;
+}
+.ngx-pinjaman-grid-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.ngx-bayar-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px dashed rgba(15, 118, 110, 0.15);
+}
+@media (min-width: 640px) {
+    .ngx-bayar-row {
+        flex-direction: row;
+    }
+}
+
+.ngx-bayar-input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #E5E7EB;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+.ngx-bayar-input:focus {
+    outline: none;
+    border-color: #0F766E;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+.ngx-bayar-confirm {
+    background: rgba(217, 119, 6, 0.06);
+    border: 1px solid rgba(217, 119, 6, 0.2);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-top: 12px;
+}
