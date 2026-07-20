@@ -180,3 +180,50 @@ img {
     color: #9CA3AF;
     text-align: center;
 }
+
+/* =========================================================
+   RIWAYAT TRANSAKSI — Timeline
+   ========================================================= */
+.ngx-badge-count {
+    background: rgba(15, 118, 110, 0.1);
+    color: #0F766E;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.ngx-riwayat-list {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.ngx-riwayat-item {
+    position: relative;
+    display: flex;
+    gap: 14px;
+    padding-left: 4px;
+}
+
+.ngx-riwayat-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: 9px;
+    top: 18px;
+    bottom: -18px;
+    width: 2px;
+    background: rgba(15, 118, 110, 0.12);
+}
+
+.ngx-riwayat-dot {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #F0FDFA;
+    border: 2px solid #0F766E;
+    margin-top: 2px;
+}
