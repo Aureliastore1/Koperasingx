@@ -167,17 +167,21 @@
                     </div>
                     <button
                         type="submit"
+                        id="cekTagihanBtn"
                         class="inline-flex items-center justify-center gap-2 bg-kop-700 text-white text-sm font-bold px-6 py-3.5 rounded-xl hover:bg-kop-800 transition shadow-md whitespace-nowrap"
                     >
                         <i data-lucide="search-check" class="w-4 h-4"></i>
-                        Cek Sekarang
+                        <span>Cek Sekarang</span>
                     </button>
                 </form>
                 <p id="cekTagihanError" class="hidden text-xs text-red-600 mt-3 flex items-center gap-1.5">
                     <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
-                    Nama tidak boleh kosong.
+                    <span id="cekTagihanErrorText">Nama tidak boleh kosong.</span>
                 </p>
             </div>
+
+            <!-- Hasil Cek Tagihan (muncul langsung di halaman) -->
+            <div id="cekTagihanResult" class="mt-6"></div>
         </div>
     </section>
 
@@ -424,35 +428,5 @@
     <!-- Scripts -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="script.js"></script>
-    <script>
-        (function () {
-            var CEK_TAGIHAN_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9CkSgx27TEjbovKO46dQepkwQ0nlXJ39f17MmAjTvw3ZQ8je9T7BTH/exec";
-
-            var form = document.getElementById("cekTagihanForm");
-            var input = document.getElementById("cekTagihanNama");
-            var errorMsg = document.getElementById("cekTagihanError");
-
-            if (form && input) {
-                form.addEventListener("submit", function (e) {
-                    e.preventDefault();
-                    var nama = input.value.trim();
-
-                    if (!nama) {
-                        errorMsg.classList.remove("hidden");
-                        input.focus();
-                        return;
-                    }
-                    errorMsg.classList.add("hidden");
-
-                    var url = CEK_TAGIHAN_BASE_URL + "?nama=" + encodeURIComponent(nama);
-                    window.open(url, "_blank", "noopener");
-                });
-
-                input.addEventListener("input", function () {
-                    errorMsg.classList.add("hidden");
-                });
-            }
-        })();
-    </script>
 </body>
 </html>
