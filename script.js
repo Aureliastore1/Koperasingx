@@ -39,12 +39,14 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
+// Ganti URL ini kalau nanti deploy ulang Apps Script — dipakai bareng oleh Cek Tagihan & Informasi Kas
+var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9CkSgx27TEjbovKO46dQepkwQ0nlXJ39f17MmAjTvw3ZQ8je9T7BTH/exec";
+
 /* =========================================================
    CEK TAGIHAN — fetch ke Apps Script API, render di halaman
    ========================================================= */
 (function () {
-    // Ganti URL ini kalau nanti deploy ulang Apps Script
-    var CEK_TAGIHAN_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9CkSgx27TEjbovKO46dQepkwQ0nlXJ39f17MmAjTvw3ZQ8je9T7BTH/exec";
+    var CEK_TAGIHAN_BASE_URL = NGX_API_BASE_URL;
 
     var form = document.getElementById("cekTagihanForm");
     var input = document.getElementById("cekTagihanNama");
@@ -422,4 +424,71 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 renderNetworkError();
             });
     });
+})();
+
+/* =========================================================
+   INFORMASI KAS — ringkasan kas real-time (KAS, PENGELUARAN,
+   PINJAMAN, SISA KAS) diambil langsung dari sheet "KAS"
+   ========================================================= */
+(function () {
+    var loadingBox = document.getElementById("infoKasLoading");
+    var errorBox = document.getElementById("infoKasError");
+    var errorText = document.getElementById("infoKasErrorText");
+    var grid = document.getElementById("infoKasGrid");
+    var elKas = document.getElementById("infoKasTotal");
+    var elPengeluaran = document.getElementById("infoKasPengeluaran");
+    var elPinjaman = document.getElementById("infoKasPinjaman");
+    var elSisa = document.getElementById("infoKasSisa");
+    var elUpdated = document.getElementById("infoKasUpdated");
+
+    if (!grid) return;
+
+    function muatInformasiKas() {
+
+        loadingBox.classList.remove("hidden");
+        errorBox.classList.add("hidden");
+        grid.classList.add("hidden");
+        elUpdated.classList.add("hidden");
+
+        fetch(NGX_API_BASE_URL + "?action=informasiKas")
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+
+                loadingBox.classList.add("hidden");
+
+                if (!data || data.success !== true) {
+                    if (errorText) errorText.textContent = (data && data.message) ? data.message : "Gagal memuat data kas.";
+                    errorBox.classList.remove("hidden");
+                    return;
+                }
+
+                elKas.textContent = data.kasFormat;
+                elPengeluaran.textContent = data.pengeluaranFormat;
+                elPinjaman.textContent = data.pinjamanFormat;
+                elSisa.textContent = data.sisaKasFormat;
+
+                var now = new Date();
+                elUpdated.textContent = "Terakhir diperbarui: " + now.toLocaleString("id-ID");
+                elUpdated.classList.remove("hidden");
+
+                grid.classList.remove("hidden");
+                if (window.lucide) lucide.createIcons();
+
+            })
+            .catch(function () {
+                loadingBox.classList.add("hidden");
+                if (errorText) errorText.textContent = "Gagal terhubung ke server.";
+                errorBox.classList.remove("hidden");
+            });
+    }
+
+    muatInformasiKas();
+
+    // Refresh otomatis setiap 5 menit supaya datanya tetap real-time
+    setInterval(muatInformasiKas, 5 * 60 * 1000);
+
+    var btnRefresh = document.getElementById("infoKasRefreshBtn");
+    if (btnRefresh) {
+        btnRefresh.addEventListener("click", muatInformasiKas);
+    }
 })();
