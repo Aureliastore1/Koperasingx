@@ -758,6 +758,35 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
 })();
 
 /* =========================================================
+   SALIN NOMOR REKENING — halaman /pelunasan
+   ========================================================= */
+(function () {
+    var btn = document.getElementById("btnCopyRekening");
+    var nomorEl = document.getElementById("rekeningNomor");
+
+    if (!btn || !nomorEl) return;
+
+    btn.addEventListener("click", function () {
+        var nomor = nomorEl.textContent.trim();
+
+        var salin = function () {
+            btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i><span>Tersalin!</span>';
+            if (window.lucide) lucide.createIcons();
+            setTimeout(function () {
+                btn.innerHTML = '<i data-lucide="copy" class="w-3 h-3"></i><span>Salin</span>';
+                if (window.lucide) lucide.createIcons();
+            }, 1800);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(nomor).then(salin).catch(salin);
+        } else {
+            salin();
+        }
+    });
+})();
+
+/* =========================================================
    PELUNASAN — cari nasabah, tampilkan pinjaman aktif, proses bayar
    Hanya aktif kalau elemen #pelunasanForm ada di halaman (/pelunasan)
    ========================================================= */
@@ -771,6 +800,8 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
     var suggestBox = document.getElementById("pelunasanSuggest");
 
     if (!form || !input || !resultBox) return;
+
+    var fotoTersimpan = {}; // { [rowNumber]: { base64, mime, nama } } — sementara sebelum dikirim
 
     /* ---- Autocomplete nama (pola sama seperti Cek Tagihan) ---- */
     var daftarNama = [];
@@ -956,6 +987,11 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
                     '<i data-lucide="wallet" class="w-4 h-4"></i> Bayar Sekarang' +
                 '</button>' +
             '</div>' +
+            '<label class="ngx-upload-box mt-2.5" data-row="' + p.rowNumber + '">' +
+                '<input type="file" accept="image/*" class="ngx-upload-input hidden" data-row="' + p.rowNumber + '">' +
+                '<i data-lucide="image-plus" class="w-4 h-4 text-kop-600 flex-shrink-0 ngx-upload-icon"></i>' +
+                '<span class="ngx-upload-text">Upload bukti transfer (foto/screenshot) &mdash; wajib</span>' +
+            '</label>' +
             '<div class="ngx-bayar-confirm-slot" data-row="' + p.rowNumber + '"></div>'
         );
 
@@ -1001,6 +1037,61 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
 
     function pasangEventBayar() {
 
+        // ---- Upload foto bukti transfer per kartu ----
+        var inputFoto = resultBox.querySelectorAll(".ngx-upload-input");
+
+        inputFoto.forEach(function (inp) {
+
+            inp.addEventListener("change", function () {
+
+                var rowNumber = inp.getAttribute("data-row");
+                var box = resultBox.querySelector('.ngx-upload-box[data-row="' + rowNumber + '"]');
+                var textEl = box.querySelector(".ngx-upload-text");
+                var file = inp.files && inp.files[0];
+
+                if (!file) return;
+
+                if (file.size > 5 * 1024 * 1024) {
+                    textEl.textContent = "Ukuran foto maksimal 5MB, pilih foto lain.";
+                    delete fotoTersimpan[rowNumber];
+                    box.classList.remove("terisi");
+                    return;
+                }
+
+                var reader = new FileReader();
+                reader.onload = function () {
+
+                    var hasil = reader.result; // data:image/xxx;base64,AAAA...
+                    var base64 = hasil.split(",")[1];
+
+                    fotoTersimpan[rowNumber] = {
+                        base64: base64,
+                        mime: file.type || "image/jpeg",
+                        nama: file.name || "bukti-transfer.jpg"
+                    };
+
+                    box.classList.add("terisi");
+
+                    var thumbLama = box.querySelector(".ngx-upload-thumb");
+                    if (thumbLama) thumbLama.remove();
+
+                    var icon = box.querySelector(".ngx-upload-icon");
+                    var thumb = document.createElement("img");
+                    thumb.src = hasil;
+                    thumb.className = "ngx-upload-thumb";
+                    box.insertBefore(thumb, icon);
+                    icon.classList.add("hidden");
+
+                    textEl.textContent = file.name + " ✓ siap diupload";
+
+                };
+                reader.readAsDataURL(file);
+
+            });
+
+        });
+
+        // ---- Tombol Bayar Sekarang ----
         var tombolBayar = resultBox.querySelectorAll(".ngx-btn-bayar");
 
         tombolBayar.forEach(function (tombol) {
@@ -1016,6 +1107,11 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
 
                 if (!jumlah || jumlah <= 0) {
                     slot.innerHTML = '<p class="text-xs text-red-600 mt-2">Masukkan jumlah pembayaran yang valid.</p>';
+                    return;
+                }
+
+                if (!fotoTersimpan[rowNumber]) {
+                    slot.innerHTML = '<p class="text-xs text-red-600 mt-2">Upload dulu foto bukti transfer sebelum konfirmasi.</p>';
                     return;
                 }
 
@@ -1047,14 +1143,18 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
     function kirimPembayaran(card, rowNumber, jumlah, slot) {
 
         var nama = card.getAttribute("data-nama");
+        var foto = fotoTersimpan[rowNumber];
 
-        slot.innerHTML = '<div class="flex items-center gap-2 mt-2"><span class="ngx-spinner" style="width:16px;height:16px;border-width:2px;"></span><span class="text-xs text-gray-500">Memproses pembayaran...</span></div>';
+        slot.innerHTML = '<div class="flex items-center gap-2 mt-2"><span class="ngx-spinner" style="width:16px;height:16px;border-width:2px;"></span><span class="text-xs text-gray-500">Mengupload bukti & memproses pembayaran...</span></div>';
 
         var body = new URLSearchParams();
         body.append("action", "bayarPelunasan");
         body.append("rowNumber", rowNumber);
         body.append("nama", nama);
         body.append("jumlah", jumlah);
+        body.append("fotoBase64", foto.base64);
+        body.append("fotoMime", foto.mime);
+        body.append("fotoNama", foto.nama);
 
         fetch(NGX_API_BASE_URL, { method: "POST", body: body })
             .then(function (res) { return res.json(); })
@@ -1086,9 +1186,25 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
                     var bayarRow = card.querySelector(".ngx-bayar-row");
                     if (bayarRow) bayarRow.remove();
 
+                    var uploadBox = card.querySelector(".ngx-upload-box");
+                    if (uploadBox) uploadBox.remove();
+
                     slot.innerHTML = '<p class="text-xs text-emerald-700 font-semibold mt-2">✓ Pembayaran berhasil, pinjaman ini sudah lunas!</p>' + pesanLebih;
 
                 } else {
+
+                    delete fotoTersimpan[rowNumber];
+
+                    var uploadBox2 = card.querySelector('.ngx-upload-box[data-row="' + rowNumber + '"]');
+                    if (uploadBox2) {
+                        uploadBox2.classList.remove("terisi");
+                        var thumb2 = uploadBox2.querySelector(".ngx-upload-thumb");
+                        if (thumb2) thumb2.remove();
+                        var icon2 = uploadBox2.querySelector(".ngx-upload-icon");
+                        if (icon2) icon2.classList.remove("hidden");
+                        uploadBox2.querySelector(".ngx-upload-text").textContent = "Upload bukti transfer (foto/screenshot) — wajib";
+                        uploadBox2.querySelector(".ngx-upload-input").value = "";
+                    }
 
                     slot.innerHTML = '<p class="text-xs text-emerald-700 font-semibold mt-2">✓ Pembayaran Rp ' + data.jumlahDiterima.toLocaleString("id-ID") + ' berhasil dicatat.</p>' + pesanLebih;
 
