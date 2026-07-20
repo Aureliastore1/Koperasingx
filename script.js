@@ -79,7 +79,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     muatDaftarNama();
 
     function escapeHtml(s) {
-        return s.replace(/[&<>"']/g, function (c) {
+        return String(s).replace(/[&<>"']/g, function (c) {
             return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
         });
     }
@@ -238,11 +238,17 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             '<div class="ngx-hasil-card hasil-fade-in rounded-3xl p-6 sm:p-8 text-center">' +
                 '<i data-lucide="user-x" class="w-8 h-8 text-red-500 mx-auto mb-3"></i>' +
                 '<p class="text-sm font-semibold text-gray-800 mb-1">Data tidak ditemukan</p>' +
-                '<p class="text-xs text-gray-500">Nama "' + nama + '" tidak terdaftar. Periksa kembali ejaan nama Anda.</p>' +
+                '<p class="text-xs text-gray-500">Nama "' + escapeHtml(nama) + '" tidak terdaftar. Periksa kembali ejaan nama Anda.</p>' +
             '</div>';
         if (window.lucide) lucide.createIcons();
     }
 
+    /* ===== Riwayat Transaksi Pinjaman =====
+       Menampilkan: Timestamp, Alasan Kebutuhan Meminjam,
+       Jatuh Tempo, Nominal yang Diajukan, Pelunasan Nasabah
+       (Nama Nasabah tidak diulang di tiap baris karena sudah
+        jadi judul kartu utama di atasnya)
+    */
     function renderRiwayat(n) {
         var riwayat = Array.isArray(n.riwayat) ? n.riwayat : [];
         var jumlah = n.jumlahPinjam != null ? n.jumlahPinjam : riwayat.length;
@@ -256,15 +262,40 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 '</div>';
         } else {
             isiList = riwayat.map(function (r) {
+                var statusLunas = r.statusBaris === "LUNAS";
+                var statusClass = statusLunas ? "ngx-badge-lunas" : "ngx-badge-belum";
+
                 return (
                     '<div class="ngx-riwayat-item">' +
                         '<div class="ngx-riwayat-dot"></div>' +
-                        '<div class="flex-1 min-w-0 flex items-center justify-between gap-3">' +
-                            '<div class="min-w-0">' +
+                        '<div class="flex-1 min-w-0">' +
+
+                            '<div class="flex items-center justify-between gap-3 mb-0.5">' +
                                 '<p class="text-sm font-semibold text-gray-800">Pengajuan Pinjaman</p>' +
-                                '<p class="text-xs text-gray-400">' + r.tanggalFormat + '</p>' +
+                                '<span class="text-sm font-bold text-kop-800 whitespace-nowrap">' + r.nominalFormat + '</span>' +
                             '</div>' +
-                            '<span class="text-sm font-bold text-kop-800 whitespace-nowrap">' + r.nominalFormat + '</span>' +
+
+                            '<p class="text-xs text-gray-400 mb-2">' + escapeHtml(r.timestampFormat) + '</p>' +
+
+                            '<div class="ngx-riwayat-detail">' +
+                                '<div class="ngx-riwayat-detail-row">' +
+                                    '<span class="ngx-riwayat-label">Alasan Peminjaman</span>' +
+                                    '<span class="ngx-riwayat-value">' + escapeHtml(r.alasan) + '</span>' +
+                                '</div>' +
+                                '<div class="ngx-riwayat-detail-row">' +
+                                    '<span class="ngx-riwayat-label">Jatuh Tempo</span>' +
+                                    '<span class="ngx-riwayat-value">' + escapeHtml(r.jatuhTempoFormat) + '</span>' +
+                                '</div>' +
+                                '<div class="ngx-riwayat-detail-row">' +
+                                    '<span class="ngx-riwayat-label">Pelunasan</span>' +
+                                    '<span class="ngx-riwayat-value">' + r.pelunasanFormat + '</span>' +
+                                '</div>' +
+                            '</div>' +
+
+                            '<div class="mt-2">' +
+                                '<span class="' + statusClass + ' text-[10px] font-bold px-2.5 py-1 rounded-full">' + r.statusBaris + '</span>' +
+                            '</div>' +
+
                         '</div>' +
                     '</div>'
                 );
@@ -299,7 +330,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                         '<i data-lucide="user" class="w-5 h-5 text-white"></i>' +
                     '</div>' +
                     '<div class="min-w-0">' +
-                        '<p class="text-base font-bold text-gray-900 truncate">' + n.nama + '</p>' +
+                        '<p class="text-base font-bold text-gray-900 truncate">' + escapeHtml(n.nama) + '</p>' +
                         '<p class="text-xs text-gray-500">Status Tagihan</p>' +
                     '</div>' +
                 '</div>' +
