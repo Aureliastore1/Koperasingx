@@ -258,3 +258,144 @@ img {
     font-weight: 600;
     text-align: right;
 }
+
+/* =========================================================
+   HALAMAN INTERNAL (Informasi Kas / Cek Tagihan) — header ringkas
+   ========================================================= */
+.ngx-page-nav {
+    background: linear-gradient(135deg, #0F766E, #134E4A);
+}
+.ngx-page-hero {
+    background: linear-gradient(180deg, #134E4A 0%, #0F766E 55%, #F0FDFA 100%);
+}
+.ngx-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255,255,255,0.75);
+    font-size: 13px;
+    transition: color 0.15s ease;
+}
+.ngx-back-link:hover {
+    color: #fff;
+}
+
+/* =========================================================
+   TABEL IURAN BULANAN — modern, minimalis, scroll horizontal
+   ========================================================= */
+.ngx-iuran-scroll {
+    overflow-x: auto;
+    border-radius: 20px;
+    border: 1px solid rgba(15, 118, 110, 0.1);
+    background: #fff;
+    box-shadow: 0 10px 30px -12px rgba(15, 118, 110, 0.18);
+}
+
+.ngx-iuran-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+    min-width: 760px;
+}
+
+.ngx-iuran-th {
+    position: sticky;
+    top: 0;
+    background: #F0FDFA;
+    color: #0F766E;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    text-align: right;
+    padding: 14px 12px;
+    border-bottom: 1px solid rgba(15, 118, 110, 0.12);
+    white-space: nowrap;
+}
+.ngx-iuran-th-nama {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #F0FDFA;
+}
+.ngx-iuran-th-total {
+    color: #0F766E;
+    background: rgba(15, 118, 110, 0.08);
+}
+
+.ngx-iuran-row {
+    transition: background 0.12s ease;
+}
+.ngx-iuran-row:nth-child(even) {
+    background: rgba(15, 118, 110, 0.025);
+}
+.ngx-iuran-row:hover {
+    background: rgba(45, 212, 191, 0.08);
+}
+.ngx-iuran-row:not(:last-child) td,
+.ngx-iuran-row-kelompok td {
+    border-bottom: 1px solid rgba(15, 118, 110, 0.06);
+}
+
+.ngx-iuran-cell {
+    padding: 12px;
+    text-align: right;
+    color: #4B5563;
+    white-space: nowrap;
+}
+.ngx-iuran-cell-nama {
+    padding: 12px;
+    position: sticky;
+    left: 0;
+    background: #fff;
+    z-index: 1;
+}
+.ngx-iuran-row:nth-child(even) .ngx-iuran-cell-nama {
+    background: #FAFFFE;
+}
+.ngx-iuran-row:hover .ngx-iuran-cell-nama {
+    background: #F0FDFA;
+}
+
+.ngx-iuran-total {
+    font-weight: 700;
+    color: #0F766E;
+    background: rgba(15, 118, 110, 0.04);
+}
+
+.ngx-iuran-kosong {
+    color: #D1D5DB;
+}
+
+.ngx-iuran-avatar {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2DD4BF, #0F766E);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.ngx-iuran-avatar-kelompok {
+    background: linear-gradient(135deg, #FBBF24, #D97706);
+}
+
+.ngx-iuran-row-kelompok {
+    background: rgba(217, 119, 6, 0.05);
+}
+.ngx-iuran-row-kelompok td {
+    font-weight: 600;
+}
+.ngx-iuran-row-kelompok .ngx-iuran-cell-nama {
+    background: rgba(217, 119, 6, 0.06);
+}
+.ngx-iuran-row-kelompok .ngx-iuran-total {
+    background: rgba(217, 119, 6, 0.1);
+    color: #B45309;
+}
