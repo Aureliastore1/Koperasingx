@@ -1589,3 +1589,180 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
             });
     });
 })();
+
+/* =========================================================
+   FORMULIR PINJAMAN — dropdown nama/toko/bank, format Rupiah,
+   validasi HP & email realtime, SweetAlert
+   Hanya aktif kalau elemen #pinjamanForm ada di halaman (/pinjaman)
+   ========================================================= */
+(function () {
+    var form = document.getElementById("pinjamanForm");
+    if (!form) return;
+
+    var namaSelect = document.getElementById("pinjamanNamaSelect");
+    var namaLainnya = document.getElementById("pinjamanNamaLainnya");
+    var alasanInput = document.getElementById("pinjamanAlasan");
+    var namaTokoSelect = document.getElementById("pinjamanNamaToko");
+    var grupPartnerSelect = document.getElementById("pinjamanGrupPartner");
+    var jatuhTempoInput = document.getElementById("pinjamanJatuhTempo");
+    var noHpInput = document.getElementById("pinjamanNoHp");
+    var atasNamaInput = document.getElementById("pinjamanAtasNama");
+    var noRekeningInput = document.getElementById("pinjamanNoRekening");
+    var namaBankSelect = document.getElementById("pinjamanNamaBank");
+    var namaBankLainnya = document.getElementById("pinjamanNamaBankLainnya");
+    var nominalInput = document.getElementById("pinjamanNominal");
+    var emailInput = document.getElementById("pinjamanEmail");
+    var setujuCheckbox = document.getElementById("pinjamanSetuju");
+    var formError = document.getElementById("pinjamanFormError");
+    var submitBtn = document.getElementById("pinjamanSubmitBtn");
+
+    // Tanggal minimum Jatuh Tempo = besok
+    var besok = new Date();
+    besok.setDate(besok.getDate() + 1);
+    jatuhTempoInput.min = besok.toISOString().split("T")[0];
+
+    /* ---- Nama Anggota: dropdown + toggle "Lainnya..." ---- */
+    function updateNamaLainnyaUI() {
+        if (namaSelect.value === "__lainnya__") {
+            namaLainnya.classList.remove("hidden");
+            namaLainnya.required = true;
+        } else {
+            namaLainnya.classList.add("hidden");
+            namaLainnya.required = false;
+            namaLainnya.value = "";
+        }
+    }
+    namaSelect.addEventListener("change", updateNamaLainnyaUI);
+    updateNamaLainnyaUI();
+
+    function ambilNamaTerpilih() {
+        return namaSelect.value === "__lainnya__" ? namaLainnya.value.trim() : namaSelect.value;
+    }
+
+    /* ---- Nama Bank: dropdown + toggle "Lainnya..." ---- */
+    function updateBankLainnyaUI() {
+        if (namaBankSelect.value === "__lainnya__") {
+            namaBankLainnya.classList.remove("hidden");
+            namaBankLainnya.required = true;
+        } else {
+            namaBankLainnya.classList.add("hidden");
+            namaBankLainnya.required = false;
+            namaBankLainnya.value = "";
+        }
+    }
+    namaBankSelect.addEventListener("change", updateBankLainnyaUI);
+    updateBankLainnyaUI();
+
+    function ambilBankTerpilih() {
+        return namaBankSelect.value === "__lainnya__" ? namaBankLainnya.value.trim() : namaBankSelect.value;
+    }
+
+    /* ---- Nominal Pinjaman: format Rupiah otomatis saat mengetik ---- */
+    nominalInput.addEventListener("input", function () {
+        var angka = nominalInput.value.replace(/[^0-9]/g, "");
+        nominalInput.value = angka ? "Rp " + Number(angka).toLocaleString("id-ID") : "";
+    });
+
+    function ambilNominalAngka() {
+        return parseFloat(nominalInput.value.replace(/[^0-9]/g, "")) || 0;
+    }
+
+    function setLoadingSubmit(isLoading) {
+        submitBtn.disabled = isLoading;
+        submitBtn.innerHTML = isLoading
+            ? '<span class="ngx-spinner" style="width:16px;height:16px;border-width:2px;"></span><span>Mengirim...</span>'
+            : '<i data-lucide="send" class="w-4 h-4"></i><span>Ajukan Pinjaman</span>';
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function tampilkanErrorForm(pesan) {
+        formError.textContent = pesan;
+        formError.classList.remove("hidden");
+        setLoadingSubmit(false);
+    }
+
+    form.addEventListener("submit", function (e) {
+
+        e.preventDefault();
+        formError.classList.add("hidden");
+
+        var nama = ambilNamaTerpilih();
+        var alasan = alasanInput.value.trim();
+        var namaToko = namaTokoSelect.value;
+        var grupPartner = grupPartnerSelect.value;
+        var jatuhTempo = jatuhTempoInput.value;
+        var noHp = noHpInput.value.trim();
+        var atasNama = atasNamaInput.value.trim();
+        var noRekening = noRekeningInput.value.trim();
+        var namaBank = ambilBankTerpilih();
+        var nominal = ambilNominalAngka();
+        var email = emailInput.value.trim();
+        var setuju = setujuCheckbox.checked;
+
+        var polaEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        var polaHp = /^(\+62|62|0)8[0-9]{8,11}$/;
+
+        if (!nama) return tampilkanErrorForm("Nama anggota tidak boleh kosong.");
+        if (!alasan) return tampilkanErrorForm("Alasan kebutuhan meminjam wajib diisi.");
+        if (!namaToko) return tampilkanErrorForm("Nama toko wajib dipilih.");
+        if (!grupPartner) return tampilkanErrorForm("Grup Partner wajib dipilih.");
+        if (!jatuhTempo) return tampilkanErrorForm("Jatuh tempo wajib diisi.");
+        if (!noHp || !polaHp.test(noHp.replace(/[\s-]/g, ""))) return tampilkanErrorForm("Nomor HP/WhatsApp tidak valid.");
+        if (!atasNama) return tampilkanErrorForm("Atas nama rekening wajib diisi.");
+        if (!noRekening) return tampilkanErrorForm("Nomor rekening wajib diisi.");
+        if (!namaBank) return tampilkanErrorForm("Nama bank wajib dipilih.");
+        if (!nominal || nominal <= 0) return tampilkanErrorForm("Nominal pinjaman tidak valid.");
+        if (!email || !polaEmail.test(email)) return tampilkanErrorForm("Email wajib diisi dengan format yang benar.");
+        if (!setuju) return tampilkanErrorForm("Anda wajib menyetujui Syarat & Ketentuan Pinjaman.");
+
+        var body = new URLSearchParams();
+        body.append("action", "kirimPinjaman");
+        body.append("nama", nama);
+        body.append("alasan", alasan);
+        body.append("namaToko", namaToko);
+        body.append("grupPartner", grupPartner);
+        body.append("jatuhTempo", jatuhTempo);
+        body.append("noHp", noHp);
+        body.append("atasNama", atasNama);
+        body.append("noRekening", noRekening);
+        body.append("namaBank", namaBank);
+        body.append("nominal", nominal);
+        body.append("email", email);
+        body.append("setuju", "true");
+
+        setLoadingSubmit(true);
+
+        fetch(NGX_API_BASE_URL, { method: "POST", body: body })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+
+                setLoadingSubmit(false);
+
+                if (!data || data.success !== true) {
+                    tampilkanErrorForm(data && data.message ? data.message : "Gagal mengirim data, coba lagi.");
+                    return;
+                }
+
+                form.reset();
+                updateNamaLainnyaUI();
+                updateBankLainnyaUI();
+
+                if (window.Swal) {
+                    Swal.fire({
+                        title: "Berhasil",
+                        text: "Pengajuan pinjaman berhasil dikirim. Silakan menunggu proses verifikasi Admin KAS NGX.",
+                        icon: "success",
+                        confirmButtonColor: "#0F766E"
+                    });
+                } else {
+                    alert("Berhasil! Pengajuan pinjaman berhasil dikirim. Silakan menunggu proses verifikasi Admin KAS NGX.");
+                }
+
+            })
+            .catch(function (err) {
+                tampilkanErrorForm("Gagal terhubung ke server, coba lagi. (" + (err && err.message ? err.message : "network error") + ")");
+            });
+
+    });
+
+})();
