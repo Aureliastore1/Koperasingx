@@ -683,3 +683,186 @@ img {
 .ngx-rekening-copy:hover {
     background: rgba(255,255,255,0.2);
 }
+
+/* =========================================================
+   FORMULIR SIMPANAN — dropdown metode, drag&drop, preview, progress
+   ========================================================= */
+.ngx-form-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.ngx-form-input,
+.ngx-form-select,
+.ngx-form-textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px solid #E5E7EB;
+    font-size: 13px;
+    color: #374151;
+    background: #fff;
+    font-family: inherit;
+}
+.ngx-form-input:focus,
+.ngx-form-select:focus,
+.ngx-form-textarea:focus {
+    outline: none;
+    border-color: #0F766E;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+.ngx-form-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.ngx-metode-toggle {
+    display: flex;
+    gap: 10px;
+}
+.ngx-metode-opsi {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1.5px solid #E5E7EB;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6B7280;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.ngx-metode-opsi.aktif {
+    border-color: #0F766E;
+    background: rgba(15, 118, 110, 0.06);
+    color: #0F766E;
+}
+
+/* Drag & drop zone */
+.ngx-dropzone {
+    border: 2px dashed rgba(15, 118, 110, 0.3);
+    border-radius: 16px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    background: rgba(15, 118, 110, 0.02);
+}
+.ngx-dropzone:hover {
+    border-color: #0F766E;
+    background: rgba(15, 118, 110, 0.05);
+}
+.ngx-dropzone.dragover {
+    border-color: #0F766E;
+    background: rgba(45, 212, 191, 0.1);
+    border-style: solid;
+}
+.ngx-dropzone.terisi {
+    border-style: solid;
+    border-color: rgba(15, 118, 110, 0.25);
+    padding: 16px;
+}
+
+.ngx-dropzone-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(15, 118, 110, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px auto;
+    color: #0F766E;
+}
+
+.ngx-dropzone-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 3px;
+}
+.ngx-dropzone-subtext {
+    font-size: 11px;
+    color: #9CA3AF;
+}
+
+/* Preview file terpilih */
+.ngx-file-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+}
+.ngx-file-preview-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid rgba(15, 118, 110, 0.15);
+    flex-shrink: 0;
+}
+.ngx-file-preview-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    background: rgba(15, 118, 110, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0F766E;
+    flex-shrink: 0;
+}
+.ngx-file-preview-info {
+    min-width: 0;
+    flex: 1;
+}
+.ngx-file-preview-name {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #374151;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ngx-file-preview-size {
+    font-size: 11px;
+    color: #9CA3AF;
+}
+.ngx-file-remove {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #EF4444;
+    background: rgba(239, 68, 68, 0.08);
+    cursor: pointer;
+}
+.ngx-file-remove:hover {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+/* Progress bar upload */
+.ngx-upload-progress-track {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(15, 118, 110, 0.12);
+    overflow: hidden;
+    margin-top: 10px;
+}
+.ngx-upload-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    width: 0%;
+    background: linear-gradient(90deg, #2DD4BF, #0F766E);
+    transition: width 0.2s ease;
+}
