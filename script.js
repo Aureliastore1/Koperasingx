@@ -758,6 +758,376 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
 })();
 
 /* =========================================================
+   FORMULIR SIMPANAN — dropdown metode, drag&drop upload, SweetAlert
+   Hanya aktif kalau elemen #simpananForm ada di halaman (/simpanan)
+   ========================================================= */
+(function () {
+    var form = document.getElementById("simpananForm");
+    if (!form) return;
+
+    var namaInput = document.getElementById("simpananNama");
+    var suggestBox = document.getElementById("simpananSuggest");
+    var jenisSelect = document.getElementById("simpananJenis");
+    var nominalInput = document.getElementById("simpananNominal");
+    var keteranganInput = document.getElementById("simpananKeterangan");
+    var noHpInput = document.getElementById("simpananNoHp");
+    var emailInput = document.getElementById("simpananEmail");
+    var metodeSelect = document.getElementById("simpananMetode");
+    var rekeningCard = document.getElementById("simpananRekeningCard");
+    var uploadSection = document.getElementById("simpananUploadSection");
+    var dropzone = document.getElementById("simpananDropzone");
+    var fileInput = document.getElementById("simpananFileInput");
+    var progressTrack = document.getElementById("simpananProgressTrack");
+    var progressFill = document.getElementById("simpananProgressFill");
+    var formError = document.getElementById("simpananFormError");
+    var submitBtn = document.getElementById("simpananSubmitBtn");
+    var btnCopyRek = document.getElementById("simpananCopyRekening");
+
+    var fileTerpilih = null; // { base64, mime, nama, size, isImage, dataUrl }
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+    }
+
+    /* ---- Autocomplete nama (pola sama seperti fitur lain) ---- */
+    var daftarNama = [];
+    var daftarNamaSiap = false;
+    var suggestItems = [];
+    var debounceTimer = null;
+
+    fetch(NGX_API_BASE_URL + "?action=daftarNama")
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            if (data && data.success && Array.isArray(data.daftarNama)) daftarNama = data.daftarNama;
+            daftarNamaSiap = true;
+        })
+        .catch(function () { daftarNamaSiap = true; });
+
+    function highlightMatch(nama, query) {
+        var idx = nama.toUpperCase().indexOf(query.toUpperCase());
+        if (idx === -1) return escapeHtml(nama);
+        return escapeHtml(nama.slice(0, idx)) + "<mark>" + escapeHtml(nama.slice(idx, idx + query.length)) + "</mark>" + escapeHtml(nama.slice(idx + query.length));
+    }
+
+    function closeSuggest() {
+        suggestBox.classList.add("hidden");
+        suggestBox.innerHTML = "";
+        suggestItems = [];
+    }
+
+    function tampilkanSuggest(query) {
+        if (!query) { closeSuggest(); return; }
+        var hasil = daftarNama.filter(function (n) { return n.toUpperCase().indexOf(query.toUpperCase()) !== -1; }).slice(0, 8);
+
+        if (hasil.length === 0) {
+            suggestBox.innerHTML = daftarNamaSiap
+                ? '<div class="ngx-suggest-empty">Nama tidak ditemukan, boleh diketik manual</div>'
+                : '<div class="ngx-suggest-empty">Memuat daftar nama...</div>';
+            suggestBox.classList.remove("hidden");
+            suggestItems = [];
+            return;
+        }
+
+        suggestBox.innerHTML = hasil.map(function (nama) {
+            return '<div class="ngx-suggest-item" data-nama="' + escapeHtml(nama) + '">' +
+                '<i data-lucide="user-round" class="w-3.5 h-3.5 text-kop-500 flex-shrink-0"></i>' +
+                '<span>' + highlightMatch(nama, query) + '</span></div>';
+        }).join("");
+
+        suggestBox.classList.remove("hidden");
+        if (window.lucide) lucide.createIcons();
+
+        suggestItems = Array.prototype.slice.call(suggestBox.querySelectorAll(".ngx-suggest-item"));
+        suggestItems.forEach(function (el) {
+            el.addEventListener("mousedown", function (e) {
+                e.preventDefault();
+                namaInput.value = el.getAttribute("data-nama");
+                closeSuggest();
+            });
+        });
+    }
+
+    if (namaInput && suggestBox) {
+        namaInput.addEventListener("input", function () {
+            clearTimeout(debounceTimer);
+            var q = namaInput.value.trim();
+            debounceTimer = setTimeout(function () { tampilkanSuggest(q); }, 120);
+        });
+        document.addEventListener("click", function (e) {
+            if (!suggestBox.contains(e.target) && e.target !== namaInput) closeSuggest();
+        });
+    }
+
+    /* ---- Toggle tampilan berdasarkan Metode Pembayaran ---- */
+    function updateMetodeUI() {
+        if (metodeSelect.value === "Transfer Bank") {
+            rekeningCard.classList.remove("hidden");
+            uploadSection.classList.remove("hidden");
+        } else {
+            rekeningCard.classList.add("hidden");
+            uploadSection.classList.add("hidden");
+        }
+    }
+    if (metodeSelect) {
+        metodeSelect.addEventListener("change", updateMetodeUI);
+        updateMetodeUI();
+    }
+
+    /* ---- Salin nomor rekening ---- */
+    if (btnCopyRek) {
+        btnCopyRek.addEventListener("click", function () {
+            var nomor = document.getElementById("simpananNomorRek").textContent.trim();
+            var tandai = function () {
+                btnCopyRek.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i><span>Tersalin!</span>';
+                if (window.lucide) lucide.createIcons();
+                setTimeout(function () {
+                    btnCopyRek.innerHTML = '<i data-lucide="copy" class="w-3 h-3"></i><span>Salin</span>';
+                    if (window.lucide) lucide.createIcons();
+                }, 1800);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(nomor).then(tandai).catch(tandai);
+            } else { tandai(); }
+        });
+    }
+
+    /* ---- Drag & drop + pilih file ---- */
+    var EKSTENSI_DIIZINKAN = ["jpg", "jpeg", "png", "pdf"];
+
+    function validasiFile(file) {
+        var ekstensi = (file.name.split(".").pop() || "").toLowerCase();
+        if (EKSTENSI_DIIZINKAN.indexOf(ekstensi) === -1) {
+            return "Jenis file tidak didukung. Hanya JPG, JPEG, PNG, atau PDF.";
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            return "Ukuran file maksimal 5MB.";
+        }
+        return null;
+    }
+
+    function formatUkuran(bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + " KB";
+        return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    }
+
+    function htmlDropzoneKosong() {
+        return (
+            '<div class="ngx-dropzone-icon"><i data-lucide="upload-cloud" class="w-5 h-5"></i></div>' +
+            '<p class="ngx-dropzone-text">Klik atau seret foto/PDF ke sini</p>' +
+            '<p class="ngx-dropzone-subtext">JPG, JPEG, PNG, atau PDF &middot; maks 5MB</p>'
+        );
+    }
+
+    function renderPreview() {
+
+        if (!fileTerpilih) {
+            dropzone.classList.remove("terisi");
+            dropzone.innerHTML = htmlDropzoneKosong();
+            if (window.lucide) lucide.createIcons();
+            return;
+        }
+
+        dropzone.classList.add("terisi");
+
+        var thumbHtml = fileTerpilih.isImage
+            ? '<img src="' + fileTerpilih.dataUrl + '" class="ngx-file-preview-thumb">'
+            : '<div class="ngx-file-preview-icon"><i data-lucide="file-text" class="w-6 h-6"></i></div>';
+
+        dropzone.innerHTML =
+            '<div class="ngx-file-preview">' +
+                thumbHtml +
+                '<div class="ngx-file-preview-info">' +
+                    '<div class="ngx-file-preview-name">' + escapeHtml(fileTerpilih.nama) + '</div>' +
+                    '<div class="ngx-file-preview-size">' + formatUkuran(fileTerpilih.size) + '</div>' +
+                '</div>' +
+                '<div class="ngx-file-remove" id="simpananHapusFile"><i data-lucide="x" class="w-4 h-4"></i></div>' +
+            '</div>';
+
+        if (window.lucide) lucide.createIcons();
+
+        document.getElementById("simpananHapusFile").addEventListener("click", function (e) {
+            e.stopPropagation();
+            fileTerpilih = null;
+            fileInput.value = "";
+            renderPreview();
+        });
+
+    }
+
+    function prosesFile(file) {
+
+        var pesanError = validasiFile(file);
+
+        if (pesanError) {
+            formError.textContent = pesanError;
+            formError.classList.remove("hidden");
+            return;
+        }
+        formError.classList.add("hidden");
+
+        var isImage = /^image\/(jpeg|png|jpg)/.test(file.type) || /\.(jpg|jpeg|png)$/i.test(file.name);
+
+        var reader = new FileReader();
+        reader.onload = function () {
+
+            var hasil = reader.result;
+            var base64 = hasil.split(",")[1];
+
+            fileTerpilih = {
+                base64: base64,
+                mime: file.type || (isImage ? "image/jpeg" : "application/pdf"),
+                nama: file.name,
+                size: file.size,
+                isImage: isImage,
+                dataUrl: hasil
+            };
+
+            renderPreview();
+
+        };
+        reader.readAsDataURL(file);
+
+    }
+
+    if (dropzone && fileInput) {
+
+        dropzone.innerHTML = htmlDropzoneKosong();
+        if (window.lucide) lucide.createIcons();
+
+        dropzone.addEventListener("click", function () { fileInput.click(); });
+
+        dropzone.addEventListener("dragover", function (e) {
+            e.preventDefault();
+            dropzone.classList.add("dragover");
+        });
+        dropzone.addEventListener("dragleave", function () {
+            dropzone.classList.remove("dragover");
+        });
+        dropzone.addEventListener("drop", function (e) {
+            e.preventDefault();
+            dropzone.classList.remove("dragover");
+            var file = e.dataTransfer.files && e.dataTransfer.files[0];
+            if (file) prosesFile(file);
+        });
+
+        fileInput.addEventListener("change", function () {
+            var file = fileInput.files && fileInput.files[0];
+            if (file) prosesFile(file);
+        });
+
+    }
+
+    /* ---- Submit form ---- */
+    function setLoadingSubmit(isLoading) {
+        submitBtn.disabled = isLoading;
+        submitBtn.innerHTML = isLoading
+            ? '<span class="ngx-spinner" style="width:16px;height:16px;border-width:2px;"></span><span>Mengirim...</span>'
+            : '<i data-lucide="send" class="w-4 h-4"></i><span>Simpan</span>';
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function updateProgress(persen) {
+        progressTrack.classList.remove("hidden");
+        progressFill.style.width = persen + "%";
+    }
+
+    function tampilkanErrorForm(pesan) {
+        formError.textContent = pesan;
+        formError.classList.remove("hidden");
+        setLoadingSubmit(false);
+    }
+
+    form.addEventListener("submit", function (e) {
+
+        e.preventDefault();
+        formError.classList.add("hidden");
+
+        var nama = namaInput.value.trim();
+        var jenis = jenisSelect.value;
+        var nominal = parseFloat(String(nominalInput.value).replace(/[^0-9.-]/g, ""));
+        var metode = metodeSelect.value;
+
+        if (!nama) return tampilkanErrorForm("Nama anggota tidak boleh kosong.");
+        if (!jenis) return tampilkanErrorForm("Pilih jenis simpanan terlebih dahulu.");
+        if (!nominal || nominal <= 0) return tampilkanErrorForm("Nominal simpanan tidak valid.");
+        if (metode === "Transfer Bank" && !fileTerpilih) return tampilkanErrorForm("Bukti transfer wajib diupload untuk metode Transfer Bank.");
+
+        var body = new URLSearchParams();
+        body.append("action", "kirimSimpanan");
+        body.append("nama", nama);
+        body.append("jenisSimpanan", jenis);
+        body.append("nominal", nominal);
+        body.append("keterangan", keteranganInput.value.trim());
+        body.append("noHp", noHpInput.value.trim());
+        body.append("email", emailInput.value.trim());
+        body.append("metodePembayaran", metode);
+
+        if (metode === "Transfer Bank" && fileTerpilih) {
+            body.append("fotoBase64", fileTerpilih.base64);
+            body.append("fotoMime", fileTerpilih.mime);
+            body.append("fotoNama", fileTerpilih.nama);
+        }
+
+        setLoadingSubmit(true);
+        updateProgress(0);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", NGX_API_BASE_URL, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
+
+        xhr.upload.onprogress = function (ev) {
+            if (ev.lengthComputable) {
+                updateProgress(Math.round((ev.loaded / ev.total) * 100));
+            }
+        };
+
+        xhr.onload = function () {
+
+            setLoadingSubmit(false);
+            progressTrack.classList.add("hidden");
+
+            var data;
+            try { data = JSON.parse(xhr.responseText); } catch (err) { data = null; }
+
+            if (!data || data.success !== true) {
+                tampilkanErrorForm(data && data.message ? data.message : "Gagal mengirim data, coba lagi.");
+                return;
+            }
+
+            form.reset();
+            fileTerpilih = null;
+            renderPreview();
+            updateMetodeUI();
+
+            if (window.Swal) {
+                Swal.fire({
+                    title: "Berhasil",
+                    text: "Terima kasih. Data simpanan berhasil dikirim dan akan diverifikasi oleh Admin terlebih dahulu.",
+                    icon: "success",
+                    confirmButtonColor: "#0F766E"
+                });
+            } else {
+                alert("Berhasil! Data simpanan berhasil dikirim dan akan diverifikasi oleh Admin terlebih dahulu.");
+            }
+
+        };
+
+        xhr.onerror = function () {
+            setLoadingSubmit(false);
+            progressTrack.classList.add("hidden");
+            tampilkanErrorForm("Gagal terhubung ke server, coba lagi.");
+        };
+
+        xhr.send(body.toString());
+
+    });
+
+})();
+
+/* =========================================================
    SALIN NOMOR REKENING — halaman /pelunasan
    ========================================================= */
 (function () {
