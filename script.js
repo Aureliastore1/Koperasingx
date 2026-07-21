@@ -765,12 +765,12 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
     var form = document.getElementById("simpananForm");
     if (!form) return;
 
-    var namaInput = document.getElementById("simpananNama");
-    var suggestBox = document.getElementById("simpananSuggest");
+    var namaSelect = document.getElementById("simpananNamaSelect");
+    var namaLainnya = document.getElementById("simpananNamaLainnya");
+    var pantherGroupSelect = document.getElementById("simpananPantherGroup");
     var jenisSelect = document.getElementById("simpananJenis");
     var nominalInput = document.getElementById("simpananNominal");
     var keteranganInput = document.getElementById("simpananKeterangan");
-    var noHpInput = document.getElementById("simpananNoHp");
     var emailInput = document.getElementById("simpananEmail");
     var metodeSelect = document.getElementById("simpananMetode");
     var rekeningCard = document.getElementById("simpananRekeningCard");
@@ -791,73 +791,27 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
         });
     }
 
-    /* ---- Autocomplete nama (pola sama seperti fitur lain) ---- */
-    var daftarNama = [];
-    var daftarNamaSiap = false;
-    var suggestItems = [];
-    var debounceTimer = null;
-
-    fetch(NGX_API_BASE_URL + "?action=daftarNama")
-        .then(function (res) { return res.json(); })
-        .then(function (data) {
-            if (data && data.success && Array.isArray(data.daftarNama)) daftarNama = data.daftarNama;
-            daftarNamaSiap = true;
-        })
-        .catch(function () { daftarNamaSiap = true; });
-
-    function highlightMatch(nama, query) {
-        var idx = nama.toUpperCase().indexOf(query.toUpperCase());
-        if (idx === -1) return escapeHtml(nama);
-        return escapeHtml(nama.slice(0, idx)) + "<mark>" + escapeHtml(nama.slice(idx, idx + query.length)) + "</mark>" + escapeHtml(nama.slice(idx + query.length));
-    }
-
-    function closeSuggest() {
-        suggestBox.classList.add("hidden");
-        suggestBox.innerHTML = "";
-        suggestItems = [];
-    }
-
-    function tampilkanSuggest(query) {
-        if (!query) { closeSuggest(); return; }
-        var hasil = daftarNama.filter(function (n) { return n.toUpperCase().indexOf(query.toUpperCase()) !== -1; }).slice(0, 8);
-
-        if (hasil.length === 0) {
-            suggestBox.innerHTML = daftarNamaSiap
-                ? '<div class="ngx-suggest-empty">Nama tidak ditemukan, boleh diketik manual</div>'
-                : '<div class="ngx-suggest-empty">Memuat daftar nama...</div>';
-            suggestBox.classList.remove("hidden");
-            suggestItems = [];
-            return;
+    /* ---- Nama Anggota: dropdown + toggle "Lainnya..." ---- */
+    function updateNamaLainnyaUI() {
+        if (namaSelect.value === "__lainnya__") {
+            namaLainnya.classList.remove("hidden");
+            namaLainnya.required = true;
+        } else {
+            namaLainnya.classList.add("hidden");
+            namaLainnya.required = false;
+            namaLainnya.value = "";
         }
-
-        suggestBox.innerHTML = hasil.map(function (nama) {
-            return '<div class="ngx-suggest-item" data-nama="' + escapeHtml(nama) + '">' +
-                '<i data-lucide="user-round" class="w-3.5 h-3.5 text-kop-500 flex-shrink-0"></i>' +
-                '<span>' + highlightMatch(nama, query) + '</span></div>';
-        }).join("");
-
-        suggestBox.classList.remove("hidden");
-        if (window.lucide) lucide.createIcons();
-
-        suggestItems = Array.prototype.slice.call(suggestBox.querySelectorAll(".ngx-suggest-item"));
-        suggestItems.forEach(function (el) {
-            el.addEventListener("mousedown", function (e) {
-                e.preventDefault();
-                namaInput.value = el.getAttribute("data-nama");
-                closeSuggest();
-            });
-        });
+    }
+    if (namaSelect) {
+        namaSelect.addEventListener("change", updateNamaLainnyaUI);
+        updateNamaLainnyaUI();
     }
 
-    if (namaInput && suggestBox) {
-        namaInput.addEventListener("input", function () {
-            clearTimeout(debounceTimer);
-            var q = namaInput.value.trim();
-            debounceTimer = setTimeout(function () { tampilkanSuggest(q); }, 120);
-        });
-        document.addEventListener("click", function (e) {
-            if (!suggestBox.contains(e.target) && e.target !== namaInput) closeSuggest();
-        });
+    function ambilNamaTerpilih() {
+        if (namaSelect.value === "__lainnya__") {
+            return namaLainnya.value.trim();
+        }
+        return namaSelect.value;
     }
 
     /* ---- Toggle tampilan berdasarkan Metode Pembayaran ---- */
@@ -1045,24 +999,30 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
         e.preventDefault();
         formError.classList.add("hidden");
 
-        var nama = namaInput.value.trim();
+        var nama = ambilNamaTerpilih();
+        var pantherGroup = pantherGroupSelect.value;
         var jenis = jenisSelect.value;
         var nominal = parseFloat(String(nominalInput.value).replace(/[^0-9.-]/g, ""));
+        var email = emailInput.value.trim();
         var metode = metodeSelect.value;
 
+        var polaEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
         if (!nama) return tampilkanErrorForm("Nama anggota tidak boleh kosong.");
+        if (!pantherGroup) return tampilkanErrorForm("Panther Group wajib dipilih.");
         if (!jenis) return tampilkanErrorForm("Pilih jenis simpanan terlebih dahulu.");
         if (!nominal || nominal <= 0) return tampilkanErrorForm("Nominal simpanan tidak valid.");
+        if (!email || !polaEmail.test(email)) return tampilkanErrorForm("Email wajib diisi dengan format yang benar (contoh: nama@email.com).");
         if (metode === "Transfer Bank" && !fileTerpilih) return tampilkanErrorForm("Bukti transfer wajib diupload untuk metode Transfer Bank.");
 
         var body = new URLSearchParams();
         body.append("action", "kirimSimpanan");
         body.append("nama", nama);
+        body.append("pantherGroup", pantherGroup);
         body.append("jenisSimpanan", jenis);
         body.append("nominal", nominal);
         body.append("keterangan", keteranganInput.value.trim());
-        body.append("noHp", noHpInput.value.trim());
-        body.append("email", emailInput.value.trim());
+        body.append("email", email);
         body.append("metodePembayaran", metode);
 
         if (metode === "Transfer Bank" && fileTerpilih) {
@@ -1101,6 +1061,7 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
             fileTerpilih = null;
             renderPreview();
             updateMetodeUI();
+            updateNamaLainnyaUI();
 
             if (window.Swal) {
                 Swal.fire({
