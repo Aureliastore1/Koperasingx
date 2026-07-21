@@ -77,10 +77,42 @@
             <!-- Nama Anggota -->
             <div>
                 <label class="ngx-form-label">Nama Anggota</label>
-                <div class="relative">
-                    <input type="text" id="simpananNama" required autocomplete="off" placeholder="Contoh: ADDIN MAS AMBAR" class="ngx-form-input">
-                    <div id="simpananSuggest" class="ngx-suggest hidden"></div>
-                </div>
+                <select id="simpananNamaSelect" required class="ngx-form-select">
+                    <option value="" disabled selected>Pilih nama anggota</option>
+                    <option value="ISLAFUDDIN AL ISLAMI">ISLAFUDDIN AL ISLAMI</option>
+                    <option value="SAYYID MAFU RAHMAN">SAYYID MAFU RAHMAN</option>
+                    <option value="TRIAS MARDIANTO">TRIAS MARDIANTO</option>
+                    <option value="MOH FAJARUL ADAM">MOH FAJARUL ADAM</option>
+                    <option value="FAHMI HUSAIN ASRORI">FAHMI HUSAIN ASRORI</option>
+                    <option value="ROSIKHUL ILMI">ROSIKHUL ILMI</option>
+                    <option value="AHMAD TIO HERMAWAN">AHMAD TIO HERMAWAN</option>
+                    <option value="ROHID MURTAFISHOLEH">ROHID MURTAFISHOLEH</option>
+                    <option value="MUHAMMAD FAHRIL AGUSTO">MUHAMMAD FAHRIL AGUSTO</option>
+                    <option value="MUHAMMAD JAMALLUDIN AL">MUHAMMAD JAMALLUDIN AL</option>
+                    <option value="RAHMAT AGUNG">RAHMAT AGUNG</option>
+                    <option value="MUHAMMAD BEJA PRASETYA">MUHAMMAD BEJA PRASETYA</option>
+                    <option value="RAFLY BAGAS MAULANA">RAFLY BAGAS MAULANA</option>
+                    <option value="KHAMZAH MUKHOYAR">KHAMZAH MUKHOYAR</option>
+                    <option value="MUHAMMAD AJI NUGRAHA">MUHAMMAD AJI NUGRAHA</option>
+                    <option value="DISTRIA REVANA">DISTRIA REVANA</option>
+                    <option value="SHAKILATU ZAHRA">SHAKILATU ZAHRA</option>
+                    <option value="PRADITA INTAN">PRADITA INTAN</option>
+                    <option value="MILA ERDIANA">MILA ERDIANA</option>
+                    <option value="__lainnya__">Lainnya...</option>
+                </select>
+                <input type="text" id="simpananNamaLainnya" placeholder="Ketik nama Anda" class="ngx-form-input hidden mt-2">
+            </div>
+
+            <!-- Panther Group -->
+            <div>
+                <label class="ngx-form-label">Panther Group</label>
+                <select id="simpananPantherGroup" required class="ngx-form-select">
+                    <option value="" disabled selected>Pilih Panther Group</option>
+                    <option value="BMX">BMX</option>
+                    <option value="BNR">BNR</option>
+                    <option value="CUSTOMER SERVIS">CUSTOMER SERVIS</option>
+                    <option value="UMUM">UMUM</option>
+                </select>
             </div>
 
             <!-- Jenis Simpanan -->
@@ -106,16 +138,11 @@
                 <textarea id="simpananKeterangan" placeholder="Catatan tambahan (opsional)" class="ngx-form-textarea"></textarea>
             </div>
 
-            <!-- Nomor HP & Email -->
-            <div class="grid sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="ngx-form-label">Nomor HP/WA</label>
-                    <input type="text" id="simpananNoHp" placeholder="08xxxxxxxxxx" class="ngx-form-input">
-                </div>
-                <div>
-                    <label class="ngx-form-label">Email <span class="font-normal text-gray-400">(opsional)</span></label>
-                    <input type="email" id="simpananEmail" placeholder="nama@email.com" class="ngx-form-input">
-                </div>
+            <!-- Email -->
+            <div>
+                <label class="ngx-form-label">Email</label>
+                <input type="email" id="simpananEmail" required placeholder="nama@email.com" class="ngx-form-input">
+                <p class="text-[11px] text-gray-400 mt-1.5">Konfirmasi & status verifikasi akan dikirim ke email ini.</p>
             </div>
 
             <!-- Metode Pembayaran -->
