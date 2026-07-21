@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0F766E">
     <link rel="icon" type="image/png" href="/favicon.png.png">
-    <title>Data Simpanan | Admin KAS NGX</title>
+    <title>Kelola Admin | Admin KAS NGX</title>
     <meta name="robots" content="noindex, nofollow">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -50,10 +50,10 @@
                 <a href="/admin/anggota/" class="ngx-admin-nav-item"><i data-lucide="users" class="w-4 h-4"></i> Data Anggota</a>
                 <a href="/admin/pinjaman/" class="ngx-admin-nav-item"><i data-lucide="banknote" class="w-4 h-4"></i> Pinjaman</a>
                 <a href="/admin/pengeluaran/" class="ngx-admin-nav-item"><i data-lucide="receipt" class="w-4 h-4"></i> Catatan Bulanan</a>
-                <a href="/admin/simpanan/" class="ngx-admin-nav-item aktif"><i data-lucide="piggy-bank" class="w-4 h-4"></i> Simpanan</a>
+                <a href="/admin/simpanan/" class="ngx-admin-nav-item"><i data-lucide="piggy-bank" class="w-4 h-4"></i> Simpanan</a>
                 <a href="/admin/followup/" class="ngx-admin-nav-item"><i data-lucide="phone-call" class="w-4 h-4"></i> Follow Up</a>
                 <div class="ngx-admin-nav-item segera"><i data-lucide="file-bar-chart" class="w-4 h-4"></i> Laporan <span class="ngx-admin-badge-segera">Segera</span></div>
-                <a href="/admin/users/" class="ngx-admin-nav-item"><i data-lucide="shield" class="w-4 h-4"></i> Kelola Admin</a>
+                <a href="/admin/users/" class="ngx-admin-nav-item aktif"><i data-lucide="shield" class="w-4 h-4"></i> Kelola Admin</a>
                 <a href="/admin/settings/" class="ngx-admin-nav-item"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
             </nav>
 
@@ -65,8 +65,8 @@
 
             <header class="ngx-admin-topbar px-5 py-4 flex items-center justify-between">
                 <div>
-                    <h1 class="text-base font-bold text-gray-900">Data Simpanan</h1>
-                    <p class="text-xs text-gray-400">Kelola simpanan anggota &amp; verifikasi</p>
+                    <h1 class="text-base font-bold text-gray-900">Kelola Admin</h1>
+                    <p class="text-xs text-gray-400">Kelola akun &amp; role tim admin (khusus Super Admin)</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <div class="text-right hidden sm:block">
@@ -82,7 +82,13 @@
 
                 <div id="pageLoading" class="flex flex-col items-center justify-center gap-3 py-24">
                     <div class="ngx-spinner"></div>
-                    <p class="text-sm text-gray-500">Memuat data simpanan...</p>
+                    <p class="text-sm text-gray-500">Memuat data admin...</p>
+                </div>
+
+                <div id="pageForbidden" class="hidden text-center py-24">
+                    <i data-lucide="lock" class="w-8 h-8 text-amber-500 mx-auto mb-3"></i>
+                    <p class="text-sm font-semibold text-gray-800 mb-1">Akses Terbatas</p>
+                    <p class="text-xs text-gray-500">Halaman ini hanya bisa diakses oleh Super Admin.</p>
                 </div>
 
                 <div id="pageError" class="hidden text-center py-24">
@@ -98,32 +104,18 @@
 
                     <div class="ngx-admin-table-card">
                         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <select id="filterJenis" class="ngx-admin-toolbar-input">
-                                    <option value="">Semua Jenis</option>
-                                    <option value="Simpanan Pokok">Simpanan Pokok</option>
-                                    <option value="Simpanan Wajib">Simpanan Wajib</option>
-                                    <option value="Simpanan Sukarela">Simpanan Sukarela</option>
-                                </select>
-                                <select id="filterStatusSimpanan" class="ngx-admin-toolbar-input">
-                                    <option value="">Semua Status</option>
-                                    <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
-                                    <option value="Disetujui">Disetujui</option>
-                                    <option value="Ditolak">Ditolak</option>
-                                </select>
-                            </div>
-                            <button id="btnTambahSimpanan" class="ngx-admin-btn ngx-admin-btn-primary"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Catat Simpanan</button>
+                            <p class="text-xs text-gray-400">Total akun admin terdaftar</p>
+                            <button id="btnTambahUser" class="ngx-admin-btn ngx-admin-btn-primary"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Tambah Admin</button>
                         </div>
 
                         <div class="overflow-x-auto">
-                            <table id="tabelSimpanan" class="display" style="width:100%">
+                            <table id="tabelUsers" class="display" style="width:100%">
                                 <thead>
                                     <tr>
-                                        <th>Tanggal</th>
                                         <th>Nama</th>
-                                        <th>Jenis</th>
-                                        <th>Nominal</th>
-                                        <th>Metode</th>
+                                        <th>Username</th>
+                                        <th>Role</th>
+                                        <th>Dibuat</th>
                                         <th>Status</th>
                                         <th>Aksi</th>
                                     </tr>
@@ -139,58 +131,49 @@
         </div>
     </div>
 
-    <!-- Modal Tambah/Edit Simpanan -->
-    <div id="modalSimpanan" class="ngx-modal-overlay hidden">
+    <!-- Modal Tambah/Edit User -->
+    <div id="modalUser" class="ngx-modal-overlay hidden">
         <div class="ngx-modal-box">
             <div class="ngx-modal-header">
-                <h3 class="text-sm font-bold text-gray-900" id="modalSimpananTitle">Catat Simpanan</h3>
-                <i data-lucide="x" class="w-5 h-5 ngx-modal-close" id="modalSimpananClose"></i>
+                <h3 class="text-sm font-bold text-gray-900" id="modalUserTitle">Tambah Admin</h3>
+                <i data-lucide="x" class="w-5 h-5 ngx-modal-close" id="modalUserClose"></i>
             </div>
-            <form id="formSimpanan">
+            <form id="formUser">
                 <div class="ngx-modal-body space-y-4">
-                    <input type="hidden" id="smId">
+                    <input type="hidden" id="usUsernameAsli">
                     <div>
                         <label class="ngx-form-label">Nama</label>
-                        <input type="text" id="smNama" required class="ngx-form-input">
+                        <input type="text" id="usNama" required class="ngx-form-input">
                     </div>
                     <div>
-                        <label class="ngx-form-label">Panther Group</label>
-                        <select id="smPantherGroup" class="ngx-form-select">
-                            <option value="BMX">BMX</option>
-                            <option value="BNR">BNR</option>
-                            <option value="CUSTOMER SERVIS">CUSTOMER SERVIS</option>
-                            <option value="UMUM">UMUM</option>
+                        <label class="ngx-form-label">Username</label>
+                        <input type="text" id="usUsername" required class="ngx-form-input" autocomplete="off">
+                    </div>
+                    <div>
+                        <label class="ngx-form-label" id="usPasswordLabel">Password</label>
+                        <input type="password" id="usPassword" class="ngx-form-input" autocomplete="new-password">
+                        <p class="text-[11px] text-gray-400 mt-1" id="usPasswordHint">Minimal 4 karakter.</p>
+                    </div>
+                    <div>
+                        <label class="ngx-form-label">Role</label>
+                        <select id="usRole" class="ngx-form-select">
+                            <option value="Super Admin">Super Admin</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Asisten Bendahara">Asisten Bendahara</option>
                         </select>
-                    </div>
-                    <div>
-                        <label class="ngx-form-label">Jenis Simpanan</label>
-                        <select id="smJenis" required class="ngx-form-select">
-                            <option value="Simpanan Pokok">Simpanan Pokok</option>
-                            <option value="Simpanan Wajib">Simpanan Wajib</option>
-                            <option value="Simpanan Sukarela">Simpanan Sukarela</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="ngx-form-label">Nominal</label>
-                        <input type="text" inputmode="numeric" id="smNominal" required class="ngx-form-input">
-                    </div>
-                    <div>
-                        <label class="ngx-form-label">Keterangan</label>
-                        <input type="text" id="smKeterangan" class="ngx-form-input">
                     </div>
                     <div>
                         <label class="ngx-form-label">Status</label>
-                        <select id="smStatus" class="ngx-form-select">
-                            <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
-                            <option value="Disetujui">Disetujui</option>
-                            <option value="Ditolak">Ditolak</option>
+                        <select id="usStatus" class="ngx-form-select">
+                            <option value="Aktif">Aktif</option>
+                            <option value="Nonaktif">Nonaktif</option>
                         </select>
                     </div>
-                    <p id="modalSimpananError" class="hidden text-xs text-red-600"></p>
+                    <p id="modalUserError" class="hidden text-xs text-red-600"></p>
                 </div>
                 <div class="ngx-modal-footer">
-                    <button type="button" id="btnBatalSimpanan" class="flex-1 bg-gray-100 text-gray-600 text-xs font-bold py-2.5 rounded-lg hover:bg-gray-200 transition">Batal</button>
-                    <button type="submit" id="btnSimpanSimpanan" class="flex-1 bg-kop-700 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-kop-800 transition">Simpan</button>
+                    <button type="button" id="btnBatalUser" class="flex-1 bg-gray-100 text-gray-600 text-xs font-bold py-2.5 rounded-lg hover:bg-gray-200 transition">Batal</button>
+                    <button type="submit" id="btnSimpanUser" class="flex-1 bg-kop-700 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-kop-800 transition">Simpan</button>
                 </div>
             </form>
         </div>
@@ -201,6 +184,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/admin/admin.js"></script>
-    <script src="/admin/simpanan/simpanan.js"></script>
+    <script src="/admin/users/users.js"></script>
 </body>
 </html>
