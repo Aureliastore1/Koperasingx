@@ -896,3 +896,92 @@ img {
     background: linear-gradient(90deg, #2DD4BF, #0F766E);
     transition: width 0.2s ease;
 }
+
+/* =========================================================
+   ADMIN PANEL — sidebar, stat card, login
+   ========================================================= */
+.ngx-admin-login-bg {
+    background: linear-gradient(160deg, #042F2E 0%, #0F766E 55%, #134E4A 100%);
+    min-height: 100vh;
+}
+
+.ngx-admin-login-card {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.35);
+}
+
+.ngx-admin-sidebar {
+    background: linear-gradient(180deg, #134E4A, #042F2E);
+    width: 264px;
+    flex-shrink: 0;
+}
+
+.ngx-admin-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.65);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.ngx-admin-nav-item:hover {
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+}
+.ngx-admin-nav-item.aktif {
+    background: rgba(45, 212, 191, 0.15);
+    color: #5EEAD4;
+}
+.ngx-admin-nav-item.segera {
+    opacity: 0.4;
+    cursor: default;
+}
+.ngx-admin-nav-item.segera:hover {
+    background: none;
+    color: rgba(255,255,255,0.65);
+}
+
+.ngx-admin-badge-segera {
+    font-size: 9px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.6);
+    padding: 2px 7px;
+    border-radius: 999px;
+    margin-left: auto;
+}
+
+.ngx-admin-topbar {
+    background: #fff;
+    border-bottom: 1px solid #F0FDFA;
+}
+
+.ngx-admin-stat-card {
+    background: #fff;
+    border: 1px solid rgba(15, 118, 110, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 16px -10px rgba(15, 118, 110, 0.15);
+}
+
+.ngx-admin-stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.ngx-admin-chart-card {
+    background: #fff;
+    border: 1px solid rgba(15, 118, 110, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 16px -10px rgba(15, 118, 110, 0.15);
+}
