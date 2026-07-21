@@ -684,6 +684,36 @@ img {
     background: rgba(255,255,255,0.2);
 }
 
+/* ===== Checkbox Persetujuan ===== */
+.ngx-checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(15, 118, 110, 0.04);
+    border: 1px solid rgba(15, 118, 110, 0.12);
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+.ngx-checkbox-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    accent-color: #0F766E;
+    cursor: pointer;
+}
+.ngx-checkbox-row label {
+    font-size: 12.5px;
+    color: #4B5563;
+    line-height: 1.5;
+    cursor: pointer;
+}
+.ngx-checkbox-row a {
+    color: #0F766E;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
 /* =========================================================
    FORMULIR SIMPANAN — dropdown metode, drag&drop, preview, progress
    ========================================================= */
