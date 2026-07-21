@@ -39,6 +39,10 @@
         if (window.lucide) lucide.createIcons();
     }
 
+    // Default tanggal = hari ini
+    var tanggalInput = document.getElementById("pgTanggal");
+    tanggalInput.value = new Date().toISOString().split("T")[0];
+
     form.addEventListener("submit", function (e) {
 
         e.preventDefault();
@@ -46,11 +50,13 @@
 
         var bulan = document.getElementById("pgBulan").value;
         var bendahara = document.getElementById("pgBendahara").value;
+        var tanggal = tanggalInput.value;
         var keterangan = document.getElementById("pgKeterangan").value.trim();
         var nominal = ambilNominalAngka();
 
         if (!bulan) return tampilkanError("Bulan wajib dipilih.");
         if (!bendahara) return tampilkanError("Pilih dulu siapa yang mencatat (Dian/Fajar).");
+        if (!tanggal) return tampilkanError("Tanggal wajib diisi.");
         if (!keterangan) return tampilkanError("Keterangan pengeluaran wajib diisi.");
         if (!nominal || nominal <= 0) return tampilkanError("Nominal tidak valid.");
 
@@ -61,6 +67,7 @@
         body.append("token", ngxAdminGetToken());
         body.append("bulan", bulan);
         body.append("bendahara", bendahara);
+        body.append("tanggal", tanggal);
         body.append("keterangan", keterangan);
         body.append("nominal", nominal);
 
@@ -82,11 +89,15 @@
                     return;
                 }
 
+                var namaBulanTampil = document.getElementById("pgBulan").options[document.getElementById("pgBulan").selectedIndex].text;
+
                 form.reset();
+                tanggalInput.value = new Date().toISOString().split("T")[0];
                 muatRekap();
 
                 if (window.Swal) {
-                    Swal.fire({ title: "Tersimpan", text: "Catatan pengeluaran berhasil disimpan.", icon: "success", confirmButtonColor: "#0F766E", timer: 1800, showConfirmButton: false });
+                    var lokasi = data.lokasi ? ("Tersimpan di sheet PENGELUARAN, kolom " + data.lokasi.kolomKeterangan + "/" + data.lokasi.kolomNominal + " baris " + data.lokasi.baris + ".") : "";
+                    Swal.fire({ title: "Tersimpan", text: "Catatan pengeluaran " + namaBulanTampil + " berhasil disimpan. " + lokasi, icon: "success", confirmButtonColor: "#0F766E" });
                 }
 
             })
