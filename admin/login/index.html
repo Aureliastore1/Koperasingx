@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0F766E">
+    <link rel="icon" type="image/png" href="/favicon.png.png">
+    <title>Login Admin | KAS NGX</title>
+    <meta name="robots" content="noindex, nofollow">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 'inter': ['Inter', 'sans-serif'] },
+                    colors: {
+                        'kop': {
+                            50: '#F0FDFA', 100: '#CCFBF1', 200: '#99F6E4', 300: '#5EEAD4',
+                            400: '#2DD4BF', 500: '#14B8A6', 600: '#0D9488', 700: '#0F766E',
+                            800: '#115E59', 900: '#134E4A', 950: '#042F2E',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-inter antialiased">
+
+    <div class="ngx-admin-login-bg flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-sm">
+
+            <div class="text-center mb-8">
+                <div class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/20">
+                    <i data-lucide="shield-check" class="w-7 h-7 text-white"></i>
+                </div>
+                <h1 class="text-xl font-extrabold text-white">Admin Panel</h1>
+                <p class="text-sm text-white/60 mt-1">KAS NGX &middot; Koperasi Simpan Pinjam</p>
+            </div>
+
+            <div class="ngx-admin-login-card p-8">
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label class="ngx-form-label">Username</label>
+                        <input type="text" id="loginUsername" required autocomplete="username" placeholder="Masukkan username" class="ngx-form-input">
+                    </div>
+                    <div>
+                        <label class="ngx-form-label">Password</label>
+                        <div class="relative">
+                            <input type="password" id="loginPassword" required autocomplete="current-password" placeholder="Masukkan password" class="ngx-form-input pr-11">
+                            <button type="button" id="togglePassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <p id="loginError" class="hidden text-xs text-red-600 flex items-start gap-1.5">
+                        <i data-lucide="alert-circle" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5"></i>
+                        <span></span>
+                    </p>
+
+                    <button type="submit" id="loginBtn" class="w-full inline-flex items-center justify-center gap-2 bg-kop-700 text-white text-sm font-bold py-3.5 rounded-xl hover:bg-kop-800 transition shadow-md">
+                        <i data-lucide="log-in" class="w-4 h-4"></i>
+                        <span>Masuk</span>
+                    </button>
+                </form>
+            </div>
+
+            <p class="text-center text-xs text-white/40 mt-6">
+                <a href="/" class="hover:text-white/70 transition">&larr; Kembali ke Website Utama</a>
+            </p>
+
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>lucide.createIcons();</script>
+    <script>
+        // Ganti URL ini kalau nanti deploy ulang Apps Script (sama dengan script.js utama)
+        var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9CkSgx27TEjbovKO46dQepkwQ0nlXJ39f17MmAjTvw3ZQ8je9T7BTH/exec";
+
+        // Kalau sudah ada sesi aktif, langsung lempar ke dashboard
+        (function () {
+            var token = sessionStorage.getItem("ngxAdminToken");
+            if (!token) return;
+
+            fetch(NGX_API_BASE_URL + "?action=adminVerifySession&token=" + encodeURIComponent(token))
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data && data.success) {
+                        window.location.href = "/admin/dashboard/";
+                    }
+                })
+                .catch(function () {});
+        })();
+
+        var form = document.getElementById("loginForm");
+        var usernameInput = document.getElementById("loginUsername");
+        var passwordInput = document.getElementById("loginPassword");
+        var errorBox = document.getElementById("loginError");
+        var btn = document.getElementById("loginBtn");
+        var toggleBtn = document.getElementById("togglePassword");
+
+        toggleBtn.addEventListener("click", function () {
+            var isPassword = passwordInput.type === "password";
+            passwordInput.type = isPassword ? "text" : "password";
+            toggleBtn.innerHTML = isPassword
+                ? '<i data-lucide="eye-off" class="w-4 h-4"></i>'
+                : '<i data-lucide="eye" class="w-4 h-4"></i>';
+            if (window.lucide) lucide.createIcons();
+        });
+
+        function tampilkanError(pesan) {
+            errorBox.querySelector("span").textContent = pesan;
+            errorBox.classList.remove("hidden");
+        }
+
+        function setLoading(isLoading) {
+            btn.disabled = isLoading;
+            btn.innerHTML = isLoading
+                ? '<span class="ngx-spinner" style="width:16px;height:16px;border-width:2px;"></span><span>Memproses...</span>'
+                : '<i data-lucide="log-in" class="w-4 h-4"></i><span>Masuk</span>';
+            if (window.lucide) lucide.createIcons();
+        }
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            errorBox.classList.add("hidden");
+
+            var username = usernameInput.value.trim();
+            var password = passwordInput.value;
+
+            if (!username || !password) {
+                tampilkanError("Username dan password wajib diisi.");
+                return;
+            }
+
+            setLoading(true);
+
+            var body = new URLSearchParams();
+            body.append("action", "adminLogin");
+            body.append("username", username);
+            body.append("password", password);
+
+            fetch(NGX_API_BASE_URL, { method: "POST", body: body })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    setLoading(false);
+
+                    if (!data || data.success !== true) {
+                        tampilkanError(data && data.message ? data.message : "Gagal login, coba lagi.");
+                        return;
+                    }
+
+                    sessionStorage.setItem("ngxAdminToken", data.token);
+                    sessionStorage.setItem("ngxAdminUser", JSON.stringify(data.user));
+
+                    window.location.href = "/admin/dashboard/";
+                })
+                .catch(function () {
+                    setLoading(false);
+                    tampilkanError("Gagal terhubung ke server, coba lagi.");
+                });
+        });
+    </script>
+</body>
+</html>
