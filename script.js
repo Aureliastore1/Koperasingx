@@ -1766,3 +1766,41 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
     });
 
 })();
+
+/* =========================================================
+   POPUP PENGENALAN FITUR — muncul sekali saat pertama kali
+   buka website (pakai localStorage, bukan lagi tiap kunjungan)
+   ========================================================= */
+(function () {
+    var modal = document.getElementById("modalFiturIntro");
+    if (!modal) return;
+
+    var KEY = "ngx_sudah_lihat_intro";
+
+    try {
+        if (localStorage.getItem(KEY)) return;
+    } catch (err) {
+        return; // localStorage tidak tersedia (mode privat dsb), lewati saja
+    }
+
+    setTimeout(function () {
+        modal.classList.remove("hidden");
+        if (window.lucide) lucide.createIcons();
+    }, 900);
+
+    function tutupIntro() {
+        modal.classList.add("hidden");
+        try { localStorage.setItem(KEY, "1"); } catch (err) {}
+    }
+
+    var btnTutup = document.getElementById("btnTutupIntro");
+    var btnMulai = document.getElementById("btnMulaiIntro");
+
+    if (btnTutup) btnTutup.addEventListener("click", tutupIntro);
+    if (btnMulai) btnMulai.addEventListener("click", tutupIntro);
+
+    modal.addEventListener("click", function (e) {
+        if (e.target === modal) tutupIntro();
+    });
+
+})();

@@ -457,5 +457,41 @@
     <!-- Scripts -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="/script.js"></script>
+
+    <!-- Popup Pengenalan Fitur (muncul sekali saat pertama buka website) -->
+    <div id="modalFiturIntro" class="ngx-modal-overlay hidden">
+        <div class="ngx-modal-box" style="max-width:420px;">
+            <div class="ngx-modal-header">
+                <h3 class="text-sm font-bold text-gray-900">Selamat Datang di KAS NGX 👋</h3>
+                <i data-lucide="x" class="w-5 h-5 ngx-modal-close" id="btnTutupIntro"></i>
+            </div>
+            <div class="ngx-modal-body space-y-2.5">
+                <p class="text-xs text-gray-500 mb-2">Beberapa hal yang bisa kamu lakukan di sini:</p>
+
+                <a href="/cek-tagihan/" class="flex items-center gap-3 p-3 rounded-xl hover:bg-kop-50 transition border border-gray-100">
+                    <div class="w-10 h-10 bg-kop-700 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="search-check" class="w-5 h-5 text-white"></i></div>
+                    <div><p class="text-sm font-bold text-gray-800">Cek Tagihan</p><p class="text-[11px] text-gray-500">Lihat status &amp; riwayat pinjaman Anda</p></div>
+                </a>
+
+                <a href="/informasi-kas/" class="flex items-center gap-3 p-3 rounded-xl hover:bg-kop-50 transition border border-gray-100">
+                    <div class="w-10 h-10 bg-kop-600 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="wallet" class="w-5 h-5 text-white"></i></div>
+                    <div><p class="text-sm font-bold text-gray-800">Info Kas</p><p class="text-[11px] text-gray-500">Transparansi kondisi kas koperasi</p></div>
+                </a>
+
+                <a href="/simpanan/" class="flex items-center gap-3 p-3 rounded-xl hover:bg-kop-50 transition border border-gray-100">
+                    <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="piggy-bank" class="w-5 h-5 text-white"></i></div>
+                    <div><p class="text-sm font-bold text-gray-800">Simpan</p><p class="text-[11px] text-gray-500">Setor simpanan online, transfer atau tunai</p></div>
+                </a>
+
+                <a href="/pelunasan/" class="flex items-center gap-3 p-3 rounded-xl hover:bg-kop-50 transition border border-gray-100">
+                    <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="banknote" class="w-5 h-5 text-white"></i></div>
+                    <div><p class="text-sm font-bold text-gray-800">Pelunasan</p><p class="text-[11px] text-gray-500">Bayar pinjaman, penuh atau sebagian</p></div>
+                </a>
+            </div>
+            <div class="ngx-modal-footer">
+                <button id="btnMulaiIntro" class="w-full bg-kop-700 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-kop-800 transition">Mulai Jelajahi</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

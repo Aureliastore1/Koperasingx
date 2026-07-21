@@ -4,6 +4,78 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
 if (window.lucide) lucide.createIcons();
 
 /* =========================================================
+   BOTTOM NAV MOBILE — otomatis disuntikkan di semua halaman
+   admin (dideteksi dari adanya .ngx-admin-sidebar), supaya
+   tidak perlu edit tiap file HTML satu-satu.
+   ========================================================= */
+(function () {
+
+    var sidebar = document.querySelector(".ngx-admin-sidebar");
+    if (!sidebar) return; // bukan halaman admin
+
+    document.body.classList.add("ngx-has-bottomnav");
+
+    var halamanSekarang = window.location.pathname;
+
+    function aktifJika(path) {
+        return halamanSekarang.indexOf(path) === 0 ? " aktif" : "";
+    }
+
+    var itemUtama = [
+        { href: "/admin/dashboard/", icon: "layout-dashboard", label: "Dashboard" },
+        { href: "/admin/pinjaman/", icon: "banknote", label: "Pinjaman" },
+        { href: "/admin/simpanan/", icon: "piggy-bank", label: "Simpanan" },
+        { href: "/admin/followup/", icon: "phone-call", label: "Follow Up" }
+    ];
+
+    var itemLainnya = [
+        { href: "/admin/anggota/", icon: "users", label: "Data Anggota" },
+        { href: "/admin/pengeluaran/", icon: "receipt", label: "Catatan Bulanan" },
+        { href: "/admin/laporan/", icon: "file-bar-chart", label: "Laporan" },
+        { href: "/admin/users/", icon: "shield", label: "Kelola Admin" },
+        { href: "/admin/settings/", icon: "settings", label: "Settings" }
+    ];
+
+    var html = '<div class="ngx-admin-bottomnav">';
+
+    itemUtama.forEach(function (it) {
+        html += '<a href="' + it.href + '" class="ngx-admin-bottomnav-item' + aktifJika(it.href) + '">' +
+            '<i data-lucide="' + it.icon + '" class="w-5 h-5"></i><span>' + it.label + '</span></a>';
+    });
+
+    html += '<div class="ngx-admin-bottomnav-item" id="ngxBottomNavMore">' +
+        '<i data-lucide="menu" class="w-5 h-5"></i><span>Lainnya</span></div>';
+    html += '</div>';
+
+    document.body.insertAdjacentHTML("beforeend", html);
+
+    document.getElementById("ngxBottomNavMore").addEventListener("click", function () {
+
+        var sheetHtml = '<div class="ngx-admin-bottomnav-more-sheet" id="ngxMoreSheet"><div class="ngx-admin-bottomnav-more-box">' +
+            '<p class="text-sm font-bold text-gray-800 mb-2">Menu Lainnya</p>';
+
+        itemLainnya.forEach(function (it) {
+            sheetHtml += '<a href="' + it.href + '" class="ngx-admin-bottomnav-more-link"><i data-lucide="' + it.icon + '" class="w-4 h-4 text-kop-700"></i>' + it.label + '</a>';
+        });
+
+        sheetHtml += '<button id="ngxMoreClose" class="w-full mt-4 bg-gray-100 text-gray-600 text-xs font-bold py-3 rounded-xl">Tutup</button>';
+        sheetHtml += '</div></div>';
+
+        document.body.insertAdjacentHTML("beforeend", sheetHtml);
+        if (window.lucide) lucide.createIcons();
+
+        var sheet = document.getElementById("ngxMoreSheet");
+
+        document.getElementById("ngxMoreClose").addEventListener("click", function () { sheet.remove(); });
+        sheet.addEventListener("click", function (e) { if (e.target === sheet) sheet.remove(); });
+
+    });
+
+    if (window.lucide) lucide.createIcons();
+
+})();
+
+/* =========================================================
    PROTEKSI HALAMAN — semua halaman admin (kecuali /admin/login)
    wajib punya sesi valid, kalau tidak otomatis dilempar ke login
    ========================================================= */
