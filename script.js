@@ -1034,55 +1034,55 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
         setLoadingSubmit(true);
         updateProgress(0);
 
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", NGX_API_BASE_URL, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
+        // Animasi progress halus (bukan persentase asli per-byte, tapi tetap
+        // kasih indikasi aktivitas) — dipakai karena fetch() tidak punya
+        // event progress upload seperti XHR, dan fetch() terbukti lebih
+        // stabil untuk kirim file ke Apps Script dibanding XHR manual.
+        var progresPalsu = 8;
+        var timerProgres = setInterval(function () {
+            progresPalsu = Math.min(progresPalsu + Math.random() * 12, 88);
+            updateProgress(Math.round(progresPalsu));
+        }, 350);
 
-        xhr.upload.onprogress = function (ev) {
-            if (ev.lengthComputable) {
-                updateProgress(Math.round((ev.loaded / ev.total) * 100));
-            }
-        };
+        fetch(NGX_API_BASE_URL, { method: "POST", body: body })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
 
-        xhr.onload = function () {
+                clearInterval(timerProgres);
+                updateProgress(100);
+                setLoadingSubmit(false);
 
-            setLoadingSubmit(false);
-            progressTrack.classList.add("hidden");
+                setTimeout(function () { progressTrack.classList.add("hidden"); }, 400);
 
-            var data;
-            try { data = JSON.parse(xhr.responseText); } catch (err) { data = null; }
+                if (!data || data.success !== true) {
+                    tampilkanErrorForm(data && data.message ? data.message : "Gagal mengirim data, coba lagi.");
+                    return;
+                }
 
-            if (!data || data.success !== true) {
-                tampilkanErrorForm(data && data.message ? data.message : "Gagal mengirim data, coba lagi.");
-                return;
-            }
+                form.reset();
+                fileTerpilih = null;
+                renderPreview();
+                updateMetodeUI();
+                updateNamaLainnyaUI();
 
-            form.reset();
-            fileTerpilih = null;
-            renderPreview();
-            updateMetodeUI();
-            updateNamaLainnyaUI();
+                if (window.Swal) {
+                    Swal.fire({
+                        title: "Berhasil",
+                        text: "Terima kasih. Data simpanan berhasil dikirim dan akan diverifikasi oleh Admin terlebih dahulu.",
+                        icon: "success",
+                        confirmButtonColor: "#0F766E"
+                    });
+                } else {
+                    alert("Berhasil! Data simpanan berhasil dikirim dan akan diverifikasi oleh Admin terlebih dahulu.");
+                }
 
-            if (window.Swal) {
-                Swal.fire({
-                    title: "Berhasil",
-                    text: "Terima kasih. Data simpanan berhasil dikirim dan akan diverifikasi oleh Admin terlebih dahulu.",
-                    icon: "success",
-                    confirmButtonColor: "#0F766E"
-                });
-            } else {
-                alert("Berhasil! Data simpanan berhasil dikirim dan akan diverifikasi oleh Admin terlebih dahulu.");
-            }
-
-        };
-
-        xhr.onerror = function () {
-            setLoadingSubmit(false);
-            progressTrack.classList.add("hidden");
-            tampilkanErrorForm("Gagal terhubung ke server, coba lagi.");
-        };
-
-        xhr.send(body.toString());
+            })
+            .catch(function (err) {
+                clearInterval(timerProgres);
+                setLoadingSubmit(false);
+                progressTrack.classList.add("hidden");
+                tampilkanErrorForm("Gagal terhubung ke server, coba lagi. (" + (err && err.message ? err.message : "network error") + ")");
+            });
 
     });
 
