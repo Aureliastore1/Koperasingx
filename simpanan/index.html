@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0F766E">
+    <link rel="icon" type="image/png" href="/favicon.png.png">
+    <link rel="shortcut icon" href="/favicon.png.png">
+    <link rel="apple-touch-icon" href="/favicon.png.png">
+
+    <title>Formulir Simpanan | Koperasi Simpan Pinjam NGX</title>
+    <meta name="description" content="Setor simpanan anggota Koperasi Simpan Pinjam NGX secara online, transfer bank atau tunai.">
+    <meta property="og:title" content="Formulir Simpanan | KAS NGX">
+    <meta property="og:description" content="Setor simpanan secara online, transfer bank atau tunai.">
+    <meta property="og:url" content="https://koperasingx.web.id/simpanan">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 'inter': ['Inter', 'sans-serif'] },
+                    colors: {
+                        'kop': {
+                            50: '#F0FDFA', 100: '#CCFBF1', 200: '#99F6E4', 300: '#5EEAD4',
+                            400: '#2DD4BF', 500: '#14B8A6', 600: '#0D9488', 700: '#0F766E',
+                            800: '#115E59', 900: '#134E4A', 950: '#042F2E',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-inter bg-gray-50 antialiased overflow-x-hidden">
+
+    <!-- Nav ringkas -->
+    <nav class="ngx-page-nav">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-16">
+                <a href="/" class="flex items-center gap-2">
+                    <div class="w-9 h-9 bg-white/10 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/20">
+                        <i data-lucide="landmark" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span class="text-white font-bold text-sm tracking-wide">KAS NGX</span>
+                </a>
+                <a href="/" class="ngx-back-link">
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                    Kembali ke Beranda
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero halaman -->
+    <section class="ngx-page-hero pt-16 pb-24 px-4 sm:px-6">
+        <div class="max-w-2xl mx-auto text-center pt-10">
+            <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 mb-5">
+                <i data-lucide="piggy-bank" class="w-3.5 h-3.5 text-kop-200"></i>
+                <span class="text-white/90 text-xs font-medium">Setor Simpanan Anggota</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3 drop-shadow-lg">
+                Formulir Simpanan
+            </h1>
+            <p class="text-white/70 text-sm sm:text-base max-w-lg mx-auto">
+                Isi data simpanan Anda, transfer bank atau tunai — akan diverifikasi Admin sebelum tercatat resmi.
+            </p>
+        </div>
+    </section>
+
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 -mt-14 pb-24">
+
+        <form id="simpananForm" class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-xl shadow-kop-900/5 space-y-5" autocomplete="off">
+
+            <!-- Nama Anggota -->
+            <div>
+                <label class="ngx-form-label">Nama Anggota</label>
+                <div class="relative">
+                    <input type="text" id="simpananNama" required autocomplete="off" placeholder="Contoh: ADDIN MAS AMBAR" class="ngx-form-input">
+                    <div id="simpananSuggest" class="ngx-suggest hidden"></div>
+                </div>
+            </div>
+
+            <!-- Jenis Simpanan -->
+            <div>
+                <label class="ngx-form-label">Jenis Simpanan</label>
+                <select id="simpananJenis" required class="ngx-form-select">
+                    <option value="" disabled selected>Pilih jenis simpanan</option>
+                    <option value="Simpanan Pokok">Simpanan Pokok</option>
+                    <option value="Simpanan Wajib">Simpanan Wajib</option>
+                    <option value="Simpanan Sukarela">Simpanan Sukarela</option>
+                </select>
+            </div>
+
+            <!-- Nominal -->
+            <div>
+                <label class="ngx-form-label">Nominal Simpanan (Rp)</label>
+                <input type="text" inputmode="numeric" id="simpananNominal" required placeholder="Contoh: 100000" class="ngx-form-input">
+            </div>
+
+            <!-- Keterangan -->
+            <div>
+                <label class="ngx-form-label">Keterangan <span class="font-normal text-gray-400">(opsional)</span></label>
+                <textarea id="simpananKeterangan" placeholder="Catatan tambahan (opsional)" class="ngx-form-textarea"></textarea>
+            </div>
+
+            <!-- Nomor HP & Email -->
+            <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="ngx-form-label">Nomor HP/WA</label>
+                    <input type="text" id="simpananNoHp" placeholder="08xxxxxxxxxx" class="ngx-form-input">
+                </div>
+                <div>
+                    <label class="ngx-form-label">Email <span class="font-normal text-gray-400">(opsional)</span></label>
+                    <input type="email" id="simpananEmail" placeholder="nama@email.com" class="ngx-form-input">
+                </div>
+            </div>
+
+            <!-- Metode Pembayaran -->
+            <div>
+                <label class="ngx-form-label">Metode Pembayaran</label>
+                <select id="simpananMetode" class="ngx-form-select">
+                    <option value="Transfer Bank" selected>Transfer Bank</option>
+                    <option value="Tunai">Tunai</option>
+                </select>
+            </div>
+
+            <!-- Info Rekening (tampil kalau Transfer Bank) -->
+            <div id="simpananRekeningCard" class="ngx-rekening-card">
+                <div class="flex items-center gap-2 mb-3">
+                    <i data-lucide="landmark" class="w-4 h-4 text-white/70"></i>
+                    <span class="text-xs font-semibold text-white/80">Silakan transfer ke rekening berikut</span>
+                </div>
+                <p class="text-sm font-bold text-white mb-3">KAS NGANJUK</p>
+                <div class="flex items-end justify-between gap-3 flex-wrap">
+                    <div>
+                        <p class="ngx-rekening-label">BRI &middot; A/N Trias Mardianto</p>
+                        <p class="ngx-rekening-nomor" id="simpananNomorRek">375301017541500</p>
+                    </div>
+                    <button type="button" id="simpananCopyRekening" class="ngx-rekening-copy">
+                        <i data-lucide="copy" class="w-3 h-3"></i>
+                        <span>Salin</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Upload Bukti Transfer (tampil kalau Transfer Bank) -->
+            <div id="simpananUploadSection">
+                <label class="ngx-form-label">Upload Bukti Transfer</label>
+                <div id="simpananDropzone" class="ngx-dropzone"></div>
+                <input type="file" id="simpananFileInput" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" class="hidden">
+                <div id="simpananProgressTrack" class="ngx-upload-progress-track hidden">
+                    <div id="simpananProgressFill" class="ngx-upload-progress-fill"></div>
+                </div>
+            </div>
+
+            <!-- Error -->
+            <p id="simpananFormError" class="hidden text-xs text-red-600 flex items-start gap-1.5">
+                <i data-lucide="alert-circle" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5"></i>
+                <span></span>
+            </p>
+
+            <!-- Submit -->
+            <button type="submit" id="simpananSubmitBtn" class="w-full inline-flex items-center justify-center gap-2 bg-kop-700 text-white text-sm font-bold py-3.5 rounded-xl hover:bg-kop-800 transition shadow-md">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Simpan</span>
+            </button>
+
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-kop-950 text-white py-10 px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 bg-kop-700 rounded-xl flex items-center justify-center">
+                    <i data-lucide="landmark" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold">SIMPAN PINJAM KAS NGX</h3>
+                    <p class="text-xs text-white/40">Nyaman &mdash; Sejahtera</p>
+                </div>
+            </div>
+            <a href="/" class="text-xs text-white/60 hover:text-white transition">&larr; Kembali ke Beranda</a>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/script.js"></script>
+</body>
+</html>
