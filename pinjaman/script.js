@@ -1,0 +1,1296 @@
+/* ===== Base ===== */
+html {
+    scroll-behavior: smooth;
+}
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+/* ===== Navbar Scroll Effect ===== */
+#navbar.scrolled {
+    background: rgba(19, 78, 74, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+#navbar:not(.scrolled) {
+    background: linear-gradient(to bottom, rgba(19, 78, 74, 0.35), transparent);
+}
+/* ===== Reveal Animation ===== */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+/* ===== Custom Scrollbar ===== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f0f0f0;
+}
+::-webkit-scrollbar-thumb {
+    background: #0D9488;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #0F766E;
+}
+/* ===== Selection ===== */
+::selection {
+    background: #0F766E;
+    color: #fff;
+}
+/* ===== Smooth image rendering ===== */
+img {
+    -webkit-user-drag: none;
+    user-select: none;
+}
+
+/* =========================================================
+   CEK TAGIHAN — Loading, Card Hasil, Progress Bar
+   ========================================================= */
+
+/* Fade-in halus untuk hasil */
+.hasil-fade-in {
+    animation: hasilFadeIn 0.45s ease forwards;
+}
+@keyframes hasilFadeIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Spinner loading */
+.ngx-spinner {
+    width: 38px;
+    height: 38px;
+    border: 3px solid rgba(15, 118, 110, 0.15);
+    border-top-color: #0F766E;
+    border-radius: 50%;
+    animation: ngxSpin 0.8s linear infinite;
+}
+@keyframes ngxSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* Kartu hasil — glassmorphism */
+.ngx-hasil-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(240,253,250,0.9));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(15, 118, 110, 0.12);
+    box-shadow: 0 10px 30px -10px rgba(15, 118, 110, 0.25);
+}
+
+/* Track progress bar */
+.ngx-progress-track {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(15, 118, 110, 0.12);
+    overflow: hidden;
+}
+
+/* Isi progress bar — dianimasikan lewat width via JS */
+.ngx-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    width: 0%;
+    background: linear-gradient(90deg, #2DD4BF, #0F766E);
+    transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ngx-progress-fill.belum-lunas {
+    background: linear-gradient(90deg, #FBBF24, #D97706);
+}
+
+/* Badge status */
+.ngx-badge-lunas {
+    background: rgba(16, 185, 129, 0.12);
+    color: #047857;
+}
+.ngx-badge-belum {
+    background: rgba(217, 119, 6, 0.12);
+    color: #B45309;
+}
+.ngx-badge-notfound {
+    background: rgba(239, 68, 68, 0.12);
+    color: #B91C1C;
+}
+
+/* Tombol dalam keadaan loading */
+#cekTagihanBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   AUTOCOMPLETE — Dropdown Saran Nama
+   ========================================================= */
+.ngx-suggest {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 40;
+    background: #fff;
+    border: 1px solid rgba(15, 118, 110, 0.12);
+    border-radius: 14px;
+    box-shadow: 0 14px 34px -12px rgba(15, 118, 110, 0.3);
+    max-height: 240px;
+    overflow-y: auto;
+    animation: ngxSuggestIn 0.18s ease forwards;
+}
+@keyframes ngxSuggestIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.ngx-suggest-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    transition: background 0.12s ease;
+}
+.ngx-suggest-item:not(:last-child) {
+    border-bottom: 1px solid rgba(15, 118, 110, 0.06);
+}
+.ngx-suggest-item:hover,
+.ngx-suggest-item.active {
+    background: #F0FDFA;
+}
+.ngx-suggest-item mark {
+    background: rgba(45, 212, 191, 0.35);
+    color: #0F766E;
+    font-weight: 700;
+    border-radius: 3px;
+    padding: 0 1px;
+}
+.ngx-suggest-empty {
+    padding: 12px 14px;
+    font-size: 12px;
+    color: #9CA3AF;
+    text-align: center;
+}
+
+/* =========================================================
+   RIWAYAT TRANSAKSI — Timeline
+   ========================================================= */
+.ngx-badge-count {
+    background: rgba(15, 118, 110, 0.1);
+    color: #0F766E;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.ngx-riwayat-list {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.ngx-riwayat-item {
+    position: relative;
+    display: flex;
+    gap: 14px;
+    padding-left: 4px;
+}
+
+.ngx-riwayat-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: 9px;
+    top: 18px;
+    bottom: -18px;
+    width: 2px;
+    background: rgba(15, 118, 110, 0.12);
+}
+
+.ngx-riwayat-dot {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #F0FDFA;
+    border: 2px solid #0F766E;
+    margin-top: 2px;
+}
+
+/* ===== Detail per baris riwayat: Alasan, Jatuh Tempo, Pelunasan ===== */
+.ngx-riwayat-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: rgba(15, 118, 110, 0.045);
+    border: 1px solid rgba(15, 118, 110, 0.08);
+    border-radius: 12px;
+    padding: 10px 12px;
+}
+
+.ngx-riwayat-detail-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.ngx-riwayat-label {
+    color: #9CA3AF;
+    flex-shrink: 0;
+}
+
+.ngx-riwayat-value {
+    color: #374151;
+    font-weight: 600;
+    text-align: right;
+}
+
+/* =========================================================
+   HALAMAN INTERNAL (Informasi Kas / Cek Tagihan) — header ringkas
+   ========================================================= */
+.ngx-page-nav {
+    background: linear-gradient(135deg, #0F766E, #134E4A);
+}
+.ngx-page-hero {
+    background: linear-gradient(180deg, #134E4A 0%, #0F766E 55%, #F0FDFA 100%);
+}
+.ngx-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255,255,255,0.75);
+    font-size: 13px;
+    transition: color 0.15s ease;
+}
+.ngx-back-link:hover {
+    color: #fff;
+}
+
+/* =========================================================
+   TABEL IURAN BULANAN — modern, minimalis, scroll horizontal
+   ========================================================= */
+.ngx-iuran-scroll {
+    overflow-x: auto;
+    border-radius: 20px;
+    border: 1px solid rgba(15, 118, 110, 0.1);
+    background: #fff;
+    box-shadow: 0 10px 30px -12px rgba(15, 118, 110, 0.18);
+}
+
+.ngx-iuran-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+    min-width: 760px;
+}
+
+.ngx-iuran-th {
+    position: sticky;
+    top: 0;
+    background: #F0FDFA;
+    color: #0F766E;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    text-align: right;
+    padding: 14px 12px;
+    border-bottom: 1px solid rgba(15, 118, 110, 0.12);
+    white-space: nowrap;
+}
+.ngx-iuran-th-nama {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #F0FDFA;
+}
+.ngx-iuran-th-total {
+    color: #0F766E;
+    background: rgba(15, 118, 110, 0.08);
+}
+
+.ngx-iuran-row {
+    transition: background 0.12s ease;
+}
+.ngx-iuran-row:nth-child(even) {
+    background: rgba(15, 118, 110, 0.025);
+}
+.ngx-iuran-row:hover {
+    background: rgba(45, 212, 191, 0.08);
+}
+.ngx-iuran-row:not(:last-child) td,
+.ngx-iuran-row-kelompok td {
+    border-bottom: 1px solid rgba(15, 118, 110, 0.06);
+}
+
+.ngx-iuran-cell {
+    padding: 12px;
+    text-align: right;
+    color: #4B5563;
+    white-space: nowrap;
+}
+.ngx-iuran-cell-nama {
+    padding: 12px;
+    position: sticky;
+    left: 0;
+    background: #fff;
+    z-index: 1;
+}
+.ngx-iuran-row:nth-child(even) .ngx-iuran-cell-nama {
+    background: #FAFFFE;
+}
+.ngx-iuran-row:hover .ngx-iuran-cell-nama {
+    background: #F0FDFA;
+}
+
+.ngx-iuran-total {
+    font-weight: 700;
+    color: #0F766E;
+    background: rgba(15, 118, 110, 0.04);
+}
+
+.ngx-iuran-kosong {
+    color: #D1D5DB;
+}
+
+.ngx-iuran-avatar {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2DD4BF, #0F766E);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.ngx-iuran-avatar-kelompok {
+    background: linear-gradient(135deg, #FBBF24, #D97706);
+}
+
+.ngx-iuran-row-kelompok {
+    background: rgba(217, 119, 6, 0.05);
+}
+.ngx-iuran-row-kelompok td {
+    font-weight: 600;
+}
+.ngx-iuran-row-kelompok .ngx-iuran-cell-nama {
+    background: rgba(217, 119, 6, 0.06);
+}
+.ngx-iuran-row-kelompok .ngx-iuran-total {
+    background: rgba(217, 119, 6, 0.1);
+    color: #B45309;
+}
+
+/* =========================================================
+   ACCORDION — Rincian Pengeluaran per Bulan
+   ========================================================= */
+.ngx-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ngx-accordion-item {
+    background: #fff;
+    border: 1px solid rgba(15, 118, 110, 0.1);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px -8px rgba(15, 118, 110, 0.12);
+}
+
+.ngx-accordion-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+}
+.ngx-accordion-header:hover {
+    background: rgba(15, 118, 110, 0.03);
+}
+
+.ngx-accordion-item.kosong .ngx-accordion-header {
+    cursor: default;
+}
+.ngx-accordion-item.kosong .ngx-accordion-header:hover {
+    background: none;
+}
+
+.ngx-accordion-chevron {
+    transition: transform 0.25s ease;
+    color: #9CA3AF;
+    flex-shrink: 0;
+}
+.ngx-accordion-item.open .ngx-accordion-chevron {
+    transform: rotate(180deg);
+    color: #0F766E;
+}
+
+.ngx-accordion-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+.ngx-accordion-item.open .ngx-accordion-body {
+    max-height: 2000px;
+}
+
+.ngx-accordion-list {
+    display: flex;
+    flex-direction: column;
+    padding: 0 18px 16px 18px;
+}
+
+.ngx-accordion-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid rgba(15, 118, 110, 0.06);
+    font-size: 13px;
+}
+
+.ngx-accordion-row-nama {
+    color: #4B5563;
+    min-width: 0;
+    word-break: break-word;
+}
+
+.ngx-accordion-row-nominal {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.ngx-accordion-chip {
+    font-size: 10px;
+    font-weight: 700;
+    color: #0F766E;
+    background: rgba(15, 118, 110, 0.08);
+    padding: 2px 7px;
+    border-radius: 999px;
+}
+
+.ngx-accordion-total {
+    font-weight: 700;
+    color: #374151;
+}
+
+.ngx-accordion-empty {
+    padding: 0 18px 16px 18px;
+    font-size: 12px;
+    color: #9CA3AF;
+}
+
+/* =========================================================
+   PELUNASAN — kartu pinjaman aktif & form bayar
+   ========================================================= */
+.ngx-pinjaman-card {
+    background: #fff;
+    border: 1px solid rgba(15, 118, 110, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 6px 20px -10px rgba(15, 118, 110, 0.15);
+}
+.ngx-pinjaman-card.lunas {
+    opacity: 0.75;
+}
+
+.ngx-pinjaman-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.ngx-pinjaman-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+}
+.ngx-pinjaman-grid-item {
+    background: rgba(15, 118, 110, 0.04);
+    border-radius: 12px;
+    padding: 10px 12px;
+}
+.ngx-pinjaman-grid-label {
+    font-size: 10px;
+    color: #9CA3AF;
+    margin-bottom: 2px;
+}
+.ngx-pinjaman-grid-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.ngx-bayar-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px dashed rgba(15, 118, 110, 0.15);
+}
+@media (min-width: 640px) {
+    .ngx-bayar-row {
+        flex-direction: row;
+    }
+}
+
+.ngx-bayar-input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #E5E7EB;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+.ngx-bayar-input:focus {
+    outline: none;
+    border-color: #0F766E;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+.ngx-bayar-confirm {
+    background: rgba(217, 119, 6, 0.06);
+    border: 1px solid rgba(217, 119, 6, 0.2);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-top: 12px;
+}
+
+/* ===== Upload Bukti Transfer ===== */
+.ngx-upload-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1.5px dashed rgba(15, 118, 110, 0.3);
+    border-radius: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    background: rgba(15, 118, 110, 0.02);
+}
+.ngx-upload-box:hover {
+    border-color: #0F766E;
+    background: rgba(15, 118, 110, 0.05);
+}
+.ngx-upload-box.terisi {
+    border-style: solid;
+    border-color: rgba(15, 118, 110, 0.25);
+}
+
+.ngx-upload-thumb {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid rgba(15, 118, 110, 0.15);
+}
+
+.ngx-upload-text {
+    font-size: 12px;
+    color: #6B7280;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ngx-upload-box.terisi .ngx-upload-text {
+    color: #0F766E;
+    font-weight: 600;
+}
+
+/* ===== Kartu Info Rekening Tujuan ===== */
+.ngx-rekening-card {
+    background: linear-gradient(135deg, #0F766E, #134E4A);
+    border-radius: 24px;
+    padding: 24px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+}
+.ngx-rekening-card::before {
+    content: "";
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 140px;
+    height: 140px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+}
+.ngx-rekening-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+}
+.ngx-rekening-nomor {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    font-variant-numeric: tabular-nums;
+}
+.ngx-rekening-copy {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.ngx-rekening-copy:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* ===== Checkbox Persetujuan ===== */
+.ngx-checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(15, 118, 110, 0.04);
+    border: 1px solid rgba(15, 118, 110, 0.12);
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+.ngx-checkbox-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    accent-color: #0F766E;
+    cursor: pointer;
+}
+.ngx-checkbox-row label {
+    font-size: 12.5px;
+    color: #4B5563;
+    line-height: 1.5;
+    cursor: pointer;
+}
+.ngx-checkbox-row a {
+    color: #0F766E;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+/* =========================================================
+   FORMULIR SIMPANAN — dropdown metode, drag&drop, preview, progress
+   ========================================================= */
+.ngx-form-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.ngx-form-input,
+.ngx-form-select,
+.ngx-form-textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px solid #E5E7EB;
+    font-size: 13px;
+    color: #374151;
+    background: #fff;
+    font-family: inherit;
+}
+.ngx-form-input:focus,
+.ngx-form-select:focus,
+.ngx-form-textarea:focus {
+    outline: none;
+    border-color: #0F766E;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+.ngx-form-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.ngx-metode-toggle {
+    display: flex;
+    gap: 10px;
+}
+.ngx-metode-opsi {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1.5px solid #E5E7EB;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6B7280;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.ngx-metode-opsi.aktif {
+    border-color: #0F766E;
+    background: rgba(15, 118, 110, 0.06);
+    color: #0F766E;
+}
+
+/* Drag & drop zone */
+.ngx-dropzone {
+    border: 2px dashed rgba(15, 118, 110, 0.3);
+    border-radius: 16px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    background: rgba(15, 118, 110, 0.02);
+}
+.ngx-dropzone:hover {
+    border-color: #0F766E;
+    background: rgba(15, 118, 110, 0.05);
+}
+.ngx-dropzone.dragover {
+    border-color: #0F766E;
+    background: rgba(45, 212, 191, 0.1);
+    border-style: solid;
+}
+.ngx-dropzone.terisi {
+    border-style: solid;
+    border-color: rgba(15, 118, 110, 0.25);
+    padding: 16px;
+}
+
+.ngx-dropzone-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(15, 118, 110, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px auto;
+    color: #0F766E;
+}
+
+.ngx-dropzone-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 3px;
+}
+.ngx-dropzone-subtext {
+    font-size: 11px;
+    color: #9CA3AF;
+}
+
+/* Preview file terpilih */
+.ngx-file-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+}
+.ngx-file-preview-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid rgba(15, 118, 110, 0.15);
+    flex-shrink: 0;
+}
+.ngx-file-preview-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    background: rgba(15, 118, 110, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0F766E;
+    flex-shrink: 0;
+}
+.ngx-file-preview-info {
+    min-width: 0;
+    flex: 1;
+}
+.ngx-file-preview-name {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #374151;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ngx-file-preview-size {
+    font-size: 11px;
+    color: #9CA3AF;
+}
+.ngx-file-remove {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #EF4444;
+    background: rgba(239, 68, 68, 0.08);
+    cursor: pointer;
+}
+.ngx-file-remove:hover {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+/* Progress bar upload */
+.ngx-upload-progress-track {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(15, 118, 110, 0.12);
+    overflow: hidden;
+    margin-top: 10px;
+}
+.ngx-upload-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    width: 0%;
+    background: linear-gradient(90deg, #2DD4BF, #0F766E);
+    transition: width 0.2s ease;
+}
+
+/* =========================================================
+   BOTTOM NAV ADMIN (mobile) — sidebar disembunyikan di <1024px,
+   diganti bottom nav supaya tetap bisa pindah halaman di HP
+   ========================================================= */
+.ngx-admin-bottomnav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(180deg, #134E4A, #042F2E);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    z-index: 90;
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)) 4px;
+    box-shadow: 0 -8px 20px -8px rgba(0,0,0,0.25);
+}
+@media (max-width: 1023px) {
+    .ngx-admin-bottomnav { display: flex; }
+    .ngx-admin-sidebar { display: none !important; }
+    body.ngx-has-bottomnav main { padding-bottom: 84px; }
+}
+.ngx-admin-bottomnav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 7px 2px;
+    color: rgba(255,255,255,0.55);
+    font-size: 9.5px;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    cursor: pointer;
+}
+.ngx-admin-bottomnav-item.aktif {
+    color: #5EEAD4;
+    background: rgba(45,212,191,0.12);
+}
+.ngx-admin-bottomnav-more-sheet {
+    position: fixed;
+    inset: 0;
+    background: rgba(4,47,46,0.55);
+    z-index: 95;
+    display: flex;
+    align-items: flex-end;
+}
+.ngx-admin-bottomnav-more-box {
+    background: #fff;
+    width: 100%;
+    border-radius: 22px 22px 0 0;
+    padding: 22px 20px calc(20px + env(safe-area-inset-bottom, 0px)) 20px;
+    max-height: 72vh;
+    overflow-y: auto;
+    animation: ngxSheetUp 0.25s ease forwards;
+}
+@keyframes ngxSheetUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+.ngx-admin-bottomnav-more-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 4px;
+    border-bottom: 1px solid #F3F4F6;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* =========================================================
+   TABEL RAPAT (COMPACT) — dipakai halaman Pinjaman v2
+   ========================================================= */
+.ngx-table-compact {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+}
+.ngx-table-compact thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #F0FDFA;
+    color: #0F766E;
+    font-weight: 700;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding: 9px 10px;
+    white-space: nowrap;
+    border-bottom: 1px solid rgba(15,118,110,0.15);
+}
+.ngx-table-compact tbody td {
+    padding: 8px 10px;
+    height: 52px;
+    vertical-align: middle;
+    color: #374151;
+    border-bottom: 1px solid #F3F4F6;
+    white-space: nowrap;
+}
+.ngx-table-compact tbody tr:nth-child(even) { background: rgba(15,118,110,0.02); }
+.ngx-table-compact tbody tr:hover { background: rgba(45,212,191,0.08); }
+
+.ngx-badge-mini {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+.ngx-badge-kuning2 { background: rgba(250,204,21,0.18); color: #92400E; }
+.ngx-badge-biru2 { background: rgba(59,130,246,0.14); color: #1D4ED8; }
+.ngx-badge-hijau2 { background: rgba(16,185,129,0.14); color: #047857; }
+.ngx-badge-oranye2 { background: rgba(249,115,22,0.14); color: #C2410C; }
+.ngx-badge-merah2 { background: rgba(239,68,68,0.14); color: #B91C1C; }
+.ngx-badge-abu2 { background: rgba(107,114,128,0.12); color: #4B5563; }
+
+.ngx-icon-btn {
+    width: 26px; height: 26px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    border: 1px solid rgba(15,118,110,0.15);
+    background: #fff;
+    color: #0F766E;
+    cursor: pointer;
+    transition: background .12s ease;
+}
+.ngx-icon-btn:hover { background: rgba(15,118,110,0.08); }
+.ngx-icon-btn.danger { color:#DC2626; border-color: rgba(220,38,38,0.2); }
+.ngx-icon-btn.danger:hover { background: rgba(220,38,38,0.08); }
+.ngx-icon-btn.wa { color:#16A34A; border-color: rgba(22,163,74,0.2); }
+.ngx-icon-btn.wa:hover { background: rgba(22,163,74,0.08); }
+
+/* Kartu ringkasan yang bisa diklik untuk filter */
+.ngx-stat-clickable {
+    background: #fff;
+    border: 1px solid rgba(15,118,110,0.1);
+    border-radius: 14px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: box-shadow .15s ease, border-color .15s ease;
+}
+.ngx-stat-clickable:hover { box-shadow: 0 6px 18px -8px rgba(15,118,110,0.35); border-color: rgba(15,118,110,0.3); }
+.ngx-stat-clickable.aktif { border-color:#0F766E; background: rgba(15,118,110,0.06); }
+.ngx-stat-clickable .val { font-size:15px; font-weight:800; color:#111827; }
+.ngx-stat-clickable .lbl { font-size:10.5px; color:#6B7280; }
+
+/* Progress workflow (dipakai di modal Detail) */
+.ngx-progress-steps { display:flex; align-items:flex-start; gap:0; overflow-x:auto; padding-bottom:4px; }
+.ngx-progress-step { flex:1; min-width:90px; text-align:center; position:relative; }
+.ngx-progress-step .dot {
+    width:26px; height:26px; border-radius:50%; margin:0 auto 6px auto;
+    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;
+    background:#E5E7EB; color:#9CA3AF;
+}
+.ngx-progress-step.selesai .dot { background:#0F766E; color:#fff; }
+.ngx-progress-step .lbl2 { font-size:10px; color:#6B7280; font-weight:600; }
+.ngx-progress-step.selesai .lbl2 { color:#0F766E; }
+.ngx-progress-step:not(:last-child)::after {
+    content:""; position:absolute; top:13px; left:60%; right:-40%; height:2px; background:#E5E7EB; z-index:0;
+}
+.ngx-progress-step.selesai:not(:last-child)::after { background:#0F766E; }
+
+/* =========================================================
+   ADMIN PANEL — sidebar, stat card, login
+   ========================================================= */
+.ngx-admin-login-bg {
+    background: linear-gradient(160deg, #042F2E 0%, #0F766E 55%, #134E4A 100%);
+    min-height: 100vh;
+}
+
+.ngx-admin-login-card {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.35);
+}
+
+.ngx-admin-sidebar {
+    background: linear-gradient(180deg, #134E4A, #042F2E);
+    width: 264px;
+    flex-shrink: 0;
+}
+
+.ngx-admin-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.65);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.ngx-admin-nav-item:hover {
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+}
+.ngx-admin-nav-item.aktif {
+    background: rgba(45, 212, 191, 0.15);
+    color: #5EEAD4;
+}
+.ngx-admin-nav-item.segera {
+    opacity: 0.4;
+    cursor: default;
+}
+.ngx-admin-nav-item.segera:hover {
+    background: none;
+    color: rgba(255,255,255,0.65);
+}
+
+.ngx-admin-badge-segera {
+    font-size: 9px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.6);
+    padding: 2px 7px;
+    border-radius: 999px;
+    margin-left: auto;
+}
+
+.ngx-admin-topbar {
+    background: #fff;
+    border-bottom: 1px solid #F0FDFA;
+}
+
+.ngx-admin-stat-card {
+    background: #fff;
+    border: 1px solid rgba(15, 118, 110, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 16px -10px rgba(15, 118, 110, 0.15);
+}
+
+.ngx-admin-stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.ngx-admin-chart-card {
+    background: #fff;
+    border: 1px solid rgba(15, 118, 110, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 16px -10px rgba(15, 118, 110, 0.15);
+}
+
+/* ===== Modal Admin ===== */
+.ngx-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 47, 46, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+.ngx-modal-box {
+    background: #fff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.4);
+}
+.ngx-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid #F0FDFA;
+}
+.ngx-modal-body {
+    padding: 20px 24px;
+}
+.ngx-modal-footer {
+    display: flex;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid #F0FDFA;
+}
+.ngx-modal-close {
+    color: #9CA3AF;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+.ngx-modal-close:hover {
+    color: #374151;
+}
+
+/* ===== Toolbar & Table Card Admin ===== */
+.ngx-admin-table-card {
+    background: #fff;
+    border: 1px solid rgba(15, 118, 110, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 16px -10px rgba(15, 118, 110, 0.15);
+}
+
+.ngx-admin-toolbar-input {
+    padding: 9px 14px;
+    border-radius: 10px;
+    border: 1px solid #E5E7EB;
+    font-size: 13px;
+    color: #374151;
+}
+.ngx-admin-toolbar-input:focus {
+    outline: none;
+    border-color: #0F766E;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+.ngx-admin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+    white-space: nowrap;
+}
+.ngx-admin-btn:hover { opacity: 0.85; }
+.ngx-admin-btn-primary { background: #0F766E; color: #fff; }
+.ngx-admin-btn-outline { background: #fff; color: #0F766E; border: 1px solid rgba(15,118,110,0.3); }
+.ngx-admin-btn-danger { background: rgba(239,68,68,0.1); color: #DC2626; }
+.ngx-admin-btn-success { background: rgba(16,185,129,0.1); color: #059669; }
+.ngx-admin-btn-whatsapp { background: rgba(34,197,94,0.1); color: #16A34A; }
+.ngx-admin-btn-sm { padding: 6px 10px; font-size: 11.5px; }
+
+.ngx-badge-jt-lewat { background: rgba(239,68,68,0.12); color: #B91C1C; }
+.ngx-badge-jt-hariini { background: rgba(217,119,6,0.15); color: #B45309; }
+.ngx-badge-jt-besok { background: rgba(251,191,36,0.15); color: #92400E; }
+.ngx-badge-jt-aman { background: rgba(107,114,128,0.1); color: #4B5563; }
+
+/* ===== Override tampilan DataTables biar senada tema ===== */
+table.dataTable {
+    font-size: 13px;
+    border-collapse: separate !important;
+    border-spacing: 0;
+    width: 100% !important;
+}
+table.dataTable thead th {
+    background: #F0FDFA;
+    color: #0F766E;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding: 12px !important;
+    border-bottom: none !important;
+}
+table.dataTable tbody td {
+    padding: 12px !important;
+    border-bottom: 1px solid #F3F4F6;
+    color: #374151;
+    vertical-align: middle;
+}
+table.dataTable tbody tr:hover { background: rgba(15,118,110,0.03); }
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    border-radius: 8px !important;
+    padding: 5px 10px !important;
+    margin-left: 2px !important;
+    font-size: 12px !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #0F766E !important;
+    color: #fff !important;
+    border: none !important;
+}
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info {
+    font-size: 12.5px;
+    color: #6B7280;
+}
+.dataTables_wrapper .dataTables_filter input {
+    border-radius: 8px;
+    border: 1px solid #E5E7EB;
+    padding: 6px 10px;
+    margin-left: 6px;
+    font-size: 12.5px;
+}
