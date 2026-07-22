@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0F766E">
+    <link rel="icon" type="image/png" href="/favicon.png.png">
+    <link rel="shortcut icon" href="/favicon.png.png">
+    <link rel="apple-touch-icon" href="/favicon.png.png">
+
+    <title>Jadwal Piket Atas | Koperasi Simpan Pinjam NGX</title>
+    <meta name="description" content="Jadwal piket kantor BMX Crop Cabang Nganjuk, bagian kantor dan sekitarnya, diperbarui otomatis setiap bulan.">
+    <meta property="og:title" content="Jadwal Piket Atas | KAS NGX">
+    <meta property="og:url" content="https://koperasingx.web.id/piket-atas">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 'inter': ['Inter', 'sans-serif'] },
+                    colors: {
+                        'kop': {
+                            50: '#F0FDFA', 100: '#CCFBF1', 200: '#99F6E4', 300: '#5EEAD4',
+                            400: '#2DD4BF', 500: '#14B8A6', 600: '#0D9488', 700: '#0F766E',
+                            800: '#115E59', 900: '#134E4A', 950: '#042F2E',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-inter bg-gray-50 antialiased overflow-x-hidden">
+
+    <!-- Nav ringkas -->
+    <nav class="ngx-page-nav">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-16">
+                <a href="/" class="flex items-center gap-2">
+                    <div class="w-9 h-9 bg-white/10 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/20">
+                        <i data-lucide="landmark" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span class="text-white font-bold text-sm tracking-wide">KAS NGX</span>
+                </a>
+                <a href="/" class="ngx-back-link">
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                    Kembali ke Beranda
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero halaman -->
+    <section class="ngx-page-hero pt-16 pb-16 px-4 sm:px-6">
+        <div class="max-w-5xl mx-auto text-center pt-10">
+            <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 mb-5">
+                <i data-lucide="calendar-check-2" class="w-3.5 h-3.5 text-kop-200"></i>
+                <span class="text-white/90 text-xs font-medium">Jadwal Piket</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3 drop-shadow-lg" id="pageJudul">
+                Piket Atas
+            </h1>
+            <p class="text-white/70 text-sm sm:text-base max-w-xl mx-auto" id="pageSubJudul">
+                Bagian Kantor dan Sekitarnya
+            </p>
+        </div>
+    </section>
+
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 -mt-8 pb-24">
+
+        <div id="piketLoading" class="flex flex-col items-center justify-center gap-3 py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
+            <div class="ngx-spinner"></div>
+            <p class="text-sm text-gray-500">Memuat jadwal piket...</p>
+        </div>
+
+        <div id="piketError" class="hidden text-center py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
+            <i data-lucide="wifi-off" class="w-8 h-8 text-red-500 mx-auto mb-3"></i>
+            <p class="text-sm font-semibold text-gray-800 mb-1">Gagal memuat jadwal</p>
+            <p class="text-xs text-gray-500" id="piketErrorText">Silakan coba lagi beberapa saat lagi.</p>
+        </div>
+
+        <div id="piketContent" class="hidden">
+
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-5 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="calendar" class="w-4 h-4 text-kop-600"></i>
+                    <span class="text-sm font-bold text-gray-800">Bulan <span id="piketBulan">-</span></span>
+                </div>
+                <span class="ngx-badge-count" id="piketJumlahHari">0 hari</span>
+            </div>
+
+            <div id="piketLegend" class="hidden mb-5 bg-amber-50 border border-amber-100 rounded-2xl p-4 flex items-start gap-2.5">
+                <i data-lucide="info" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
+                <p class="text-xs text-amber-700" id="piketLegendText"></p>
+            </div>
+
+            <div id="piketList" class="space-y-3"></div>
+
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/script.js"></script>
+    <script src="/piket-atas/piket-atas.js"></script>
+</body>
+</html>

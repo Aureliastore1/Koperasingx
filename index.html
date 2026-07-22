@@ -63,7 +63,7 @@
                     <a href="#sk" class="text-white/80 text-sm hover:text-white transition px-3 py-2 rounded-lg hover:bg-white/10">S&K</a>
                 </div>
                 <div class="flex items-center gap-2">
-                    <a href="#layanan" class="bg-white/15 backdrop-blur-md border border-white/20 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-white/25 transition">Mulai</a>
+                    <button id="btnBukaMenuMulai" class="bg-white/15 backdrop-blur-md border border-white/20 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-white/25 transition">Mulai</button>
                     <a href="/admin/login/" title="Login Admin" class="w-9 h-9 flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/20 rounded-lg hover:bg-white/20 transition">
                         <i data-lucide="lock" class="w-4 h-4 text-white"></i>
                     </a>
@@ -503,6 +503,42 @@
     <!-- Scripts -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="/script.js"></script>
+
+    <!-- Popup Menu "Mulai" -->
+    <div id="modalMenuMulai" class="ngx-modal-overlay hidden">
+        <div class="ngx-modal-box" style="max-width:420px;">
+            <div class="ngx-modal-header">
+                <h3 class="text-sm font-bold text-gray-900">Mau Lihat Apa?</h3>
+                <i data-lucide="x" class="w-5 h-5 ngx-modal-close" id="btnTutupMenuMulai"></i>
+            </div>
+            <div class="ngx-modal-body space-y-2.5">
+                <a href="/cek-tagihan/" class="flex items-center gap-3 p-3 rounded-xl hover:bg-kop-50 transition border border-gray-100">
+                    <div class="w-10 h-10 bg-kop-700 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="search-check" class="w-5 h-5 text-white"></i></div>
+                    <div><p class="text-sm font-bold text-gray-800">Cek Tagihan</p><p class="text-[11px] text-gray-500">Status & riwayat pinjaman Anda</p></div>
+                </a>
+                <a href="/informasi-kas/" class="flex items-center gap-3 p-3 rounded-xl hover:bg-kop-50 transition border border-gray-100">
+                    <div class="w-10 h-10 bg-kop-600 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="wallet" class="w-5 h-5 text-white"></i></div>
+                    <div><p class="text-sm font-bold text-gray-800">Informasi Kas</p><p class="text-[11px] text-gray-500">Kondisi kas & iuran bulanan</p></div>
+                </a>
+                <a href="/piket-atas/" class="flex items-center gap-3 p-3 rounded-xl hover:bg-kop-50 transition border border-gray-100">
+                    <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="calendar-check-2" class="w-5 h-5 text-white"></i></div>
+                    <div><p class="text-sm font-bold text-gray-800">Jadwal Piket Atas</p><p class="text-[11px] text-gray-500">Bagian kantor dan sekitarnya</p></div>
+                </a>
+                <a href="/piket-bawah/" class="flex items-center gap-3 p-3 rounded-xl hover:bg-kop-50 transition border border-gray-100">
+                    <div class="w-10 h-10 bg-cyan-600 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="calendar-clock" class="w-5 h-5 text-white"></i></div>
+                    <div><p class="text-sm font-bold text-gray-800">Jadwal Piket Bawah</p><p class="text-[11px] text-gray-500">Bagian sift sore</p></div>
+                </a>
+                <a href="#info-kurs" class="menu-mulai-scroll flex items-center gap-3 p-3 rounded-xl hover:bg-kop-50 transition border border-gray-100">
+                    <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="gem" class="w-5 h-5 text-white"></i></div>
+                    <div><p class="text-sm font-bold text-gray-800">Kurs Dolar & Harga Emas</p><p class="text-[11px] text-gray-500">Update harian</p></div>
+                </a>
+                <a href="#visi-misi" class="menu-mulai-scroll flex items-center gap-3 p-3 rounded-xl hover:bg-kop-50 transition border border-gray-100">
+                    <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="eye" class="w-5 h-5 text-white"></i></div>
+                    <div><p class="text-sm font-bold text-gray-800">Visi & Misi</p><p class="text-[11px] text-gray-500">Tentang KAS NGX</p></div>
+                </a>
+            </div>
+        </div>
+    </div>
 
     <!-- Popup Pengenalan Fitur (muncul sekali saat pertama buka website) -->
     <div id="modalFiturIntro" class="ngx-modal-overlay hidden">

@@ -1876,3 +1876,36 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
         });
 
 })();
+
+/* =========================================================
+   POPUP MENU "MULAI" — quick-links ke halaman & section utama
+   ========================================================= */
+(function () {
+    var btn = document.getElementById("btnBukaMenuMulai");
+    var modal = document.getElementById("modalMenuMulai");
+    var btnTutup = document.getElementById("btnTutupMenuMulai");
+
+    if (!btn || !modal) return;
+
+    function bukaModal() {
+        modal.classList.remove("hidden");
+        if (window.lucide) lucide.createIcons();
+    }
+    function tutupModal() { modal.classList.add("hidden"); }
+
+    btn.addEventListener("click", bukaModal);
+    if (btnTutup) btnTutup.addEventListener("click", tutupModal);
+    modal.addEventListener("click", function (e) { if (e.target === modal) tutupModal(); });
+
+    // Link ke section di halaman yang sama (bukan pindah halaman) — scroll halus lalu tutup modal
+    modal.querySelectorAll(".menu-mulai-scroll").forEach(function (a) {
+        a.addEventListener("click", function (e) {
+            e.preventDefault();
+            var target = document.querySelector(a.getAttribute("href"));
+            tutupModal();
+            if (target) {
+                setTimeout(function () { target.scrollIntoView({ behavior: "smooth", block: "start" }); }, 150);
+            }
+        });
+    });
+})();
