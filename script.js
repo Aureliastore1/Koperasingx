@@ -1804,3 +1804,75 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
     });
 
 })();
+
+/* =========================================================
+   INFO KURS DOLAR & HARGA EMAS — tampil di beranda, di bawah
+   Informasi Kas. Naik/turun dibandingkan data hari sebelumnya
+   (dihitung di server, konsisten untuk semua pengunjung).
+   ========================================================= */
+(function () {
+
+    var loadingBox = document.getElementById("kursEmasLoading");
+    var errorBox = document.getElementById("kursEmasError");
+    var grid = document.getElementById("kursEmasGrid");
+
+    if (!grid) return;
+
+    function warnaArah(arah) {
+        if (arah === "naik") return "text-emerald-600";
+        if (arah === "turun") return "text-red-600";
+        return "text-gray-400";
+    }
+
+    function ikonArah(arah) {
+        if (arah === "naik") return "trending-up";
+        if (arah === "turun") return "trending-down";
+        return "minus";
+    }
+
+    function labelArah(arah, persen) {
+        if (arah === "naik") return "Naik " + persen + "% dari kemarin";
+        if (arah === "turun") return "Turun " + persen + "% dari kemarin";
+        return "Stabil dari kemarin";
+    }
+
+    function isiKartu(prefix, data) {
+
+        document.getElementById(prefix + "Nilai").textContent = data.nilaiFormat;
+
+        var warna = warnaArah(data.arah);
+        var wrap = document.getElementById(prefix + "ArahWrap");
+        wrap.className = "flex items-center gap-1.5 " + warna;
+
+        document.getElementById(prefix + "Ikon").setAttribute("data-lucide", ikonArah(data.arah));
+        document.getElementById(prefix + "ArahText").textContent = labelArah(data.arah, data.perubahanPersen);
+
+    }
+
+    fetch(NGX_API_BASE_URL + "?action=infoKursEmas")
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+
+            loadingBox.classList.add("hidden");
+
+            if (!data || data.success !== true) {
+                errorBox.classList.remove("hidden");
+                return;
+            }
+
+            if (data.kursUsd) isiKartu("kursUsd", data.kursUsd);
+            if (data.hargaEmas) isiKartu("hargaEmas", data.hargaEmas);
+
+            var updatedEl = document.getElementById("kursEmasUpdated");
+            if (updatedEl) updatedEl.textContent = "Data per " + data.tanggal;
+
+            grid.classList.remove("hidden");
+            if (window.lucide) lucide.createIcons();
+
+        })
+        .catch(function () {
+            loadingBox.classList.add("hidden");
+            errorBox.classList.remove("hidden");
+        });
+
+})();

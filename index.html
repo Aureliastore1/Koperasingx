@@ -213,6 +213,52 @@
         </div>
     </section>
 
+    <!-- Info Kurs Dolar & Harga Emas -->
+    <section id="info-kurs" class="py-16 px-4 sm:px-6 bg-white">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center mb-10">
+                <span class="inline-block text-xs font-semibold text-kop-600 bg-kop-50 px-3 py-1 rounded-full mb-3 reveal">INFO EKONOMI</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3 reveal" style="transition-delay: 0.1s;">Kurs Dolar & Harga Emas</h2>
+                <p class="text-gray-500 text-sm max-w-xl mx-auto reveal" style="transition-delay: 0.2s;">Update harian, biar Anda selalu tahu kondisi ekonomi terkini</p>
+            </div>
+
+            <div id="kursEmasLoading" class="flex justify-center py-10">
+                <div class="ngx-spinner"></div>
+            </div>
+
+            <div id="kursEmasError" class="hidden text-center py-10">
+                <p class="text-xs text-gray-400">Gagal memuat info kurs & emas saat ini.</p>
+            </div>
+
+            <div id="kursEmasGrid" class="hidden grid sm:grid-cols-2 gap-5">
+                <div class="bg-gradient-to-br from-kop-50 to-white rounded-3xl p-6 border border-kop-100 reveal">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-12 h-12 bg-kop-700 rounded-2xl flex items-center justify-center flex-shrink-0"><i data-lucide="dollar-sign" class="w-6 h-6 text-white"></i></div>
+                        <div><p class="text-sm font-bold text-gray-900">Kurs Dolar AS</p><p class="text-xs text-gray-400">1 USD ke Rupiah</p></div>
+                    </div>
+                    <p class="text-2xl font-extrabold text-gray-900 mb-1.5" id="kursUsdNilai">-</p>
+                    <div class="flex items-center gap-1.5" id="kursUsdArahWrap">
+                        <i data-lucide="minus" class="w-3.5 h-3.5" id="kursUsdIkon"></i>
+                        <span class="text-xs font-semibold" id="kursUsdArahText">-</span>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-amber-50 to-white rounded-3xl p-6 border border-amber-100 reveal" style="transition-delay:0.1s;">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center flex-shrink-0"><i data-lucide="gem" class="w-6 h-6 text-white"></i></div>
+                        <div><p class="text-sm font-bold text-gray-900">Harga Emas Antam</p><p class="text-xs text-gray-400">per 1 gram</p></div>
+                    </div>
+                    <p class="text-2xl font-extrabold text-gray-900 mb-1.5" id="hargaEmasNilai">-</p>
+                    <div class="flex items-center gap-1.5" id="hargaEmasArahWrap">
+                        <i data-lucide="minus" class="w-3.5 h-3.5" id="hargaEmasIkon"></i>
+                        <span class="text-xs font-semibold" id="hargaEmasArahText">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-center text-[11px] text-gray-400 mt-5" id="kursEmasUpdated"></p>
+        </div>
+    </section>
+
     <!-- Visi & Misi -->
     <section id="visi-misi" class="py-20 px-4 sm:px-6 bg-white">
         <div class="max-w-5xl mx-auto">
