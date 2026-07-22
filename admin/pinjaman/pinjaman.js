@@ -18,9 +18,18 @@
         return bersih;
     }
 
-    function bukaWaLangsung(noHp, pesan) {
+    function bukaWaLangsung(noHp, pesan, rowNumberUntukLog) {
         if (!noHp || noHp === "-") { if (window.Swal) Swal.fire("Nomor tidak ada", "Nomor HP tidak tercatat.", "warning"); return; }
         window.open("https://wa.me/" + formatNomorWa(noHp) + "?text=" + encodeURIComponent(pesan), "_blank");
+
+        if (rowNumberUntukLog) {
+            var body = new URLSearchParams();
+            body.append("action", "adminCatatLogWa");
+            body.append("token", ngxAdminGetToken());
+            body.append("rowNumber", rowNumberUntukLog);
+            body.append("ringkasan", pesan.split("\n")[0]);
+            fetch(NGX_API_BASE_URL, { method: "POST", body: body }).catch(function () {});
+        }
     }
 
     /* ============ EDIT MODAL (fitur lama, tampilan disegarkan) ============ */
@@ -173,7 +182,7 @@
                             cancelButtonText: "Tidak",
                             confirmButtonColor: "#16A34A"
                         }).then(function (r) {
-                            if (r.isConfirmed) bukaWaLangsung(data.noHp, data.pesanWa);
+                            if (r.isConfirmed) bukaWaLangsung(data.noHp, data.pesanWa, p.rowNumber);
                         });
                     }
 
@@ -212,7 +221,7 @@
                         Swal.fire({
                             title: "Dana Dicairkan!", text: "Email otomatis terkirim. Kirim WhatsApp juga?",
                             icon: "success", showCancelButton: true, confirmButtonText: "Kirim WhatsApp", cancelButtonText: "Tidak", confirmButtonColor: "#16A34A"
-                        }).then(function (r) { if (r.isConfirmed) bukaWaLangsung(data.noHp, data.pesanWa); });
+                        }).then(function (r) { if (r.isConfirmed) bukaWaLangsung(data.noHp, data.pesanWa, p.rowNumber); });
                     }
 
                 });
@@ -244,7 +253,7 @@
                         Swal.fire({
                             title: "Notifikasi Lunas Terkirim", text: "Email sudah dikirim. Kirim WhatsApp juga?",
                             icon: "success", showCancelButton: true, confirmButtonText: "Kirim WhatsApp", cancelButtonText: "Tidak", confirmButtonColor: "#16A34A"
-                        }).then(function (r) { if (r.isConfirmed) bukaWaLangsung(data.noHp, data.pesanWa); });
+                        }).then(function (r) { if (r.isConfirmed) bukaWaLangsung(data.noHp, data.pesanWa, p.rowNumber); });
                     }
                 });
 
@@ -345,7 +354,7 @@
             var sudahCair = !!p.danaDicairkan;
 
             return "<tr>" +
-                "<td class='font-semibold'>" + escapeHtml(p.nama) + "</td>" +
+                "<td class='font-semibold text-kop-700 hover:underline cursor-pointer btn-nama-detail' data-row='" + p.rowNumber + "'>" + escapeHtml(p.nama) + "</td>" +
                 "<td>" + p.nominalFormat + "</td>" +
                 "<td>" + p.sisaFormat + "</td>" +
                 "<td><span class='ngx-badge-mini " + badgeStatusPinjaman(p.status) + "'>" + p.status + "</span></td>" +
@@ -370,7 +379,8 @@
         emptyState.classList.toggle("hidden", hasil.length > 0);
         if (window.lucide) lucide.createIcons();
 
-        document.querySelectorAll(".btn-detail").forEach(function (b) { b.addEventListener("click", function () { bukaModalDetail(cariData(b.getAttribute("data-row"))); }); });
+        document.querySelectorAll(".btn-nama-detail").forEach(function (b) { b.addEventListener("click", function () { window.location.href = "/admin/pinjaman/detail/?row=" + b.getAttribute("data-row"); }); });
+        document.querySelectorAll(".btn-detail").forEach(function (b) { b.addEventListener("click", function () { window.location.href = "/admin/pinjaman/detail/?row=" + b.getAttribute("data-row"); }); });
         document.querySelectorAll(".btn-edit").forEach(function (b) { b.addEventListener("click", function () { bukaModalEdit(cariData(b.getAttribute("data-row"))); }); });
         document.querySelectorAll(".btn-verif").forEach(function (b) { b.addEventListener("click", function () { verifikasiPinjaman(cariData(b.getAttribute("data-row")), "Disetujui"); }); });
         document.querySelectorAll(".btn-cair").forEach(function (b) { b.addEventListener("click", function () { cairkanDana(cariData(b.getAttribute("data-row"))); }); });
@@ -381,7 +391,7 @@
                 var p = cariData(b.getAttribute("data-row"));
                 var pesan = "Halo Bapak/Ibu " + p.nama + "\nPengajuan pinjaman Anda telah kami terima.\nSaat ini status:\n" + p.statusVerifikasi.toUpperCase() +
                     "\nSilakan menunggu admin melakukan pengecekan.\nTerima kasih.";
-                bukaWaLangsung(p.noHp, pesan);
+                bukaWaLangsung(p.noHp, pesan, p.rowNumber);
             });
         });
 

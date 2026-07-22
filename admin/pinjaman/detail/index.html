@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0F766E">
+    <link rel="icon" type="image/png" href="/favicon.png.png">
+    <title>Detail Pinjaman | Admin KAS NGX</title>
+    <meta name="robots" content="noindex, nofollow">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 'inter': ['Inter', 'sans-serif'] },
+                    colors: {
+                        'kop': {
+                            50: '#F0FDFA', 100: '#CCFBF1', 200: '#99F6E4', 300: '#5EEAD4',
+                            400: '#2DD4BF', 500: '#14B8A6', 600: '#0D9488', 700: '#0F766E',
+                            800: '#115E59', 900: '#134E4A', 950: '#042F2E',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-inter antialiased bg-gray-50">
+
+    <div class="flex min-h-screen">
+
+        <!-- Sidebar -->
+        <aside class="ngx-admin-sidebar hidden lg:flex flex-col p-5">
+            <div class="flex items-center gap-2.5 mb-8 px-1">
+                <div class="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center border border-white/20">
+                    <i data-lucide="landmark" class="w-4 h-4 text-white"></i>
+                </div>
+                <div>
+                    <p class="text-white font-bold text-sm">KAS NGX</p>
+                    <p class="text-white/40 text-[10px]">Admin Panel</p>
+                </div>
+            </div>
+
+            <nav class="flex flex-col gap-1 flex-1">
+                <a href="/admin/dashboard/" class="ngx-admin-nav-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
+                <a href="/admin/anggota/" class="ngx-admin-nav-item"><i data-lucide="users" class="w-4 h-4"></i> Data Anggota</a>
+                <a href="/admin/pinjaman/" class="ngx-admin-nav-item aktif"><i data-lucide="banknote" class="w-4 h-4"></i> Pinjaman</a>
+                <a href="/admin/pengeluaran/" class="ngx-admin-nav-item"><i data-lucide="receipt" class="w-4 h-4"></i> Catatan Bulanan</a>
+                <a href="/admin/simpanan/" class="ngx-admin-nav-item"><i data-lucide="piggy-bank" class="w-4 h-4"></i> Simpanan</a>
+                <a href="/admin/followup/" class="ngx-admin-nav-item"><i data-lucide="phone-call" class="w-4 h-4"></i> Follow Up</a>
+                <a href="/admin/laporan/" class="ngx-admin-nav-item"><i data-lucide="file-bar-chart" class="w-4 h-4"></i> Laporan</a>
+                <a href="/admin/users/" class="ngx-admin-nav-item"><i data-lucide="shield" class="w-4 h-4"></i> Kelola Admin</a>
+                <a href="/admin/settings/" class="ngx-admin-nav-item"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
+            </nav>
+
+            <a href="/" class="ngx-admin-nav-item"><i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Website</a>
+        </aside>
+
+        <!-- Main -->
+        <div class="flex-1 flex flex-col min-w-0">
+
+            <header class="ngx-admin-topbar px-5 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <a href="/admin/pinjaman/" class="text-gray-400 hover:text-kop-700 transition"><i data-lucide="arrow-left" class="w-4 h-4"></i></a>
+                    <div>
+                        <h1 class="text-base font-bold text-gray-900">Detail Pinjaman</h1>
+                        <p class="text-xs text-gray-400">Data lengkap, dokumen, dan riwayat aktivitas</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-xs font-bold text-gray-800" id="userNama">-</p>
+                        <p class="text-[11px] text-kop-600" id="userRole">-</p>
+                    </div>
+                    <div class="w-9 h-9 bg-kop-700 rounded-full flex items-center justify-center text-white text-xs font-bold" id="userAvatar">-</div>
+                    <button id="btnLogout" class="text-gray-400 hover:text-red-500 transition" title="Logout"><i data-lucide="log-out" class="w-4 h-4"></i></button>
+                </div>
+            </header>
+
+            <main class="p-4 sm:p-5 flex-1 overflow-y-auto">
+
+                <div id="pageLoading" class="flex flex-col items-center justify-center gap-3 py-24">
+                    <div class="ngx-spinner"></div>
+                    <p class="text-sm text-gray-500">Memuat detail pinjaman...</p>
+                </div>
+
+                <div id="pageError" class="hidden text-center py-24">
+                    <i data-lucide="wifi-off" class="w-8 h-8 text-red-500 mx-auto mb-3"></i>
+                    <p class="text-sm font-semibold text-gray-800 mb-1">Gagal memuat data</p>
+                    <p class="text-xs text-gray-500" id="pageErrorText">Silakan coba lagi.</p>
+                </div>
+
+                <div id="pageContent" class="hidden space-y-4">
+
+                    <!-- Header ringkas -->
+                    <div class="ngx-admin-table-card">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                            <div>
+                                <h2 class="text-lg font-extrabold text-gray-900" id="dNama">-</h2>
+                                <p class="text-xs text-gray-400" id="dTimestamp">-</p>
+                            </div>
+                            <div class="flex gap-1.5 flex-wrap" id="dBadgeWrap"></div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3 mb-5">
+                            <div class="bg-kop-50 rounded-xl p-3 text-center"><p class="text-[10px] text-gray-400">Nominal</p><p class="font-bold text-gray-800" id="dNominal">-</p></div>
+                            <div class="bg-kop-50 rounded-xl p-3 text-center"><p class="text-[10px] text-gray-400">Sudah Dibayar</p><p class="font-bold text-gray-800" id="dPelunasan">-</p></div>
+                            <div class="bg-kop-50 rounded-xl p-3 text-center"><p class="text-[10px] text-gray-400">Sisa</p><p class="font-bold text-kop-700" id="dSisa">-</p></div>
+                        </div>
+                        <div class="ngx-progress-steps" id="progressSteps"></div>
+                    </div>
+
+                    <div class="grid lg:grid-cols-2 gap-4">
+
+                        <!-- Data Pribadi -->
+                        <div class="ngx-admin-table-card">
+                            <p class="text-sm font-bold text-gray-800 mb-3">Data Pribadi & Pinjaman</p>
+                            <div class="space-y-1.5 text-sm" id="dataPribadiBox"></div>
+                        </div>
+
+                        <!-- Timeline -->
+                        <div class="ngx-admin-table-card">
+                            <p class="text-sm font-bold text-gray-800 mb-3">Timeline Aktivitas</p>
+                            <div class="ngx-riwayat-list" id="timelineBox"></div>
+                        </div>
+
+                    </div>
+
+                    <!-- Dokumen -->
+                    <div class="ngx-admin-table-card">
+                        <p class="text-sm font-bold text-gray-800 mb-3">Dokumen</p>
+                        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3" id="dokumenGrid"></div>
+                    </div>
+
+                    <!-- Catatan Admin -->
+                    <div class="ngx-admin-table-card">
+                        <p class="text-sm font-bold text-gray-800 mb-3">Catatan Admin</p>
+                        <textarea id="catatanAdminBox" rows="3" class="ngx-form-textarea" placeholder="Tulis catatan internal tentang pinjaman ini..."></textarea>
+                        <button id="btnSimpanCatatan" class="mt-2 ngx-admin-btn ngx-admin-btn-primary"><i data-lucide="save" class="w-3.5 h-3.5"></i> Simpan Catatan</button>
+                    </div>
+
+                    <!-- Riwayat Pinjaman Lain -->
+                    <div class="ngx-admin-table-card" id="riwayatLainWrap">
+                        <p class="text-sm font-bold text-gray-800 mb-3">Riwayat Pinjaman Lain oleh Nasabah Ini</p>
+                        <div id="riwayatLainBox" class="space-y-2"></div>
+                    </div>
+
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Input file tersembunyi untuk upload dokumen -->
+    <input type="file" id="inputFileDokumen" accept="image/*,.pdf" class="hidden">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/admin/admin.js"></script>
+    <script src="/admin/pinjaman/detail/detail.js"></script>
+</body>
+</html>
