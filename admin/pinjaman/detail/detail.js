@@ -13,13 +13,8 @@
     var detailData = null;
 
     var JENIS_DOKUMEN = [
-        { key: "KTP", label: "Foto KTP" },
-        { key: "Selfie", label: "Foto Selfie" },
-        { key: "KK", label: "Kartu Keluarga" },
-        { key: "SlipGaji", label: "Slip Gaji" },
-        { key: "SuratPendukung", label: "Surat Pendukung" },
-        { key: "BuktiTransferPencairan", label: "Bukti Transfer Cair" },
-        { key: "DokumenLain", label: "Dokumen Lain" }
+        { key: "BuktiTransferPencairan", label: "Bukti Transfer Pencairan" },
+        { key: "BuktiTransferPelunasan", label: "Bukti Transfer Pelunasan", readOnly: true }
     ];
 
     function escapeHtml(s) {
@@ -88,12 +83,19 @@
             var url = d.dokumen[jd.key];
             var adaFile = url && url.length > 0;
 
+            var tombolAksi;
+            if (adaFile) {
+                tombolAksi = "<a href='" + escapeHtml(url) + "' target='_blank' rel='noopener' class='ngx-admin-btn ngx-admin-btn-outline ngx-admin-btn-sm w-full justify-center mb-1'><i data-lucide='eye' class='w-3 h-3'></i> Lihat</a>" +
+                    (jd.readOnly ? "" : "<button class='ngx-admin-btn ngx-admin-btn-outline ngx-admin-btn-sm w-full justify-center btn-ganti-dok' data-jenis='" + jd.key + "'>Ganti</button>");
+            } else if (jd.readOnly) {
+                tombolAksi = "<p class='text-[10px] text-gray-400 italic'>Belum ada &mdash; terisi otomatis saat nasabah melakukan pelunasan</p>";
+            } else {
+                tombolAksi = "<button class='ngx-admin-btn ngx-admin-btn-primary ngx-admin-btn-sm w-full justify-center btn-upload-dok' data-jenis='" + jd.key + "'><i data-lucide='upload' class='w-3 h-3'></i> Upload</button>";
+            }
+
             return "<div class='border border-gray-100 rounded-xl p-3 text-center'>" +
                 "<p class='text-[11px] font-bold text-gray-700 mb-2'>" + jd.label + "</p>" +
-                (adaFile
-                    ? "<a href='" + escapeHtml(url) + "' target='_blank' rel='noopener' class='ngx-admin-btn ngx-admin-btn-outline ngx-admin-btn-sm w-full justify-center mb-1'><i data-lucide='eye' class='w-3 h-3'></i> Lihat</a>" +
-                      "<button class='ngx-admin-btn ngx-admin-btn-outline ngx-admin-btn-sm w-full justify-center btn-ganti-dok' data-jenis='" + jd.key + "'>Ganti</button>"
-                    : "<button class='ngx-admin-btn ngx-admin-btn-primary ngx-admin-btn-sm w-full justify-center btn-upload-dok' data-jenis='" + jd.key + "'><i data-lucide='upload' class='w-3 h-3'></i> Upload</button>") +
+                tombolAksi +
                 "</div>";
 
         }).join("");

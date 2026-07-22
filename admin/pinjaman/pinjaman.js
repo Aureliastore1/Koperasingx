@@ -199,39 +199,62 @@
 
     }
 
-    /* ============ AKSI: CAIRKAN DANA ============ */
+    /* ============ AKSI: CAIRKAN DANA (dengan upload bukti transfer) ============ */
     function cairkanDana(p) {
 
-        var lanjut = function () {
+        if (!window.Swal) { alert("SweetAlert tidak tersedia."); return; }
+
+        Swal.fire({
+            title: "Cairkan dana untuk " + p.nama + "?",
+            html: "<p style='font-size:13px;color:#6B7280;margin-bottom:10px;'>Nominal: <strong>" + p.nominalFormat + "</strong></p>" +
+                  "<input type='file' id='swalFotoBuktiCair' accept='image/*' class='swal2-file'>" +
+                  "<p style='font-size:11px;color:#9CA3AF;margin-top:6px;'>Upload bukti transfer pencairan (opsional, bisa diupload nanti juga di halaman Detail).</p>",
+            showCancelButton: true,
+            confirmButtonText: "Ya, Cairkan",
+            cancelButtonText: "Batal",
+            confirmButtonColor: "#0F766E",
+            preConfirm: function () {
+                var fileInput = document.getElementById("swalFotoBuktiCair");
+                var file = fileInput && fileInput.files && fileInput.files[0];
+                if (!file) return { file: null };
+                return new Promise(function (resolve) {
+                    var reader = new FileReader();
+                    reader.onload = function () { resolve({ file: file, base64: reader.result.split(",")[1] }); };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }).then(function (result) {
+
+            if (!result.isConfirmed) return;
 
             var body = new URLSearchParams();
             body.append("action", "adminCairkanDana");
             body.append("token", ngxAdminGetToken());
             body.append("rowNumber", p.rowNumber);
 
+            if (result.value && result.value.file) {
+                body.append("fotoBase64", result.value.base64);
+                body.append("fotoMime", result.value.file.type || "image/jpeg");
+                body.append("fotoNama", result.value.file.name);
+            }
+
             fetch(NGX_API_BASE_URL, { method: "POST", body: body })
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
 
-                    if (!data || data.success !== true) { if (window.Swal) Swal.fire("Gagal", data && data.message ? data.message : "Gagal memproses.", "error"); return; }
+                    if (!data || data.success !== true) { Swal.fire("Gagal", data && data.message ? data.message : "Gagal memproses.", "error"); return; }
 
                     muatDataPinjaman();
 
-                    if (window.Swal) {
-                        Swal.fire({
-                            title: "Dana Dicairkan!", text: "Email otomatis terkirim. Kirim WhatsApp juga?",
-                            icon: "success", showCancelButton: true, confirmButtonText: "Kirim WhatsApp", cancelButtonText: "Tidak", confirmButtonColor: "#16A34A"
-                        }).then(function (r) { if (r.isConfirmed) bukaWaLangsung(data.noHp, data.pesanWa, p.rowNumber); });
-                    }
+                    Swal.fire({
+                        title: "Dana Dicairkan!", text: "Email otomatis terkirim. Kirim WhatsApp juga?",
+                        icon: "success", showCancelButton: true, confirmButtonText: "Kirim WhatsApp", cancelButtonText: "Tidak", confirmButtonColor: "#16A34A"
+                    }).then(function (r) { if (r.isConfirmed) bukaWaLangsung(data.noHp, data.pesanWa, p.rowNumber); });
 
-                });
+                })
+                .catch(function () { Swal.fire("Gagal", "Gagal terhubung ke server.", "error"); });
 
-        };
-
-        if (window.Swal) {
-            Swal.fire({ title: "Cairkan dana untuk " + p.nama + "?", text: p.nominalFormat, icon: "question", showCancelButton: true, confirmButtonText: "Ya, Cairkan", cancelButtonText: "Batal", confirmButtonColor: "#0F766E" })
-                .then(function (r) { if (r.isConfirmed) lanjut(); });
-        } else if (confirm("Cairkan dana untuk " + p.nama + "?")) { lanjut(); }
+        });
 
     }
 
@@ -389,8 +412,17 @@
         document.querySelectorAll(".btn-wa").forEach(function (b) {
             b.addEventListener("click", function () {
                 var p = cariData(b.getAttribute("data-row"));
-                var pesan = "Halo Bapak/Ibu " + p.nama + "\nPengajuan pinjaman Anda telah kami terima.\nSaat ini status:\n" + p.statusVerifikasi.toUpperCase() +
-                    "\nSilakan menunggu admin melakukan pengecekan.\nTerima kasih.";
+                var pesan = "Terima kasih telah mengajukan pinjaman di Koperasi Simpan Pinjam NGX.\n" +
+                    "Data pengajuan Anda telah kami terima dengan rincian:\n" +
+                    "Nama : *" + p.nama + "*\n" +
+                    "Bank : *" + p.namaBank + "*\n" +
+                    "Nomor Rekening : *" + p.noRekening + "*\n" +
+                    "Nominal Pengajuan : Rp *" + Number(p.nominal).toLocaleString("id-ID") + "*\n" +
+                    "Alasan Kebutuhan : *" + p.alasan + "*\n" +
+                    "Status Pengajuan :\n*" + p.statusVerifikasi.toUpperCase() + "*\n" +
+                    "Tim kami akan segera melakukan pengecekan data dan menghubungi Anda apabila diperlukan informasi tambahan.\n\n" +
+                    "Kepala Koperasi | Trias Mardianto\n" +
+                    "Terima kasih atas kepercayaan Anda kepada Koperasi Simpan Pinjam NGX";
                 bukaWaLangsung(p.noHp, pesan, p.rowNumber);
             });
         });
