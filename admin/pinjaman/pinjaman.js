@@ -1,8 +1,29 @@
 (function () {
 
-    var tabel = null;
-    var dataPinjamanSaatIni = [];
+    var dataPinjaman = [];
+    var quickFilter = ""; // dari klik kartu ringkasan
 
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+    }
+
+    function formatRupiah(n) { return "Rp " + (Number(n) || 0).toLocaleString("id-ID"); }
+
+    function formatNomorWa(nomor) {
+        var bersih = String(nomor || "").replace(/[^0-9]/g, "");
+        if (bersih.indexOf("0") === 0) bersih = "62" + bersih.substring(1);
+        else if (bersih.indexOf("62") !== 0) bersih = "62" + bersih;
+        return bersih;
+    }
+
+    function bukaWaLangsung(noHp, pesan) {
+        if (!noHp || noHp === "-") { if (window.Swal) Swal.fire("Nomor tidak ada", "Nomor HP tidak tercatat.", "warning"); return; }
+        window.open("https://wa.me/" + formatNomorWa(noHp) + "?text=" + encodeURIComponent(pesan), "_blank");
+    }
+
+    /* ============ EDIT MODAL (fitur lama, tampilan disegarkan) ============ */
     var modal = document.getElementById("modalPinjaman");
     var modalError = document.getElementById("modalPinjamanError");
     var form = document.getElementById("formPinjaman");
@@ -24,43 +45,9 @@
     var fNominal = document.getElementById("pjNominal");
     var fPelunasan = document.getElementById("pjPelunasan");
 
-    function escapeHtml(s) {
-        return String(s).replace(/[&<>"']/g, function (c) {
-            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-        });
-    }
-
-    function formatNomorWa(nomor) {
-        var bersih = String(nomor || "").replace(/[^0-9]/g, "");
-        if (bersih.indexOf("0") === 0) bersih = "62" + bersih.substring(1);
-        else if (bersih.indexOf("62") !== 0) bersih = "62" + bersih;
-        return bersih;
-    }
-
-    function bukaWhatsapp(p) {
-
-        if (!p.noHp || p.noHp === "-") {
-            if (window.Swal) Swal.fire("Nomor tidak ada", "Nomor HP anggota ini tidak tercatat.", "warning");
-            return;
-        }
-
-        var pesan =
-            "Halo Bapak/Ibu " + p.nama + "\n" +
-            "Kami mengingatkan bahwa pinjaman Anda sebesar " + p.nominalFormat + "\n" +
-            "Sisa tagihan\n" + p.sisaFormat + "\n" +
-            "Jatuh tempo\n" + p.jatuhTempoFormat + "\n" +
-            "Terima kasih.";
-
-        var url = "https://wa.me/" + formatNomorWa(p.noHp) + "?text=" + encodeURIComponent(pesan);
-        window.open(url, "_blank");
-
-    }
-
     function bukaModalEdit(p) {
-
         modalError.classList.add("hidden");
         form.reset();
-
         fRowNumber.value = p.rowNumber;
         fNama.value = p.nama;
         fAlasan.value = p.alasan === "-" ? "" : p.alasan;
@@ -74,29 +61,19 @@
         fNamaBank.value = p.namaBank === "-" ? "" : p.namaBank;
         fNominal.value = p.nominal;
         fPelunasan.value = p.pelunasan;
-
         modal.classList.remove("hidden");
-
     }
 
     function tutupModal() { modal.classList.add("hidden"); }
-
     btnBatal.addEventListener("click", tutupModal);
     btnClose.addEventListener("click", tutupModal);
 
     form.addEventListener("submit", function (e) {
-
         e.preventDefault();
         modalError.classList.add("hidden");
+        if (!fNama.value.trim()) { modalError.textContent = "Nama wajib diisi."; modalError.classList.remove("hidden"); return; }
 
-        if (!fNama.value.trim()) {
-            modalError.textContent = "Nama wajib diisi.";
-            modalError.classList.remove("hidden");
-            return;
-        }
-
-        btnSimpan.disabled = true;
-        btnSimpan.textContent = "Menyimpan...";
+        btnSimpan.disabled = true; btnSimpan.textContent = "Menyimpan...";
 
         var body = new URLSearchParams();
         body.append("action", "adminUpdatePinjaman");
@@ -118,231 +95,398 @@
         fetch(NGX_API_BASE_URL, { method: "POST", body: body })
             .then(function (res) { return res.json(); })
             .then(function (data) {
-
-                btnSimpan.disabled = false;
-                btnSimpan.textContent = "Simpan";
-
-                if (!data || data.success !== true) {
-                    modalError.textContent = data && data.message ? data.message : "Gagal menyimpan.";
-                    modalError.classList.remove("hidden");
-                    return;
-                }
-
+                btnSimpan.disabled = false; btnSimpan.textContent = "Simpan";
+                if (!data || data.success !== true) { modalError.textContent = data && data.message ? data.message : "Gagal menyimpan."; modalError.classList.remove("hidden"); return; }
                 tutupModal();
                 muatDataPinjaman();
-
                 if (window.Swal) Swal.fire({ title: "Berhasil", text: "Data pinjaman diperbarui.", icon: "success", confirmButtonColor: "#0F766E", timer: 1800, showConfirmButton: false });
-
             })
             .catch(function () {
-                btnSimpan.disabled = false;
-                btnSimpan.textContent = "Simpan";
-                modalError.textContent = "Gagal terhubung ke server.";
-                modalError.classList.remove("hidden");
+                btnSimpan.disabled = false; btnSimpan.textContent = "Simpan";
+                modalError.textContent = "Gagal terhubung ke server."; modalError.classList.remove("hidden");
             });
-
     });
 
-    function hapusPinjaman(rowNumber, nama) {
+    /* ============ DETAIL MODAL + PROGRESS WORKFLOW ============ */
+    var modalDetail = document.getElementById("modalDetail");
+    document.getElementById("modalDetailClose").addEventListener("click", function () { modalDetail.classList.add("hidden"); });
+    document.getElementById("btnTutupDetail").addEventListener("click", function () { modalDetail.classList.add("hidden"); });
 
-        var lanjutkan = function () {
+    function bukaModalDetail(p) {
+
+        var langkah = [
+            { label: "Pengajuan", selesai: true },
+            { label: "Verifikasi", selesai: p.statusVerifikasi !== "Menunggu Verifikasi" },
+            { label: "Disetujui", selesai: p.statusVerifikasi === "Disetujui" },
+            { label: "Dana Dicairkan", selesai: !!p.danaDicairkan },
+            { label: "Angsuran Berjalan", selesai: p.pelunasan > 0 && p.status === "BELUM LUNAS" },
+            { label: "Lunas", selesai: p.status === "LUNAS" }
+        ];
+
+        document.getElementById("progressSteps").innerHTML = langkah.map(function (l, idx) {
+            return "<div class='ngx-progress-step" + (l.selesai ? " selesai" : "") + "'>" +
+                "<div class='dot'>" + (l.selesai ? "\u2713" : (idx + 1)) + "</div>" +
+                "<div class='lbl2'>" + l.label + "</div></div>";
+        }).join("");
+
+        document.getElementById("detailInfoBox").innerHTML =
+            baris("Nama", p.nama) + baris("Alasan", p.alasan) + baris("Nama Toko", p.namaToko) + baris("Grup Partner", p.grupPartner) +
+            baris("Nomor HP", p.noHp) + baris("Email", p.email) + baris("Atas Nama Rek", p.atasNama) + baris("No Rekening", p.noRekening) +
+            baris("Bank", p.namaBank) + baris("Nominal", p.nominalFormat) + baris("Sudah Dibayar", p.pelunasanFormat) + baris("Sisa", p.sisaFormat) +
+            baris("Jatuh Tempo", p.jatuhTempoFormat) + baris("Tanggal Pengajuan", p.timestampFormat) + baris("Diproses Oleh", p.diprosesOleh);
+
+        modalDetail.classList.remove("hidden");
+        if (window.lucide) lucide.createIcons();
+
+    }
+
+    function baris(label, value) {
+        return "<div class='flex justify-between border-b border-gray-100 py-1.5'><span class='text-gray-500'>" + label + "</span><span class='font-semibold text-gray-800 text-right'>" + escapeHtml(value) + "</span></div>";
+    }
+
+    /* ============ AKSI: VERIFIKASI ============ */
+    function verifikasiPinjaman(p, keputusan) {
+
+        var lanjut = function () {
 
             var body = new URLSearchParams();
-            body.append("action", "adminDeletePinjaman");
+            body.append("action", "adminVerifikasiPinjaman");
             body.append("token", ngxAdminGetToken());
-            body.append("rowNumber", rowNumber);
+            body.append("rowNumber", p.rowNumber);
+            body.append("keputusan", keputusan);
 
             fetch(NGX_API_BASE_URL, { method: "POST", body: body })
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
 
-                    if (!data || data.success !== true) {
-                        if (window.Swal) Swal.fire("Gagal", data && data.message ? data.message : "Gagal menghapus.", "error");
-                        return;
-                    }
+                    if (!data || data.success !== true) { if (window.Swal) Swal.fire("Gagal", data && data.message ? data.message : "Gagal memproses.", "error"); return; }
 
                     muatDataPinjaman();
-                    if (window.Swal) Swal.fire({ title: "Terhapus", icon: "success", confirmButtonColor: "#0F766E", timer: 1500, showConfirmButton: false });
 
-                })
-                .catch(function () {
-                    if (window.Swal) Swal.fire("Gagal", "Gagal terhubung ke server.", "error");
+                    if (window.Swal) {
+                        Swal.fire({
+                            title: keputusan + "!",
+                            text: "Email otomatis sudah dikirim ke " + p.nama + ". Kirim WhatsApp juga?",
+                            icon: "success",
+                            showCancelButton: true,
+                            confirmButtonText: "Kirim WhatsApp",
+                            cancelButtonText: "Tidak",
+                            confirmButtonColor: "#16A34A"
+                        }).then(function (r) {
+                            if (r.isConfirmed) bukaWaLangsung(data.noHp, data.pesanWa);
+                        });
+                    }
+
                 });
 
         };
 
         if (window.Swal) {
             Swal.fire({
-                title: "Hapus data pinjaman ini?",
-                text: "Pinjaman " + nama + " akan dihapus permanen.",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Ya, Hapus",
-                cancelButtonText: "Batal",
-                confirmButtonColor: "#DC2626"
-            }).then(function (result) {
-                if (result.isConfirmed) lanjutkan();
-            });
-        } else if (confirm("Hapus pinjaman " + nama + "?")) {
-            lanjutkan();
-        }
+                title: keputusan + " pengajuan " + p.nama + "?",
+                icon: "question", showCancelButton: true, confirmButtonText: "Ya, " + keputusan, cancelButtonText: "Batal", confirmButtonColor: "#0F766E"
+            }).then(function (r) { if (r.isConfirmed) lanjut(); });
+        } else if (confirm(keputusan + " pengajuan " + p.nama + "?")) { lanjut(); }
 
     }
 
-    function cairkanDana(rowNumber, nama, nominalFormat) {
+    /* ============ AKSI: CAIRKAN DANA ============ */
+    function cairkanDana(p) {
 
-        var lanjutkan = function () {
+        var lanjut = function () {
 
             var body = new URLSearchParams();
             body.append("action", "adminCairkanDana");
             body.append("token", ngxAdminGetToken());
-            body.append("rowNumber", rowNumber);
+            body.append("rowNumber", p.rowNumber);
 
             fetch(NGX_API_BASE_URL, { method: "POST", body: body })
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
 
-                    if (!data || data.success !== true) {
-                        if (window.Swal) Swal.fire("Gagal", data && data.message ? data.message : "Gagal memproses.", "error");
-                        return;
-                    }
+                    if (!data || data.success !== true) { if (window.Swal) Swal.fire("Gagal", data && data.message ? data.message : "Gagal memproses.", "error"); return; }
 
                     muatDataPinjaman();
-                    if (window.Swal) Swal.fire({ title: "Dana Dicairkan", text: "Email konfirmasi sudah dikirim ke peminjam (jika email valid).", icon: "success", confirmButtonColor: "#0F766E" });
 
-                })
-                .catch(function () {
-                    if (window.Swal) Swal.fire("Gagal", "Gagal terhubung ke server.", "error");
+                    if (window.Swal) {
+                        Swal.fire({
+                            title: "Dana Dicairkan!", text: "Email otomatis terkirim. Kirim WhatsApp juga?",
+                            icon: "success", showCancelButton: true, confirmButtonText: "Kirim WhatsApp", cancelButtonText: "Tidak", confirmButtonColor: "#16A34A"
+                        }).then(function (r) { if (r.isConfirmed) bukaWaLangsung(data.noHp, data.pesanWa); });
+                    }
+
                 });
 
         };
 
         if (window.Swal) {
-            Swal.fire({
-                title: "Cairkan dana untuk " + nama + "?",
-                text: "Nominal " + nominalFormat + " akan ditandai sebagai Dana Dicairkan.",
-                icon: "question",
-                showCancelButton: true,
-                confirmButtonText: "Ya, Cairkan",
-                cancelButtonText: "Batal",
-                confirmButtonColor: "#0F766E"
-            }).then(function (result) {
-                if (result.isConfirmed) lanjutkan();
-            });
-        } else if (confirm("Cairkan dana untuk " + nama + "?")) {
-            lanjutkan();
-        }
+            Swal.fire({ title: "Cairkan dana untuk " + p.nama + "?", text: p.nominalFormat, icon: "question", showCancelButton: true, confirmButtonText: "Ya, Cairkan", cancelButtonText: "Batal", confirmButtonColor: "#0F766E" })
+                .then(function (r) { if (r.isConfirmed) lanjut(); });
+        } else if (confirm("Cairkan dana untuk " + p.nama + "?")) { lanjut(); }
 
     }
 
-    function badgeJatuhTempo(status) {
-        if (status === "LEWAT JATUH TEMPO") return "ngx-badge-jt-lewat";
-        if (status === "JATUH TEMPO HARI INI") return "ngx-badge-jt-hariini";
-        if (status === "JATUH TEMPO BESOK") return "ngx-badge-jt-besok";
-        return "ngx-badge-jt-aman";
+    /* ============ AKSI: TANDAI LUNAS ============ */
+    function tandaiLunas(p) {
+
+        var lanjut = function () {
+
+            var body = new URLSearchParams();
+            body.append("action", "adminTandaiLunas");
+            body.append("token", ngxAdminGetToken());
+            body.append("rowNumber", p.rowNumber);
+
+            fetch(NGX_API_BASE_URL, { method: "POST", body: body })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (!data || data.success !== true) { if (window.Swal) Swal.fire("Gagal", data && data.message ? data.message : "Gagal memproses.", "error"); return; }
+                    if (window.Swal) {
+                        Swal.fire({
+                            title: "Notifikasi Lunas Terkirim", text: "Email sudah dikirim. Kirim WhatsApp juga?",
+                            icon: "success", showCancelButton: true, confirmButtonText: "Kirim WhatsApp", cancelButtonText: "Tidak", confirmButtonColor: "#16A34A"
+                        }).then(function (r) { if (r.isConfirmed) bukaWaLangsung(data.noHp, data.pesanWa); });
+                    }
+                });
+
+        };
+
+        if (window.Swal) {
+            Swal.fire({ title: "Kirim ulang notifikasi LUNAS untuk " + p.nama + "?", icon: "question", showCancelButton: true, confirmButtonText: "Ya, Kirim", cancelButtonText: "Batal", confirmButtonColor: "#0F766E" })
+                .then(function (r) { if (r.isConfirmed) lanjut(); });
+        } else if (confirm("Kirim notifikasi lunas untuk " + p.nama + "?")) { lanjut(); }
+
     }
 
-    function renderTabel(daftar) {
+    /* ============ HAPUS ============ */
+    function hapusPinjaman(p) {
 
-        if (tabel) tabel.destroy();
+        var lanjut = function () {
+            var body = new URLSearchParams();
+            body.append("action", "adminDeletePinjaman");
+            body.append("token", ngxAdminGetToken());
+            body.append("rowNumber", p.rowNumber);
+            fetch(NGX_API_BASE_URL, { method: "POST", body: body })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (!data || data.success !== true) { if (window.Swal) Swal.fire("Gagal", data && data.message ? data.message : "Gagal menghapus.", "error"); return; }
+                    muatDataPinjaman();
+                    if (window.Swal) Swal.fire({ title: "Terhapus", icon: "success", confirmButtonColor: "#0F766E", timer: 1500, showConfirmButton: false });
+                });
+        };
 
-        var tbody = document.querySelector("#tabelPinjaman tbody");
+        if (window.Swal) {
+            Swal.fire({ title: "Hapus data pinjaman " + p.nama + "?", icon: "warning", showCancelButton: true, confirmButtonText: "Ya, Hapus", cancelButtonText: "Batal", confirmButtonColor: "#DC2626" })
+                .then(function (r) { if (r.isConfirmed) lanjut(); });
+        } else if (confirm("Hapus pinjaman " + p.nama + "?")) { lanjut(); }
 
-        tbody.innerHTML = daftar.map(function (p) {
+    }
 
-            var badgeStatus = p.status === "LUNAS" ? "ngx-badge-lunas" : "ngx-badge-belum";
-            var sudahCair = p.danaDicairkan && p.danaDicairkan.length > 0;
+    /* ============ BADGE HELPERS ============ */
+    function badgeVerifikasi(v) {
+        if (v === "Disetujui") return "ngx-badge-hijau2";
+        if (v === "Ditolak") return "ngx-badge-merah2";
+        return "ngx-badge-kuning2";
+    }
+    function badgeDanaCair(sudah) { return sudah ? "ngx-badge-hijau2" : "ngx-badge-abu2"; }
+    function badgeStatusPinjaman(s) { return s === "LUNAS" ? "ngx-badge-hijau2" : "ngx-badge-oranye2"; }
+    function badgeJatuhTempo(s) {
+        if (s === "LEWAT JATUH TEMPO") return "ngx-badge-merah2";
+        if (s === "JATUH TEMPO HARI INI" || s === "JATUH TEMPO BESOK") return "ngx-badge-kuning2";
+        return "ngx-badge-abu2";
+    }
 
-            return (
-                "<tr>" +
-                    "<td class='font-semibold'>" + escapeHtml(p.nama) + "<div class='text-[10px] text-gray-400'>" + escapeHtml(p.timestampFormat) + "</div></td>" +
-                    "<td>" + p.nominalFormat + "</td>" +
-                    "<td>" + p.sisaFormat + "</td>" +
-                    "<td><span class='" + badgeStatus + " text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap'>" + p.status + "</span></td>" +
-                    "<td><span class='" + badgeJatuhTempo(p.statusJatuhTempo) + " text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap'>" + escapeHtml(p.statusJatuhTempo) + "</span></td>" +
-                    "<td>" + (sudahCair ? "<span class='ngx-badge-lunas text-[10px] font-bold px-2 py-1 rounded-full'>Sudah Cair</span>" : "<span class='ngx-badge-belum text-[10px] font-bold px-2 py-1 rounded-full'>Belum</span>") + "</td>" +
-                    "<td>" +
-                        "<div class='flex gap-1.5 flex-wrap'>" +
-                            "<button class='ngx-admin-btn ngx-admin-btn-whatsapp ngx-admin-btn-sm btn-wa' data-row='" + p.rowNumber + "'><i data-lucide='message-circle' class='w-3 h-3'></i></button>" +
-                            (!sudahCair ? "<button class='ngx-admin-btn ngx-admin-btn-success ngx-admin-btn-sm btn-cair' data-row='" + p.rowNumber + "'><i data-lucide='banknote' class='w-3 h-3'></i></button>" : "") +
-                            "<button class='ngx-admin-btn ngx-admin-btn-outline ngx-admin-btn-sm btn-edit-pinjaman' data-row='" + p.rowNumber + "'><i data-lucide='pencil' class='w-3 h-3'></i></button>" +
-                            "<button class='ngx-admin-btn ngx-admin-btn-danger ngx-admin-btn-sm btn-hapus-pinjaman' data-row='" + p.rowNumber + "'><i data-lucide='trash-2' class='w-3 h-3'></i></button>" +
-                        "</div>" +
-                    "</td>" +
-                "</tr>"
-            );
+    /* ============ RENDER TABEL ============ */
+    function cariData(rowNumber) {
+        for (var i = 0; i < dataPinjaman.length; i++) if (String(dataPinjaman[i].rowNumber) === String(rowNumber)) return dataPinjaman[i];
+        return null;
+    }
+
+    function terapkanSemuaFilter() {
+
+        var nama = document.getElementById("filterNamaP").value.trim().toUpperCase();
+        var hp = document.getElementById("filterHpP").value.trim();
+        var verif = document.getElementById("filterStatusVerifikasiP").value;
+        var danaCair = document.getElementById("filterDanaCairP").value;
+        var statusP = document.getElementById("filterStatusPinjamanP").value;
+        var jt = document.getElementById("filterJatuhTempoP").value;
+
+        return dataPinjaman.filter(function (p) {
+
+            if (nama && p.nama.toUpperCase().indexOf(nama) === -1) return false;
+            if (hp && String(p.noHp).indexOf(hp) === -1) return false;
+            if (verif && p.statusVerifikasi !== verif) return false;
+            if (danaCair === "sudah" && !p.danaDicairkan) return false;
+            if (danaCair === "belum" && p.danaDicairkan) return false;
+            if (statusP && p.status !== statusP) return false;
+            if (jt && p.statusJatuhTempo !== jt) return false;
+
+            if (quickFilter === "belumVerifikasi" && p.statusVerifikasi !== "Menunggu Verifikasi") return false;
+            if (quickFilter === "sudahVerifikasi" && p.statusVerifikasi !== "Disetujui") return false;
+            if (quickFilter === "sudahCair" && !p.danaDicairkan) return false;
+            if (quickFilter === "belumLunas" && p.status !== "BELUM LUNAS") return false;
+            if (quickFilter === "lunas" && p.status !== "LUNAS") return false;
+            if (quickFilter === "jatuhTempoHariIni" && p.statusJatuhTempo !== "JATUH TEMPO HARI INI") return false;
+            if (quickFilter === "lewatTempo" && p.statusJatuhTempo !== "LEWAT JATUH TEMPO") return false;
+
+            return true;
+
+        });
+
+    }
+
+    function renderTabel() {
+
+        var hasil = terapkanSemuaFilter();
+        var tbody = document.getElementById("tbodyPinjamanV2");
+        var emptyState = document.getElementById("emptyStateP");
+
+        tbody.innerHTML = hasil.map(function (p) {
+
+            var sudahCair = !!p.danaDicairkan;
+
+            return "<tr>" +
+                "<td class='font-semibold'>" + escapeHtml(p.nama) + "</td>" +
+                "<td>" + p.nominalFormat + "</td>" +
+                "<td>" + p.sisaFormat + "</td>" +
+                "<td><span class='ngx-badge-mini " + badgeStatusPinjaman(p.status) + "'>" + p.status + "</span></td>" +
+                "<td><span class='ngx-badge-mini " + badgeVerifikasi(p.statusVerifikasi) + "'>" + escapeHtml(p.statusVerifikasi) + "</span></td>" +
+                "<td><span class='ngx-badge-mini " + badgeDanaCair(sudahCair) + "'>" + (sudahCair ? "Sudah Cair" : "Belum Cair") + "</span></td>" +
+                "<td><span class='ngx-badge-mini " + badgeJatuhTempo(p.statusJatuhTempo) + "'>" + escapeHtml(p.jatuhTempoFormat) + "</span></td>" +
+                "<td>" + escapeHtml(p.timestampFormat.split(",")[0]) + "</td>" +
+                "<td>" + escapeHtml(p.diprosesOleh) + "</td>" +
+                "<td><div class='flex gap-1'>" +
+                    "<div class='ngx-icon-btn btn-detail' data-row='" + p.rowNumber + "' title='Detail'><i data-lucide='eye' class='w-3.5 h-3.5'></i></div>" +
+                    "<div class='ngx-icon-btn btn-edit' data-row='" + p.rowNumber + "' title='Edit'><i data-lucide='pencil' class='w-3.5 h-3.5'></i></div>" +
+                    (p.statusVerifikasi === "Menunggu Verifikasi" ? "<div class='ngx-icon-btn btn-verif' data-row='" + p.rowNumber + "' title='Verifikasi'><i data-lucide='check-circle' class='w-3.5 h-3.5'></i></div>" : "") +
+                    (p.statusVerifikasi === "Disetujui" && !sudahCair ? "<div class='ngx-icon-btn btn-cair' data-row='" + p.rowNumber + "' title='Cairkan Dana'><i data-lucide='banknote' class='w-3.5 h-3.5'></i></div>" : "") +
+                    (p.status === "LUNAS" ? "<div class='ngx-icon-btn btn-lunas' data-row='" + p.rowNumber + "' title='Kirim Notif Lunas'><i data-lucide='party-popper' class='w-3.5 h-3.5'></i></div>" : "") +
+                    "<div class='ngx-icon-btn wa btn-wa' data-row='" + p.rowNumber + "' title='WhatsApp'><i data-lucide='message-circle' class='w-3.5 h-3.5'></i></div>" +
+                    "<div class='ngx-icon-btn danger btn-hapus' data-row='" + p.rowNumber + "' title='Hapus'><i data-lucide='trash-2' class='w-3.5 h-3.5'></i></div>" +
+                "</div></td>" +
+            "</tr>";
 
         }).join("");
 
-        tabel = $("#tabelPinjaman").DataTable({
-            pageLength: 10,
-            language: {
-                search: "Cari:",
-                lengthMenu: "Tampilkan _MENU_ data",
-                info: "_START_-_END_ dari _TOTAL_ data",
-                paginate: { previous: "\u2039", next: "\u203a" },
-                zeroRecords: "Tidak ada data ditemukan",
-                emptyTable: "Belum ada data pinjaman"
-            }
-        });
-
+        emptyState.classList.toggle("hidden", hasil.length > 0);
         if (window.lucide) lucide.createIcons();
 
-        function cariData(rowNumber) {
-            for (var i = 0; i < dataPinjamanSaatIni.length; i++) {
-                if (String(dataPinjamanSaatIni[i].rowNumber) === String(rowNumber)) return dataPinjamanSaatIni[i];
+        document.querySelectorAll(".btn-detail").forEach(function (b) { b.addEventListener("click", function () { bukaModalDetail(cariData(b.getAttribute("data-row"))); }); });
+        document.querySelectorAll(".btn-edit").forEach(function (b) { b.addEventListener("click", function () { bukaModalEdit(cariData(b.getAttribute("data-row"))); }); });
+        document.querySelectorAll(".btn-verif").forEach(function (b) { b.addEventListener("click", function () { verifikasiPinjaman(cariData(b.getAttribute("data-row")), "Disetujui"); }); });
+        document.querySelectorAll(".btn-cair").forEach(function (b) { b.addEventListener("click", function () { cairkanDana(cariData(b.getAttribute("data-row"))); }); });
+        document.querySelectorAll(".btn-lunas").forEach(function (b) { b.addEventListener("click", function () { tandaiLunas(cariData(b.getAttribute("data-row"))); }); });
+        document.querySelectorAll(".btn-hapus").forEach(function (b) { b.addEventListener("click", function () { hapusPinjaman(cariData(b.getAttribute("data-row"))); }); });
+        document.querySelectorAll(".btn-wa").forEach(function (b) {
+            b.addEventListener("click", function () {
+                var p = cariData(b.getAttribute("data-row"));
+                var pesan = "Halo Bapak/Ibu " + p.nama + "\nPengajuan pinjaman Anda telah kami terima.\nSaat ini status:\n" + p.statusVerifikasi.toUpperCase() +
+                    "\nSilakan menunggu admin melakukan pengecekan.\nTerima kasih.";
+                bukaWaLangsung(p.noHp, pesan);
+            });
+        });
+
+    }
+
+    /* ============ DASHBOARD SUMMARY ============ */
+    function renderSummary() {
+
+        var total = dataPinjaman.length;
+        var belumVerif = dataPinjaman.filter(function (p) { return p.statusVerifikasi === "Menunggu Verifikasi"; }).length;
+        var sudahVerif = dataPinjaman.filter(function (p) { return p.statusVerifikasi === "Disetujui"; }).length;
+        var sudahCair = dataPinjaman.filter(function (p) { return p.danaDicairkan; }).length;
+        var belumLunas = dataPinjaman.filter(function (p) { return p.status === "BELUM LUNAS"; }).length;
+        var lunas = dataPinjaman.filter(function (p) { return p.status === "LUNAS"; }).length;
+        var jtHariIni = dataPinjaman.filter(function (p) { return p.statusJatuhTempo === "JATUH TEMPO HARI INI"; }).length;
+        var lewatTempo = dataPinjaman.filter(function (p) { return p.statusJatuhTempo === "LEWAT JATUH TEMPO"; }).length;
+
+        var totNominal = 0, totPelunasan = 0, totPiutang = 0;
+        dataPinjaman.forEach(function (p) { totNominal += p.nominal; totPelunasan += p.pelunasan; totPiutang += p.sisa; });
+
+        document.getElementById("stTotal").textContent = total;
+        document.getElementById("stBelumVerif").textContent = belumVerif;
+        document.getElementById("stSudahVerif").textContent = sudahVerif;
+        document.getElementById("stSudahCair").textContent = sudahCair;
+        document.getElementById("stBelumLunas").textContent = belumLunas;
+        document.getElementById("stLunas").textContent = lunas;
+        document.getElementById("stTotalNominal").textContent = formatRupiah(totNominal);
+        document.getElementById("stTotalPiutang").textContent = formatRupiah(totPiutang);
+        document.getElementById("stTotalPelunasan").textContent = formatRupiah(totPelunasan);
+        document.getElementById("stJTHariIni").textContent = jtHariIni;
+        document.getElementById("stLewatTempo").textContent = lewatTempo;
+
+    }
+
+    document.querySelectorAll(".ngx-stat-clickable").forEach(function (card) {
+        card.addEventListener("click", function () {
+            var f = card.getAttribute("data-filter");
+            if (!f) return;
+            document.querySelectorAll(".ngx-stat-clickable").forEach(function (c) { c.classList.remove("aktif"); });
+            if (quickFilter === f) { quickFilter = ""; } else { quickFilter = f; card.classList.add("aktif"); }
+            renderTabel();
+        });
+    });
+
+    /* ============ FILTER MANUAL ============ */
+    ["filterNamaP", "filterHpP", "filterStatusVerifikasiP", "filterDanaCairP", "filterStatusPinjamanP", "filterJatuhTempoP"].forEach(function (id) {
+        var el = document.getElementById(id);
+        el.addEventListener(el.tagName === "SELECT" ? "change" : "input", renderTabel);
+    });
+
+    document.getElementById("btnResetFilterP").addEventListener("click", function () {
+        ["filterNamaP", "filterHpP", "filterStatusVerifikasiP", "filterDanaCairP", "filterStatusPinjamanP", "filterJatuhTempoP"].forEach(function (id) { document.getElementById(id).value = ""; });
+        quickFilter = "";
+        document.querySelectorAll(".ngx-stat-clickable").forEach(function (c) { c.classList.remove("aktif"); });
+        renderTabel();
+    });
+
+    /* ============ EXPORT ============ */
+    document.querySelectorAll(".btn-export-p").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+
+            var type = btn.getAttribute("data-type");
+            var table = document.getElementById("tabelPinjamanV2");
+
+            if (type === "print") { window.print(); return; }
+
+            if (type === "excel") {
+                var wb = XLSX.utils.table_to_book(table, { sheet: "Pinjaman" });
+                XLSX.writeFile(wb, "Data-Pinjaman.xlsx");
+                return;
             }
-            return null;
-        }
 
-        document.querySelectorAll(".btn-wa").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-                var p = cariData(btn.getAttribute("data-row"));
-                if (p) bukaWhatsapp(p);
-            });
+            if (type === "csv") {
+                var ws = XLSX.utils.table_to_sheet(table);
+                var csv = XLSX.utils.sheet_to_csv(ws);
+                var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                var link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "Data-Pinjaman.csv";
+                link.click();
+                return;
+            }
+
+            if (type === "copy") {
+                var range = document.createRange();
+                range.selectNode(table);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                document.execCommand("copy");
+                window.getSelection().removeAllRanges();
+                if (window.Swal) Swal.fire({ title: "Tersalin", icon: "success", timer: 1200, showConfirmButton: false, confirmButtonColor: "#0F766E" });
+                return;
+            }
+
+            if (type === "pdf") {
+                var doc = new window.jspdf.jsPDF("l", "pt", "a4");
+                doc.autoTable({ html: "#tabelPinjamanV2", styles: { fontSize: 6 }, headStyles: { fillColor: [15, 118, 110] } });
+                doc.save("Data-Pinjaman.pdf");
+                return;
+            }
+
         });
+    });
 
-        document.querySelectorAll(".btn-cair").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-                var p = cariData(btn.getAttribute("data-row"));
-                if (p) cairkanDana(p.rowNumber, p.nama, p.nominalFormat);
-            });
-        });
-
-        document.querySelectorAll(".btn-edit-pinjaman").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-                var p = cariData(btn.getAttribute("data-row"));
-                if (p) bukaModalEdit(p);
-            });
-        });
-
-        document.querySelectorAll(".btn-hapus-pinjaman").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-                var p = cariData(btn.getAttribute("data-row"));
-                if (p) hapusPinjaman(p.rowNumber, p.nama);
-            });
-        });
-
-    }
-
-    function terapkanFilter() {
-
-        var status = document.getElementById("filterStatus").value;
-        var jt = document.getElementById("filterJatuhTempo").value;
-
-        var hasil = dataPinjamanSaatIni.filter(function (p) {
-            if (status && p.status !== status) return false;
-            if (jt && p.statusJatuhTempo !== jt) return false;
-            return true;
-        });
-
-        renderTabel(hasil);
-
-    }
-
-    document.getElementById("filterStatus").addEventListener("change", terapkanFilter);
-    document.getElementById("filterJatuhTempo").addEventListener("change", terapkanFilter);
-
+    /* ============ MUAT DATA ============ */
     function muatDataPinjaman() {
 
         var loadingBox = document.getElementById("pageLoading");
@@ -363,23 +507,15 @@
                 loadingBox.classList.add("hidden");
 
                 if (!data || data.success !== true) {
-
-                    if (data && data.authError) {
-                        ngxAdminLogoutLokal();
-                        window.location.href = "/admin/login/";
-                        return;
-                    }
-
+                    if (data && data.authError) { ngxAdminLogoutLokal(); window.location.href = "/admin/login/"; return; }
                     errorText.textContent = data && data.message ? data.message : "Gagal memuat data.";
                     errorBox.classList.remove("hidden");
                     return;
-
                 }
 
-                dataPinjamanSaatIni = data.pinjaman;
-                document.getElementById("filterStatus").value = "";
-                document.getElementById("filterJatuhTempo").value = "";
-                renderTabel(dataPinjamanSaatIni);
+                dataPinjaman = data.pinjaman;
+                renderSummary();
+                renderTabel();
 
                 content.classList.remove("hidden");
 
@@ -394,8 +530,6 @@
 
     document.getElementById("pageRetryBtn").addEventListener("click", muatDataPinjaman);
 
-    ngxAdminCekSesi(function () {
-        muatDataPinjaman();
-    });
+    ngxAdminCekSesi(function () { muatDataPinjaman(); });
 
 })();

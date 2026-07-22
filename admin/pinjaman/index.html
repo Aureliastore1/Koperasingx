@@ -11,7 +11,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/style.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
     <script>
         tailwind.config = {
             theme: {
@@ -66,7 +65,7 @@
             <header class="ngx-admin-topbar px-5 py-4 flex items-center justify-between">
                 <div>
                     <h1 class="text-base font-bold text-gray-900">Data Pinjaman</h1>
-                    <p class="text-xs text-gray-400">Kelola pengajuan & pembayaran pinjaman</p>
+                    <p class="text-xs text-gray-400">Kelola pengajuan, verifikasi, pencairan, dan pelunasan</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <div class="text-right hidden sm:block">
@@ -78,7 +77,7 @@
                 </div>
             </header>
 
-            <main class="p-5 flex-1 overflow-y-auto">
+            <main class="p-4 sm:p-5 flex-1 overflow-y-auto">
 
                 <div id="pageLoading" class="flex flex-col items-center justify-center gap-3 py-24">
                     <div class="ngx-spinner"></div>
@@ -96,39 +95,82 @@
 
                 <div id="pageContent" class="hidden">
 
-                    <div class="ngx-admin-table-card">
-                        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <select id="filterStatus" class="ngx-admin-toolbar-input">
-                                    <option value="">Semua Status</option>
-                                    <option value="BELUM LUNAS">Belum Lunas</option>
-                                    <option value="LUNAS">Lunas</option>
-                                </select>
-                                <select id="filterJatuhTempo" class="ngx-admin-toolbar-input">
-                                    <option value="">Semua Jatuh Tempo</option>
-                                    <option value="LEWAT JATUH TEMPO">Lewat Jatuh Tempo</option>
-                                    <option value="JATUH TEMPO HARI INI">Jatuh Tempo Hari Ini</option>
-                                    <option value="JATUH TEMPO BESOK">Jatuh Tempo Besok</option>
-                                </select>
+                    <!-- DASHBOARD SUMMARY (klik untuk filter) -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 mb-4" id="statCardWrap">
+                        <div class="ngx-stat-clickable" data-filter="semua"><div class="val" id="stTotal">0</div><div class="lbl">Total Pengajuan</div></div>
+                        <div class="ngx-stat-clickable" data-filter="belumVerifikasi"><div class="val" id="stBelumVerif">0</div><div class="lbl">Belum Diverifikasi</div></div>
+                        <div class="ngx-stat-clickable" data-filter="sudahVerifikasi"><div class="val" id="stSudahVerif">0</div><div class="lbl">Sudah Diverifikasi</div></div>
+                        <div class="ngx-stat-clickable" data-filter="sudahCair"><div class="val" id="stSudahCair">0</div><div class="lbl">Sudah Cair</div></div>
+                        <div class="ngx-stat-clickable" data-filter="belumLunas"><div class="val" id="stBelumLunas">0</div><div class="lbl">Belum Lunas</div></div>
+                        <div class="ngx-stat-clickable" data-filter="lunas"><div class="val" id="stLunas">0</div><div class="lbl">Lunas</div></div>
+                        <div class="ngx-stat-clickable" data-filter=""><div class="val" id="stTotalNominal">Rp 0</div><div class="lbl">Total Nominal</div></div>
+                        <div class="ngx-stat-clickable" data-filter=""><div class="val" id="stTotalPiutang">Rp 0</div><div class="lbl">Total Piutang</div></div>
+                        <div class="ngx-stat-clickable" data-filter=""><div class="val" id="stTotalPelunasan">Rp 0</div><div class="lbl">Total Pelunasan</div></div>
+                        <div class="ngx-stat-clickable" data-filter="jatuhTempoHariIni"><div class="val" id="stJTHariIni">0</div><div class="lbl">Jatuh Tempo Hari Ini</div></div>
+                        <div class="ngx-stat-clickable" data-filter="lewatTempo"><div class="val" id="stLewatTempo">0</div><div class="lbl">Lewat Tempo</div></div>
+                    </div>
+
+                    <!-- FILTER -->
+                    <div class="ngx-admin-table-card mb-3">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                            <input type="text" id="filterNamaP" placeholder="Cari nama..." class="ngx-admin-toolbar-input">
+                            <input type="text" id="filterHpP" placeholder="Cari no HP..." class="ngx-admin-toolbar-input">
+                            <select id="filterStatusVerifikasiP" class="ngx-admin-toolbar-input">
+                                <option value="">Semua Verifikasi</option>
+                                <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                                <option value="Disetujui">Disetujui</option>
+                                <option value="Ditolak">Ditolak</option>
+                            </select>
+                            <select id="filterDanaCairP" class="ngx-admin-toolbar-input">
+                                <option value="">Semua Dana Cair</option>
+                                <option value="sudah">Sudah Cair</option>
+                                <option value="belum">Belum Cair</option>
+                            </select>
+                            <select id="filterStatusPinjamanP" class="ngx-admin-toolbar-input">
+                                <option value="">Semua Status</option>
+                                <option value="BELUM LUNAS">Belum Lunas</option>
+                                <option value="LUNAS">Lunas</option>
+                            </select>
+                            <select id="filterJatuhTempoP" class="ngx-admin-toolbar-input">
+                                <option value="">Semua Jatuh Tempo</option>
+                                <option value="LEWAT JATUH TEMPO">Lewat Jatuh Tempo</option>
+                                <option value="JATUH TEMPO HARI INI">Hari Ini</option>
+                                <option value="JATUH TEMPO BESOK">Besok</option>
+                                <option value="JATUH TEMPO MINGGU INI">Minggu Ini</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-wrap items-center justify-between gap-2 mt-3">
+                            <button id="btnResetFilterP" class="ngx-admin-btn ngx-admin-btn-outline"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset Filter</button>
+                            <div class="flex gap-2 flex-wrap">
+                                <button class="ngx-admin-btn ngx-admin-btn-outline btn-export-p" data-type="excel"><i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Excel</button>
+                                <button class="ngx-admin-btn ngx-admin-btn-outline btn-export-p" data-type="pdf"><i data-lucide="file-text" class="w-3.5 h-3.5"></i> PDF</button>
+                                <button class="ngx-admin-btn ngx-admin-btn-outline btn-export-p" data-type="print"><i data-lucide="printer" class="w-3.5 h-3.5"></i> Print</button>
+                                <button class="ngx-admin-btn ngx-admin-btn-outline btn-export-p" data-type="copy"><i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy</button>
+                                <button class="ngx-admin-btn ngx-admin-btn-outline btn-export-p" data-type="csv"><i data-lucide="file-down" class="w-3.5 h-3.5"></i> CSV</button>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="overflow-x-auto">
-                            <table id="tabelPinjaman" class="display" style="width:100%">
-                                <thead>
-                                    <tr>
-                                        <th>Nama</th>
-                                        <th>Nominal</th>
-                                        <th>Sisa</th>
-                                        <th>Status</th>
-                                        <th>Jatuh Tempo</th>
-                                        <th>Dana Cair</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
+                    <!-- TABEL -->
+                    <div class="ngx-admin-table-card" style="max-height:640px; overflow:auto;">
+                        <table id="tabelPinjamanV2" class="ngx-table-compact">
+                            <thead>
+                                <tr>
+                                    <th>Nama Nasabah</th>
+                                    <th>Nominal</th>
+                                    <th>Sisa Tagihan</th>
+                                    <th>Status Pinjaman</th>
+                                    <th>Verifikasi</th>
+                                    <th>Dana Cair</th>
+                                    <th>Jatuh Tempo</th>
+                                    <th>Tgl Pengajuan</th>
+                                    <th>Admin</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyPinjamanV2"></tbody>
+                        </table>
+                        <p id="emptyStateP" class="hidden text-center text-xs text-gray-400 py-10">Tidak ada data yang cocok dengan filter.</p>
                     </div>
 
                 </div>
@@ -156,52 +198,22 @@
                         <textarea id="pjAlasan" class="ngx-form-textarea"></textarea>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="ngx-form-label">Nama Toko</label>
-                            <input type="text" id="pjNamaToko" class="ngx-form-input">
-                        </div>
-                        <div>
-                            <label class="ngx-form-label">Grup Partner</label>
-                            <input type="text" id="pjGrupPartner" class="ngx-form-input">
-                        </div>
+                        <div><label class="ngx-form-label">Nama Toko</label><input type="text" id="pjNamaToko" class="ngx-form-input"></div>
+                        <div><label class="ngx-form-label">Grup Partner</label><input type="text" id="pjGrupPartner" class="ngx-form-input"></div>
                     </div>
-                    <div>
-                        <label class="ngx-form-label">Jatuh Tempo</label>
-                        <input type="date" id="pjJatuhTempo" class="ngx-form-input">
+                    <div><label class="ngx-form-label">Jatuh Tempo</label><input type="date" id="pjJatuhTempo" class="ngx-form-input"></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="ngx-form-label">Nomor HP</label><input type="text" id="pjNoHp" class="ngx-form-input"></div>
+                        <div><label class="ngx-form-label">Email</label><input type="email" id="pjEmail" class="ngx-form-input"></div>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="ngx-form-label">Nomor HP</label>
-                            <input type="text" id="pjNoHp" class="ngx-form-input">
-                        </div>
-                        <div>
-                            <label class="ngx-form-label">Email</label>
-                            <input type="email" id="pjEmail" class="ngx-form-input">
-                        </div>
+                        <div><label class="ngx-form-label">Atas Nama Rekening</label><input type="text" id="pjAtasNama" class="ngx-form-input"></div>
+                        <div><label class="ngx-form-label">Nomor Rekening</label><input type="text" id="pjNoRekening" class="ngx-form-input"></div>
                     </div>
+                    <div><label class="ngx-form-label">Nama Bank</label><input type="text" id="pjNamaBank" class="ngx-form-input"></div>
                     <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="ngx-form-label">Atas Nama Rekening</label>
-                            <input type="text" id="pjAtasNama" class="ngx-form-input">
-                        </div>
-                        <div>
-                            <label class="ngx-form-label">Nomor Rekening</label>
-                            <input type="text" id="pjNoRekening" class="ngx-form-input">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="ngx-form-label">Nama Bank</label>
-                        <input type="text" id="pjNamaBank" class="ngx-form-input">
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="ngx-form-label">Nominal Pinjaman</label>
-                            <input type="text" inputmode="numeric" id="pjNominal" class="ngx-form-input">
-                        </div>
-                        <div>
-                            <label class="ngx-form-label">Pelunasan (Total Dibayar)</label>
-                            <input type="text" inputmode="numeric" id="pjPelunasan" class="ngx-form-input">
-                        </div>
+                        <div><label class="ngx-form-label">Nominal Pinjaman</label><input type="text" inputmode="numeric" id="pjNominal" class="ngx-form-input"></div>
+                        <div><label class="ngx-form-label">Pelunasan (Total Dibayar)</label><input type="text" inputmode="numeric" id="pjPelunasan" class="ngx-form-input"></div>
                     </div>
                     <p id="modalPinjamanError" class="hidden text-xs text-red-600"></p>
                 </div>
@@ -213,10 +225,28 @@
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <!-- Modal Detail + Progress -->
+    <div id="modalDetail" class="ngx-modal-overlay hidden">
+        <div class="ngx-modal-box" style="max-width:600px;">
+            <div class="ngx-modal-header">
+                <h3 class="text-sm font-bold text-gray-900">Detail Pinjaman</h3>
+                <i data-lucide="x" class="w-5 h-5 ngx-modal-close" id="modalDetailClose"></i>
+            </div>
+            <div class="ngx-modal-body">
+                <div class="ngx-progress-steps mb-5" id="progressSteps"></div>
+                <div class="space-y-2 text-sm" id="detailInfoBox"></div>
+            </div>
+            <div class="ngx-modal-footer">
+                <button type="button" id="btnTutupDetail" class="flex-1 bg-gray-100 text-gray-600 text-xs font-bold py-2.5 rounded-lg hover:bg-gray-200 transition">Tutup</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="/admin/admin.js"></script>
     <script src="/admin/pinjaman/pinjaman.js"></script>
 </body>
