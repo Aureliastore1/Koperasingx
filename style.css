@@ -1065,6 +1065,114 @@ img {
 .ngx-progress-step.selesai:not(:last-child)::after { background:#0F766E; }
 
 /* =========================================================
+   DASHBOARD REDESIGN (gaya HRIMS, warna tetap hijau/teal)
+   ========================================================= */
+.ngx-dash-stat-card {
+    background: #fff;
+    border-radius: 18px;
+    border: 1px solid rgba(15,118,110,0.08);
+    padding: 18px;
+    box-shadow: 0 4px 14px -8px rgba(15,118,110,0.15);
+}
+.ngx-dash-stat-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+}
+.ngx-dash-stat-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1.2;
+}
+.ngx-dash-stat-label {
+    font-size: 12px;
+    color: #6B7280;
+    margin-bottom: 2px;
+}
+.ngx-dash-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 8px;
+}
+.ngx-dash-trend.naik { color: #059669; }
+.ngx-dash-trend.turun { color: #DC2626; }
+
+.ngx-dash-card {
+    background: #fff;
+    border-radius: 18px;
+    border: 1px solid rgba(15,118,110,0.08);
+    padding: 20px;
+    box-shadow: 0 4px 14px -8px rgba(15,118,110,0.12);
+}
+
+/* Calendar widget */
+.ngx-dash-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+}
+.ngx-dash-calendar-hari {
+    font-size: 10px;
+    font-weight: 700;
+    color: #9CA3AF;
+    padding: 4px 0;
+}
+.ngx-dash-calendar-tgl {
+    font-size: 12px;
+    padding: 7px 0;
+    border-radius: 8px;
+    color: #374151;
+    cursor: default;
+}
+.ngx-dash-calendar-tgl.luar-bulan { color: #D1D5DB; }
+.ngx-dash-calendar-tgl.hari-ini {
+    background: #0F766E;
+    color: #fff;
+    font-weight: 800;
+}
+
+/* Recent activity list */
+.ngx-dash-activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid #F3F4F6;
+}
+.ngx-dash-activity-item:last-child { border-bottom: none; }
+.ngx-dash-activity-icon {
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    background: #F0FDFA;
+    color: #0F766E;
+}
+
+/* Upcoming due-dates list */
+.ngx-dash-event-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 12px;
+    background: #F9FAFB;
+    margin-bottom: 8px;
+}
+.ngx-dash-event-icon {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+
+/* =========================================================
    ADMIN PANEL — sidebar, stat card, login
    ========================================================= */
 .ngx-admin-login-bg {

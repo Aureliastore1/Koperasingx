@@ -252,6 +252,128 @@ function ngxAdminCekSesi(callback) {
         });
     }
 
+    function escapeHtmlDash(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+    }
+
+    function renderKalender() {
+
+        var sekarang = new Date();
+        var tahun = sekarang.getFullYear();
+        var bulan = sekarang.getMonth();
+        var hariIni = sekarang.getDate();
+
+        var namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        var labelEl = document.getElementById("kalenderBulanLabel");
+        if (labelEl) labelEl.textContent = namaBulan[bulan] + " " + tahun;
+
+        var hariPertama = new Date(tahun, bulan, 1).getDay(); // 0=Minggu
+        var jumlahHari = new Date(tahun, bulan + 1, 0).getDate();
+
+        var html = ["Mg", "Sn", "Sl", "Rb", "Km", "Jm", "Sb"].map(function (h) {
+            return "<div class='ngx-dash-calendar-hari'>" + h + "</div>";
+        }).join("");
+
+        for (var i = 0; i < hariPertama; i++) html += "<div></div>";
+
+        for (var d = 1; d <= jumlahHari; d++) {
+            var kelas = "ngx-dash-calendar-tgl" + (d === hariIni ? " hari-ini" : "");
+            html += "<div class='" + kelas + "'>" + d + "</div>";
+        }
+
+        var grid = document.getElementById("kalenderGrid");
+        if (grid) grid.innerHTML = html;
+
+    }
+
+    function ikonAktivitas(jenis) {
+        if (jenis === "WhatsApp") return "message-circle";
+        if (jenis === "Email") return "mail";
+        if (jenis === "Dokumen") return "paperclip";
+        if (jenis === "Dana Cair") return "banknote";
+        if (jenis === "Verifikasi") return "check-circle";
+        if (jenis === "Lunas") return "party-popper";
+        if (jenis === "Pembayaran") return "wallet";
+        if (jenis === "Pengajuan") return "file-plus";
+        return "activity";
+    }
+
+    function muatAktivitasTerbaru(token) {
+
+        var box = document.getElementById("aktivitasList");
+        if (!box) return;
+
+        fetch(NGX_API_BASE_URL + "?action=adminGetRecentActivity&token=" + encodeURIComponent(token))
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+
+                if (!data || data.success !== true || !data.aktivitas || data.aktivitas.length === 0) {
+                    box.innerHTML = "<p class='text-xs text-gray-400 py-6 text-center'>Belum ada aktivitas tercatat.</p>";
+                    return;
+                }
+
+                box.innerHTML = data.aktivitas.map(function (a) {
+                    return "<div class='ngx-dash-activity-item'>" +
+                        "<div class='ngx-dash-activity-icon'><i data-lucide='" + ikonAktivitas(a.jenis) + "' class='w-3.5 h-3.5'></i></div>" +
+                        "<div class='flex-1 min-w-0'>" +
+                            "<p class='text-xs text-gray-800'><span class='font-bold'>" + escapeHtmlDash(a.nama) + "</span> &middot; " + escapeHtmlDash(a.jenis) + "</p>" +
+                            "<p class='text-[11px] text-gray-400 truncate'>" + escapeHtmlDash(a.keterangan) + "</p>" +
+                        "</div>" +
+                        "<span class='text-[10px] text-gray-400 flex-shrink-0'>" + escapeHtmlDash(a.waktuFormat) + "</span>" +
+                    "</div>";
+                }).join("");
+
+                if (window.lucide) lucide.createIcons();
+
+            })
+            .catch(function () {
+                box.innerHTML = "<p class='text-xs text-gray-400 py-6 text-center'>Gagal memuat aktivitas.</p>";
+            });
+
+    }
+
+    function badgeJatuhTempoDash(status) {
+        if (status === "LEWAT JATUH TEMPO") return { bg: "#FEE2E2", warna: "#B91C1C" };
+        if (status === "JATUH TEMPO HARI INI" || status === "JATUH TEMPO BESOK") return { bg: "#FEF3C7", warna: "#B45309" };
+        return { bg: "#F0FDFA", warna: "#0F766E" };
+    }
+
+    function muatJatuhTempoMendatang(token) {
+
+        var box = document.getElementById("jatuhTempoList");
+        if (!box) return;
+
+        fetch(NGX_API_BASE_URL + "?action=adminGetFollowUpList&token=" + encodeURIComponent(token))
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+
+                if (!data || data.success !== true || !data.followup || data.followup.length === 0) {
+                    box.innerHTML = "<p class='text-xs text-gray-400 py-6 text-center'>Tidak ada jatuh tempo mendatang 🎉</p>";
+                    return;
+                }
+
+                box.innerHTML = data.followup.slice(0, 5).map(function (f) {
+                    var warna = badgeJatuhTempoDash(f.statusJatuhTempo);
+                    return "<div class='ngx-dash-event-item'>" +
+                        "<div class='ngx-dash-event-icon' style='background:" + warna.bg + ";color:" + warna.warna + ";'><i data-lucide='calendar-clock' class='w-4 h-4'></i></div>" +
+                        "<div class='flex-1 min-w-0'>" +
+                            "<p class='text-xs font-bold text-gray-800 truncate'>" + escapeHtmlDash(f.nama) + "</p>" +
+                            "<p class='text-[11px]' style='color:" + warna.warna + ";'>" + escapeHtmlDash(f.jatuhTempoFormat) + "</p>" +
+                        "</div>" +
+                    "</div>";
+                }).join("");
+
+                if (window.lucide) lucide.createIcons();
+
+            })
+            .catch(function () {
+                box.innerHTML = "<p class='text-xs text-gray-400 py-6 text-center'>Gagal memuat data.</p>";
+            });
+
+    }
+
     function muatDashboard(token) {
 
         loadingBox.classList.remove("hidden");
@@ -287,6 +409,16 @@ function ngxAdminCekSesi(callback) {
                 document.getElementById("statAktif").textContent = data.pinjamanAktif;
                 document.getElementById("statLunas").textContent = data.pinjamanLunas;
 
+                var trendEl = document.getElementById("trendPinjaman");
+                if (trendEl) {
+                    if (data.trendPinjaman) {
+                        trendEl.className = "ngx-dash-trend " + data.trendPinjaman.arah;
+                        trendEl.innerHTML = "<i data-lucide='" + (data.trendPinjaman.arah === "naik" ? "trending-up" : "trending-down") + "' class='w-3 h-3'></i> " + data.trendPinjaman.persen + "% dari bulan lalu";
+                    } else {
+                        trendEl.innerHTML = "";
+                    }
+                }
+
                 var bulanan = data.grafikBulanan || [];
                 renderChartGaris("chartBulanan", bulanan.map(function (b) { return b.label; }), bulanan.map(function (b) { return b.value; }), "#0F766E");
 
@@ -298,6 +430,10 @@ function ngxAdminCekSesi(callback) {
 
                 var pemasukan = data.diagramPemasukan || [];
                 renderChartBatang("chartPemasukan", pemasukan.map(function (p) { return p.label; }), pemasukan.map(function (p) { return p.value; }), "#FBBF24");
+
+                renderKalender();
+                muatAktivitasTerbaru(token);
+                muatJatuhTempoMendatang(token);
 
                 content.classList.remove("hidden");
                 if (window.lucide) lucide.createIcons();
