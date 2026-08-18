@@ -175,6 +175,163 @@ function ngxAdminCekSesi(callback) {
 })();
 
 /* =========================================================
+   NOTIFIKASI ADMIN — bel disuntikkan otomatis di SEMUA halaman
+   admin (dicari lewat #btnLogout sebagai jangkar posisi), supaya
+   admin selalu tahu ada perubahan data terbaru di sistem.
+   ========================================================= */
+(function () {
+
+    var btnLogout = document.getElementById("btnLogout");
+    if (!btnLogout) return; // bukan halaman admin
+
+    var kontainerKanan = btnLogout.parentElement;
+    if (!kontainerKanan) return;
+
+    var htmlBel =
+        '<div class="ngx-notif-btn" id="ngxNotifWrap" style="position:relative;">' +
+            '<button id="ngxBtnNotif" class="ngx-notif-btn" title="Notifikasi"><i data-lucide="bell" class="w-4 h-4"></i>' +
+                '<span class="ngx-notif-badge hidden" id="ngxNotifBadge">0</span>' +
+            '</button>' +
+        '</div>';
+
+    kontainerKanan.insertAdjacentHTML("afterbegin", htmlBel);
+    if (window.lucide) lucide.createIcons();
+
+    function escapeHtmlNotif(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+    }
+
+    function ikonJenis(jenisTransaksi) {
+        var peta = { "Pinjaman": "banknote", "Simpanan": "piggy-bank", "Pengeluaran": "receipt", "Anggota": "users", "Saldo": "wallet" };
+        return peta[jenisTransaksi] || "activity";
+    }
+
+    function waktuRelatif(waktuFormat) {
+        return waktuFormat; // format tanggal lengkap, cukup jelas tanpa perlu hitung "X menit lalu"
+    }
+
+    function linkTujuan(n) {
+        if (n.jenisTransaksi === "Pinjaman" && n.idTransaksi) return "/admin/pinjaman/detail/?row=" + n.idTransaksi;
+        if (n.jenisTransaksi === "Simpanan") return "/admin/simpanan/";
+        if (n.jenisTransaksi === "Anggota") return "/admin/anggota/";
+        if (n.jenisTransaksi === "Pengeluaran") return "/admin/pengeluaran/";
+        return "/admin/log-aktivitas/";
+    }
+
+    function renderDropdown(data) {
+
+        var existing = document.getElementById("ngxNotifDropdown");
+        if (existing) existing.remove();
+
+        var listHtml = (!data.notifikasi || data.notifikasi.length === 0)
+            ? "<p class='text-xs text-gray-400 text-center py-8'>Belum ada notifikasi.</p>"
+            : data.notifikasi.map(function (n) {
+                return "<div class='ngx-notif-item" + (n.statusDibaca !== "Sudah" ? " belum-dibaca" : "") + "' data-id='" + escapeHtmlNotif(n.idAktivitas) + "' data-href='" + linkTujuan(n) + "'>" +
+                    "<div class='ngx-notif-dot " + n.prioritas + "'></div>" +
+                    "<div class='flex-1 min-w-0'>" +
+                        "<p class='text-xs font-bold text-gray-800'>" + escapeHtmlNotif(n.jenisAktivitas) + " &middot; " + escapeHtmlNotif(n.jenisTransaksi) + "</p>" +
+                        "<p class='text-[11px] text-gray-500 mt-0.5'>" + escapeHtmlNotif(n.keterangan) + "</p>" +
+                        "<p class='text-[10px] text-gray-400 mt-1'>" + escapeHtmlNotif(waktuRelatif(n.waktuFormat)) + "</p>" +
+                    "</div>" +
+                "</div>";
+            }).join("");
+
+        var html =
+            "<div class='ngx-notif-dropdown' id='ngxNotifDropdown'>" +
+                "<div class='ngx-notif-header'>" +
+                    "<p class='text-sm font-bold text-gray-800'>Notifikasi</p>" +
+                    "<button id='ngxBtnTandaiSemua' class='text-[11px] font-semibold text-kop-700 hover:underline'>Tandai semua dibaca</button>" +
+                "</div>" +
+                "<div class='ngx-notif-list'>" + listHtml + "</div>" +
+                "<a href='/admin/log-aktivitas/' class='block text-center text-xs font-semibold text-kop-700 py-3 border-t border-gray-100 hover:bg-gray-50'>Lihat semua log aktivitas</a>" +
+            "</div>";
+
+        document.getElementById("ngxNotifWrap").insertAdjacentHTML("beforeend", html);
+        if (window.lucide) lucide.createIcons();
+
+        document.querySelectorAll(".ngx-notif-item").forEach(function (item) {
+            item.addEventListener("click", function () {
+                var id = item.getAttribute("data-id");
+                var href = item.getAttribute("data-href");
+                tandaiNotifDibaca(id, function () { window.location.href = href; });
+            });
+        });
+
+        var btnTandaiSemua = document.getElementById("ngxBtnTandaiSemua");
+        if (btnTandaiSemua) {
+            btnTandaiSemua.addEventListener("click", function (e) {
+                e.stopPropagation();
+                tandaiNotifDibaca("semua", function () { muatNotifikasi(); });
+            });
+        }
+
+    }
+
+    function tandaiNotifDibaca(idAktivitas, callback) {
+        var body = new URLSearchParams();
+        body.append("action", "adminTandaiNotifikasiDibaca");
+        body.append("token", ngxAdminGetToken());
+        body.append("idAktivitas", idAktivitas);
+        fetch(NGX_API_BASE_URL, { method: "POST", body: body }).finally(function () { if (callback) callback(); });
+    }
+
+    function muatNotifikasi() {
+
+        var token = ngxAdminGetToken();
+        if (!token) return;
+
+        fetch(NGX_API_BASE_URL + "?action=adminGetNotifikasi&token=" + encodeURIComponent(token))
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+
+                if (!data || data.success !== true) return;
+
+                var badge = document.getElementById("ngxNotifBadge");
+                if (data.jumlahBelumDibaca > 0) {
+                    badge.textContent = data.jumlahBelumDibaca > 9 ? "9+" : data.jumlahBelumDibaca;
+                    badge.classList.remove("hidden");
+                } else {
+                    badge.classList.add("hidden");
+                }
+
+                window._ngxNotifTerakhir = data;
+
+                var dropdownTerbuka = document.getElementById("ngxNotifDropdown");
+                if (dropdownTerbuka) renderDropdown(data);
+
+            })
+            .catch(function () {});
+
+    }
+
+    document.getElementById("ngxBtnNotif").addEventListener("click", function (e) {
+
+        e.stopPropagation();
+
+        var existing = document.getElementById("ngxNotifDropdown");
+        if (existing) { existing.remove(); return; }
+
+        if (window._ngxNotifTerakhir) renderDropdown(window._ngxNotifTerakhir);
+        else renderDropdown({ notifikasi: [] });
+
+        muatNotifikasi();
+
+    });
+
+    document.addEventListener("click", function (e) {
+        var dropdown = document.getElementById("ngxNotifDropdown");
+        var wrap = document.getElementById("ngxNotifWrap");
+        if (dropdown && wrap && !wrap.contains(e.target)) dropdown.remove();
+    });
+
+    muatNotifikasi();
+    setInterval(muatNotifikasi, 60000); // polling tiap 60 detik, cara paling praktis buat "hampir real-time" tanpa server khusus
+
+})();
+
+/* =========================================================
    DASHBOARD — statistik + grafik (hanya aktif di /admin/dashboard)
    ========================================================= */
 (function () {
