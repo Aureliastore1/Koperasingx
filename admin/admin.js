@@ -88,48 +88,90 @@ function ngxAdminLogoutLokal() {
     sessionStorage.removeItem("ngxAdminUser");
 }
 
+function ngxAdminIsiInfoUser(user) {
+
+    var elNama = document.getElementById("userNama");
+    var elRole = document.getElementById("userRole");
+    var elAvatar = document.getElementById("userAvatar");
+
+    if (elNama) elNama.textContent = user.nama;
+    if (elRole) elRole.textContent = user.role;
+    if (elAvatar) elAvatar.textContent = String(user.nama || "?").trim().charAt(0).toUpperCase();
+
+    var elNamaSb = document.getElementById("sidebarUserNama");
+    var elRoleSb = document.getElementById("sidebarUserRole");
+    var elAvatarSb = document.getElementById("sidebarUserAvatar");
+
+    if (elNamaSb) elNamaSb.textContent = user.nama;
+    if (elRoleSb) elRoleSb.textContent = user.role;
+    if (elAvatarSb) elAvatarSb.textContent = String(user.nama || "?").trim().charAt(0).toUpperCase();
+
+}
+
 function ngxAdminCekSesi(callback) {
 
     var token = ngxAdminGetToken();
 
-    if (!token) {
+    if (token) {
+
+        fetch(NGX_API_BASE_URL + "?action=adminVerifySession&token=" + encodeURIComponent(token))
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+
+                if (!data || data.success !== true) { ngxAdminCobaRememberToken(callback); return; }
+
+                ngxAdminIsiInfoUser(data.user);
+                if (typeof callback === "function") callback(token, data.user);
+
+            })
+            .catch(function () { ngxAdminCobaRememberToken(callback); });
+
+        return;
+
+    }
+
+    ngxAdminCobaRememberToken(callback);
+
+}
+
+/*************************************************
+ * "INGAT SAYA" — kalau sesi biasa (sessionStorage, 6 jam) sudah
+ * habis, coba tukar token "Ingat Saya" (localStorage, 30 hari)
+ * dengan sesi baru secara diam-diam, TANPA minta login ulang.
+ * Hanya kalau token ini juga tidak ada/tidak valid, baru dilempar
+ * ke halaman login.
+ *************************************************/
+function ngxAdminCobaRememberToken(callback) {
+
+    var rememberToken = localStorage.getItem("ngxAdminRememberToken");
+
+    if (!rememberToken) {
         window.location.href = "/admin/login/";
         return;
     }
 
-    fetch(NGX_API_BASE_URL + "?action=adminVerifySession&token=" + encodeURIComponent(token))
+    var body = new URLSearchParams();
+    body.append("action", "adminLoginDenganRememberToken");
+    body.append("rememberToken", rememberToken);
+
+    fetch(NGX_API_BASE_URL, { method: "POST", body: body })
         .then(function (res) { return res.json(); })
         .then(function (data) {
 
             if (!data || data.success !== true) {
-                ngxAdminLogoutLokal();
+                localStorage.removeItem("ngxAdminRememberToken");
                 window.location.href = "/admin/login/";
                 return;
             }
 
-            // Tampilkan info user di topbar (kalau elemennya ada di halaman)
-            var elNama = document.getElementById("userNama");
-            var elRole = document.getElementById("userRole");
-            var elAvatar = document.getElementById("userAvatar");
+            sessionStorage.setItem("ngxAdminToken", data.token);
+            sessionStorage.setItem("ngxAdminUser", JSON.stringify(data.user));
 
-            if (elNama) elNama.textContent = data.user.nama;
-            if (elRole) elRole.textContent = data.user.role;
-            if (elAvatar) elAvatar.textContent = String(data.user.nama || "?").trim().charAt(0).toUpperCase();
-
-            // Tampilkan info user di kartu bawah sidebar juga (kalau ada)
-            var elNamaSb = document.getElementById("sidebarUserNama");
-            var elRoleSb = document.getElementById("sidebarUserRole");
-            var elAvatarSb = document.getElementById("sidebarUserAvatar");
-
-            if (elNamaSb) elNamaSb.textContent = data.user.nama;
-            if (elRoleSb) elRoleSb.textContent = data.user.role;
-            if (elAvatarSb) elAvatarSb.textContent = String(data.user.nama || "?").trim().charAt(0).toUpperCase();
-
-            if (typeof callback === "function") callback(token, data.user);
+            ngxAdminIsiInfoUser(data.user);
+            if (typeof callback === "function") callback(data.token, data.user);
 
         })
         .catch(function () {
-            ngxAdminLogoutLokal();
             window.location.href = "/admin/login/";
         });
 
@@ -162,13 +204,17 @@ function ngxAdminCekSesi(callback) {
 
     function prosesLogout() {
         var token = ngxAdminGetToken();
+        var rememberToken = localStorage.getItem("ngxAdminRememberToken");
+
         var body = new URLSearchParams();
         body.append("action", "adminLogout");
         body.append("token", token || "");
+        if (rememberToken) body.append("rememberToken", rememberToken);
 
         fetch(NGX_API_BASE_URL, { method: "POST", body: body })
             .finally(function () {
                 ngxAdminLogoutLokal();
+                localStorage.removeItem("ngxAdminRememberToken");
                 window.location.href = "/admin/login/";
             });
     }

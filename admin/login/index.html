@@ -41,6 +41,12 @@
                 <p class="text-sm text-white/60 mt-1">KAS NGX &middot; Koperasi Simpan Pinjam</p>
             </div>
 
+            <div id="loginCheckingBox" class="text-center py-10">
+                <div class="ngx-spinner mx-auto"></div>
+                <p class="text-xs text-white/50 mt-3">Memeriksa sesi...</p>
+            </div>
+
+            <div id="loginCardBox" class="hidden">
             <div class="ngx-admin-login-card p-8">
                 <form id="loginForm" class="space-y-4">
                     <div>
@@ -55,6 +61,13 @@
                                 <i data-lucide="eye" class="w-4 h-4"></i>
                             </button>
                         </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" id="loginIngatSaya" class="w-4 h-4 rounded border-gray-300 text-kop-700 focus:ring-kop-600">
+                            <span class="text-xs text-gray-600">Ingat Saya</span>
+                        </label>
                     </div>
 
                     <p id="loginError" class="hidden text-xs text-red-600 flex items-start gap-1.5">
@@ -72,6 +85,7 @@
             <p class="text-center text-xs text-white/40 mt-6">
                 <a href="/" class="hover:text-white/70 transition">&larr; Kembali ke Website Utama</a>
             </p>
+            </div>
 
         </div>
     </div>
@@ -82,24 +96,73 @@
         // Ganti URL ini kalau nanti deploy ulang Apps Script (sama dengan script.js utama)
         var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9CkSgx27TEjbovKO46dQepkwQ0nlXJ39f17MmAjTvw3ZQ8je9T7BTH/exec";
 
-        // Kalau sudah ada sesi aktif, langsung lempar ke dashboard
-        (function () {
-            var token = sessionStorage.getItem("ngxAdminToken");
-            if (!token) return;
+        var checkingBox = document.getElementById("loginCheckingBox");
+        var cardBox = document.getElementById("loginCardBox");
 
-            fetch(NGX_API_BASE_URL + "?action=adminVerifySession&token=" + encodeURIComponent(token))
+        function tampilkanFormLogin() {
+            checkingBox.classList.add("hidden");
+            cardBox.classList.remove("hidden");
+        }
+
+        function masukKeDashboard() {
+            window.location.href = "/admin/dashboard/";
+        }
+
+        // ===== Cek sesi SEBELUM tampilkan form, supaya tidak ada "kedipan" form login
+        // kalau ternyata Admin masih (atau bisa) login otomatis =====
+        (function () {
+
+            var token = sessionStorage.getItem("ngxAdminToken");
+
+            if (token) {
+                fetch(NGX_API_BASE_URL + "?action=adminVerifySession&token=" + encodeURIComponent(token))
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        if (data && data.success) { masukKeDashboard(); return; }
+                        cobaRememberToken();
+                    })
+                    .catch(cobaRememberToken);
+                return;
+            }
+
+            cobaRememberToken();
+
+        })();
+
+        function cobaRememberToken() {
+
+            var rememberToken = localStorage.getItem("ngxAdminRememberToken");
+
+            if (!rememberToken) { tampilkanFormLogin(); return; }
+
+            var body = new URLSearchParams();
+            body.append("action", "adminLoginDenganRememberToken");
+            body.append("rememberToken", rememberToken);
+
+            fetch(NGX_API_BASE_URL, { method: "POST", body: body })
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
+
                     if (data && data.success) {
-                        window.location.href = "/admin/dashboard/";
+                        sessionStorage.setItem("ngxAdminToken", data.token);
+                        sessionStorage.setItem("ngxAdminUser", JSON.stringify(data.user));
+                        masukKeDashboard();
+                        return;
                     }
+
+                    // Token "Ingat Saya" sudah tidak valid/kedaluwarsa -> bersihkan, tampilkan form
+                    localStorage.removeItem("ngxAdminRememberToken");
+                    tampilkanFormLogin();
+
                 })
-                .catch(function () {});
-        })();
+                .catch(function () { tampilkanFormLogin(); });
+
+        }
 
         var form = document.getElementById("loginForm");
         var usernameInput = document.getElementById("loginUsername");
         var passwordInput = document.getElementById("loginPassword");
+        var ingatSayaInput = document.getElementById("loginIngatSaya");
         var errorBox = document.getElementById("loginError");
         var btn = document.getElementById("loginBtn");
         var toggleBtn = document.getElementById("togglePassword");
@@ -144,6 +207,7 @@
             body.append("action", "adminLogin");
             body.append("username", username);
             body.append("password", password);
+            body.append("ingatSaya", ingatSayaInput.checked ? "true" : "false");
 
             fetch(NGX_API_BASE_URL, { method: "POST", body: body })
                 .then(function (res) { return res.json(); })
@@ -158,7 +222,13 @@
                     sessionStorage.setItem("ngxAdminToken", data.token);
                     sessionStorage.setItem("ngxAdminUser", JSON.stringify(data.user));
 
-                    window.location.href = "/admin/dashboard/";
+                    if (data.rememberToken) {
+                        localStorage.setItem("ngxAdminRememberToken", data.rememberToken);
+                    } else {
+                        localStorage.removeItem("ngxAdminRememberToken");
+                    }
+
+                    masukKeDashboard();
                 })
                 .catch(function () {
                     setLoading(false);
