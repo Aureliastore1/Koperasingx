@@ -116,6 +116,15 @@ function ngxAdminCekSesi(callback) {
             if (elRole) elRole.textContent = data.user.role;
             if (elAvatar) elAvatar.textContent = String(data.user.nama || "?").trim().charAt(0).toUpperCase();
 
+            // Tampilkan info user di kartu bawah sidebar juga (kalau ada)
+            var elNamaSb = document.getElementById("sidebarUserNama");
+            var elRoleSb = document.getElementById("sidebarUserRole");
+            var elAvatarSb = document.getElementById("sidebarUserAvatar");
+
+            if (elNamaSb) elNamaSb.textContent = data.user.nama;
+            if (elRoleSb) elRoleSb.textContent = data.user.role;
+            if (elAvatarSb) elAvatarSb.textContent = String(data.user.nama || "?").trim().charAt(0).toUpperCase();
+
             if (typeof callback === "function") callback(token, data.user);
 
         })
@@ -258,12 +267,14 @@ function ngxAdminCekSesi(callback) {
         });
     }
 
+    var kalenderOffset = 0; // 0 = bulan ini, -1 = bulan lalu, +1 = bulan depan, dst
+
     function renderKalender() {
 
         var sekarang = new Date();
-        var tahun = sekarang.getFullYear();
-        var bulan = sekarang.getMonth();
-        var hariIni = sekarang.getDate();
+        var acuan = new Date(sekarang.getFullYear(), sekarang.getMonth() + kalenderOffset, 1);
+        var tahun = acuan.getFullYear();
+        var bulan = acuan.getMonth();
 
         var namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
         var labelEl = document.getElementById("kalenderBulanLabel");
@@ -279,12 +290,50 @@ function ngxAdminCekSesi(callback) {
         for (var i = 0; i < hariPertama; i++) html += "<div></div>";
 
         for (var d = 1; d <= jumlahHari; d++) {
-            var kelas = "ngx-dash-calendar-tgl" + (d === hariIni ? " hari-ini" : "");
+            var iniHariIni = (kalenderOffset === 0 && d === sekarang.getDate());
+            var kelas = "ngx-dash-calendar-tgl" + (iniHariIni ? " hari-ini" : "");
             html += "<div class='" + kelas + "'>" + d + "</div>";
         }
 
         var grid = document.getElementById("kalenderGrid");
         if (grid) grid.innerHTML = html;
+
+    }
+
+    var btnBulanSebelumnya = document.getElementById("btnBulanSebelumnya");
+    var btnBulanBerikutnya = document.getElementById("btnBulanBerikutnya");
+    if (btnBulanSebelumnya) btnBulanSebelumnya.addEventListener("click", function () { kalenderOffset--; renderKalender(); });
+    if (btnBulanBerikutnya) btnBulanBerikutnya.addEventListener("click", function () { kalenderOffset++; renderKalender(); });
+
+    function renderRasioKas(danaBeredar, sudahLunas) {
+
+        var total = danaBeredar + sudahLunas;
+        var persenBeredar = total > 0 ? Math.round((danaBeredar / total) * 100) : 0;
+        var persenLunas = total > 0 ? 100 - persenBeredar : 0;
+
+        var elBeredarPersen = document.getElementById("rasioBeredarPersen");
+        var elLunasPersen = document.getElementById("rasioLunasPersen");
+        var elBeredarBar = document.getElementById("rasioBeredarBar");
+        var elLunasBar = document.getElementById("rasioLunasBar");
+
+        if (elBeredarPersen) elBeredarPersen.textContent = persenBeredar + "%";
+        if (elLunasPersen) elLunasPersen.textContent = persenLunas + "%";
+        if (elBeredarBar) elBeredarBar.style.width = persenBeredar + "%";
+        if (elLunasBar) elLunasBar.style.width = persenLunas + "%";
+
+        var canvasRasio = document.getElementById("chartRasioKas");
+        if (!canvasRasio) return;
+
+        hancurkanChart("chartRasioKas");
+        var ctx = canvasRasio.getContext("2d");
+        chartInstances["chartRasioKas"] = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+                labels: ["Dana Beredar", "Sudah Lunas"],
+                datasets: [{ data: [danaBeredar, sudahLunas], backgroundColor: ["#0F766E", "#F59E0B"], borderWidth: 0 }]
+            },
+            options: { responsive: true, cutout: "68%", plugins: { legend: { display: false } } }
+        });
 
     }
 
@@ -300,36 +349,66 @@ function ngxAdminCekSesi(callback) {
         return "activity";
     }
 
+    function inisialNama(nama) {
+        var kata = String(nama || "?").trim().split(/\s+/);
+        var a = kata[0] ? kata[0][0] : "?";
+        var b = kata[1] ? kata[1][0] : "";
+        return (a + b).toUpperCase();
+    }
+
+    function warnaAvatar(nama) {
+        var palet = ["#0F766E", "#D97706", "#7C3AED", "#DB2777", "#2563EB", "#059669"];
+        var kode = String(nama || "").split("").reduce(function (a, c) { return a + c.charCodeAt(0); }, 0);
+        return palet[kode % palet.length];
+    }
+
+    function badgeJenisAktivitas(jenis) {
+        var peta = {
+            "Pengajuan": "background:#FEF3C7;color:#92400E;", "Verifikasi": "background:#DBEAFE;color:#1D4ED8;",
+            "Dana Cair": "background:#D1FAE5;color:#047857;", "Lunas": "background:#D1FAE5;color:#047857;",
+            "Pembayaran": "background:#F0FDFA;color:#0F766E;", "Email": "background:#F3F4F6;color:#4B5563;",
+            "WhatsApp": "background:#DCFCE7;color:#166534;", "Dokumen": "background:#EDE9FE;color:#6D28D9;",
+            "Catatan": "background:#F3F4F6;color:#4B5563;", "Edit": "background:#F3F4F6;color:#4B5563;"
+        };
+        return peta[jenis] || "background:#F3F4F6;color:#4B5563;";
+    }
+
+    function ekstrakNominal(teks) {
+        var m = String(teks || "").match(/Rp\s?[\d.,]+/);
+        return m ? m[0] : "-";
+    }
+
     function muatAktivitasTerbaru(token) {
 
-        var box = document.getElementById("aktivitasList");
-        if (!box) return;
+        var tbody = document.getElementById("aktivitasTableBody");
+        if (!tbody) return;
 
         fetch(NGX_API_BASE_URL + "?action=adminGetRecentActivity&token=" + encodeURIComponent(token))
             .then(function (res) { return res.json(); })
             .then(function (data) {
 
                 if (!data || data.success !== true || !data.aktivitas || data.aktivitas.length === 0) {
-                    box.innerHTML = "<p class='text-xs text-gray-400 py-6 text-center'>Belum ada aktivitas tercatat.</p>";
+                    tbody.innerHTML = "<tr><td colspan='4' class='text-xs text-gray-400 py-6 text-center'>Belum ada aktivitas tercatat.</td></tr>";
                     return;
                 }
 
-                box.innerHTML = data.aktivitas.map(function (a) {
-                    return "<div class='ngx-dash-activity-item'>" +
-                        "<div class='ngx-dash-activity-icon'><i data-lucide='" + ikonAktivitas(a.jenis) + "' class='w-3.5 h-3.5'></i></div>" +
-                        "<div class='flex-1 min-w-0'>" +
-                            "<p class='text-xs text-gray-800'><span class='font-bold'>" + escapeHtmlDash(a.nama) + "</span> &middot; " + escapeHtmlDash(a.jenis) + "</p>" +
-                            "<p class='text-[11px] text-gray-400 truncate'>" + escapeHtmlDash(a.keterangan) + "</p>" +
-                        "</div>" +
-                        "<span class='text-[10px] text-gray-400 flex-shrink-0'>" + escapeHtmlDash(a.waktuFormat) + "</span>" +
-                    "</div>";
+                tbody.innerHTML = data.aktivitas.map(function (a) {
+                    return "<tr class='border-b border-gray-50'>" +
+                        "<td class='py-2.5'><div class='flex items-center gap-2'>" +
+                            "<div class='w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0' style='background:" + warnaAvatar(a.nama) + ";'>" + inisialNama(a.nama) + "</div>" +
+                            "<span class='text-xs font-semibold text-gray-800'>" + escapeHtmlDash(a.nama) + "</span>" +
+                        "</div></td>" +
+                        "<td class='py-2.5'><span class='text-[10px] font-bold px-2 py-1 rounded-full' style='" + badgeJenisAktivitas(a.jenis) + "'>" + escapeHtmlDash(a.jenis) + "</span></td>" +
+                        "<td class='py-2.5 text-xs font-semibold text-gray-700'>" + escapeHtmlDash(ekstrakNominal(a.keterangan)) + "</td>" +
+                        "<td class='py-2.5 text-[11px] text-gray-400'>" + escapeHtmlDash(a.waktuFormat) + "</td>" +
+                    "</tr>";
                 }).join("");
 
                 if (window.lucide) lucide.createIcons();
 
             })
             .catch(function () {
-                box.innerHTML = "<p class='text-xs text-gray-400 py-6 text-center'>Gagal memuat aktivitas.</p>";
+                tbody.innerHTML = "<tr><td colspan='4' class='text-xs text-gray-400 py-6 text-center'>Gagal memuat aktivitas.</td></tr>";
             });
 
     }
@@ -432,6 +511,7 @@ function ngxAdminCekSesi(callback) {
                 renderChartBatang("chartPemasukan", pemasukan.map(function (p) { return p.label; }), pemasukan.map(function (p) { return p.value; }), "#FBBF24");
 
                 renderKalender();
+                renderRasioKas(data.totalDanaBeredar, data.totalPelunasan);
                 muatAktivitasTerbaru(token);
                 muatJatuhTempoMendatang(token);
 

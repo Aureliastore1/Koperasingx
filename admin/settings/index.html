@@ -45,18 +45,27 @@
             </div>
 
             <nav class="flex flex-col gap-1 flex-1">
+                <p class="ngx-admin-nav-section">Menu Utama</p>
                 <a href="/admin/dashboard/" class="ngx-admin-nav-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
                 <a href="/admin/anggota/" class="ngx-admin-nav-item"><i data-lucide="users" class="w-4 h-4"></i> Data Anggota</a>
                 <a href="/admin/pinjaman/" class="ngx-admin-nav-item"><i data-lucide="banknote" class="w-4 h-4"></i> Pinjaman</a>
                 <a href="/admin/pengeluaran/" class="ngx-admin-nav-item"><i data-lucide="receipt" class="w-4 h-4"></i> Catatan Bulanan</a>
                 <a href="/admin/simpanan/" class="ngx-admin-nav-item"><i data-lucide="piggy-bank" class="w-4 h-4"></i> Simpanan</a>
                 <a href="/admin/followup/" class="ngx-admin-nav-item"><i data-lucide="phone-call" class="w-4 h-4"></i> Follow Up</a>
+                <p class="ngx-admin-nav-section">Laporan</p>
                 <a href="/admin/laporan/" class="ngx-admin-nav-item"><i data-lucide="file-bar-chart" class="w-4 h-4"></i> Laporan</a>
                 <a href="/admin/users/" class="ngx-admin-nav-item"><i data-lucide="shield" class="w-4 h-4"></i> Kelola Admin</a>
                 <a href="/admin/settings/" class="ngx-admin-nav-item aktif"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
             </nav>
 
-            <a href="/" class="ngx-admin-nav-item"><i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Website</a>
+            <div class="ngx-admin-sidebar-usercard">
+                <div class="ngx-admin-sidebar-avatar" id="sidebarUserAvatar">-</div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-white text-xs font-bold truncate" id="sidebarUserNama">-</p>
+                    <p class="text-white/40 text-[10px] truncate" id="sidebarUserRole">-</p>
+                </div>
+                <a href="/" title="Kembali ke Website" class="text-white/40 hover:text-white transition flex-shrink-0"><i data-lucide="arrow-left" class="w-4 h-4"></i></a>
+            </div>
         </aside>
 
         <!-- Main -->
@@ -78,6 +87,34 @@
             </header>
 
             <main class="p-5 flex-1 overflow-y-auto max-w-xl">
+
+                <!-- Pengaturan Pinjaman -->
+                <div class="ngx-admin-table-card mb-5" id="cardPengaturanPinjaman">
+                    <div class="flex items-center justify-between mb-1">
+                        <p class="text-sm font-bold text-gray-800">Pengaturan Pinjaman</p>
+                        <label class="ngx-toggle-switch">
+                            <input type="checkbox" id="togglePinjaman">
+                            <span class="ngx-toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-4">Nyala/matikan penerimaan pengajuan pinjaman baru dari website — publik tidak bisa mengajukan sama sekali kalau dimatikan.</p>
+
+                    <div class="flex items-center gap-2 mb-4 p-3 rounded-xl" id="statusPinjamanBox">
+                        <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" id="statusPinjamanDot"></span>
+                        <span class="text-xs font-bold" id="statusPinjamanText">Memuat status...</span>
+                        <span class="text-xs text-gray-400 ml-auto">Saldo saat ini: <strong id="saldoPinjamanAdmin" class="text-gray-700">-</strong></span>
+                    </div>
+
+                    <label class="ngx-form-label">Pesan Saat Pinjaman OFF</label>
+                    <textarea id="pesanOffPinjaman" rows="5" class="ngx-form-textarea" placeholder="Pesan yang dilihat pengunjung saat pinjaman OFF..."></textarea>
+
+                    <p id="pesanPinjamanError" class="hidden text-xs text-red-600 mt-2"></p>
+                    <p id="pesanPinjamanSukses" class="hidden text-xs text-emerald-600 mt-2">Pengaturan berhasil disimpan.</p>
+
+                    <button id="btnSimpanPengaturanPinjaman" class="mt-3 w-full inline-flex items-center justify-center gap-2 bg-kop-700 text-white text-sm font-bold py-3 rounded-xl hover:bg-kop-800 transition">
+                        <i data-lucide="save" class="w-4 h-4"></i> Simpan Pengaturan
+                    </button>
+                </div>
 
                 <!-- Info Akun -->
                 <div class="ngx-admin-table-card mb-5">

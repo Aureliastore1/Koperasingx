@@ -70,10 +70,117 @@
 
     });
 
+    /* ===== Pengaturan Pinjaman ===== */
+    var togglePinjaman = document.getElementById("togglePinjaman");
+    var statusDot = document.getElementById("statusPinjamanDot");
+    var statusText = document.getElementById("statusPinjamanText");
+    var statusBox = document.getElementById("statusPinjamanBox");
+    var saldoEl = document.getElementById("saldoPinjamanAdmin");
+    var pesanTextarea = document.getElementById("pesanOffPinjaman");
+    var btnSimpanPinjaman = document.getElementById("btnSimpanPengaturanPinjaman");
+    var errPinjaman = document.getElementById("pesanPinjamanError");
+    var suksesPinjaman = document.getElementById("pesanPinjamanSukses");
+
+    function perbaruiTampilanStatus(nyala) {
+        if (nyala) {
+            statusBox.style.background = "#D1FAE5";
+            statusDot.style.background = "#059669";
+            statusText.textContent = "Pinjaman AKTIF — publik bisa mengajukan";
+            statusText.style.color = "#047857";
+        } else {
+            statusBox.style.background = "#FEE2E2";
+            statusDot.style.background = "#DC2626";
+            statusText.textContent = "Pinjaman NONAKTIF — publik tidak bisa mengajukan";
+            statusText.style.color = "#B91C1C";
+        }
+    }
+
+    function muatPengaturanPinjaman() {
+
+        fetch(NGX_API_BASE_URL + "?action=pengaturanPinjaman")
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+
+                if (!data || data.success !== true) {
+                    statusText.textContent = "Gagal memuat status.";
+                    return;
+                }
+
+                var nyala = data.status === "ON";
+                togglePinjaman.checked = nyala;
+                perbaruiTampilanStatus(nyala);
+                saldoEl.textContent = data.saldoPinjamanFormat;
+                pesanTextarea.value = data.pesanOff;
+
+            })
+            .catch(function () {
+                statusText.textContent = "Gagal terhubung ke server.";
+            });
+
+    }
+
+    if (togglePinjaman) {
+        togglePinjaman.addEventListener("change", function () {
+            perbaruiTampilanStatus(togglePinjaman.checked);
+        });
+    }
+
+    if (btnSimpanPinjaman) {
+        btnSimpanPinjaman.addEventListener("click", function () {
+
+            errPinjaman.classList.add("hidden");
+            suksesPinjaman.classList.add("hidden");
+
+            var pesan = pesanTextarea.value.trim();
+            if (!pesan) {
+                errPinjaman.textContent = "Pesan tidak boleh kosong.";
+                errPinjaman.classList.remove("hidden");
+                return;
+            }
+
+            btnSimpanPinjaman.disabled = true;
+            btnSimpanPinjaman.innerHTML = '<span class="ngx-spinner" style="width:16px;height:16px;border-width:2px;"></span><span>Menyimpan...</span>';
+
+            var body = new URLSearchParams();
+            body.append("action", "adminSetPengaturanPinjaman");
+            body.append("token", ngxAdminGetToken());
+            body.append("status", togglePinjaman.checked ? "ON" : "OFF");
+            body.append("pesanOff", pesan);
+
+            fetch(NGX_API_BASE_URL, { method: "POST", body: body })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+
+                    btnSimpanPinjaman.disabled = false;
+                    btnSimpanPinjaman.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i><span>Simpan Pengaturan</span>';
+                    if (window.lucide) lucide.createIcons();
+
+                    if (!data || data.success !== true) {
+                        if (data && data.authError) { ngxAdminLogoutLokal(); window.location.href = "/admin/login/"; return; }
+                        errPinjaman.textContent = data && data.message ? data.message : "Gagal menyimpan pengaturan.";
+                        errPinjaman.classList.remove("hidden");
+                        return;
+                    }
+
+                    suksesPinjaman.classList.remove("hidden");
+                    setTimeout(function () { suksesPinjaman.classList.add("hidden"); }, 3000);
+
+                })
+                .catch(function () {
+                    btnSimpanPinjaman.disabled = false;
+                    btnSimpanPinjaman.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i><span>Simpan Pengaturan</span>';
+                    errPinjaman.textContent = "Gagal terhubung ke server.";
+                    errPinjaman.classList.remove("hidden");
+                });
+
+        });
+    }
+
     ngxAdminCekSesi(function (token, user) {
         document.getElementById("infoNama").textContent = user.nama;
         document.getElementById("infoUsername").textContent = user.username;
         document.getElementById("infoRole").textContent = user.role;
+        muatPengaturanPinjaman();
     });
 
 })();
