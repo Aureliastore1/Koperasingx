@@ -30,7 +30,7 @@
 </head>
 <body class="font-inter antialiased bg-gray-50">
 
-    <div class="flex min-h-screen">
+    <div class="flex min-h-screen ngx-admin-shell">
 
         <!-- Sidebar -->
         <aside class="ngx-admin-sidebar hidden lg:flex flex-col p-5">
@@ -70,7 +70,7 @@
         </aside>
 
         <!-- Main -->
-        <div class="flex-1 flex flex-col min-w-0">
+        <div class="flex-1 flex flex-col min-w-0 ngx-admin-main-col">
 
             <header class="ngx-admin-topbar px-5 py-4 flex items-center justify-between">
                 <div>
@@ -115,6 +115,81 @@
                     <button id="btnSimpanPengaturanPinjaman" class="mt-3 w-full inline-flex items-center justify-center gap-2 bg-kop-700 text-white text-sm font-bold py-3 rounded-xl hover:bg-kop-800 transition">
                         <i data-lucide="save" class="w-4 h-4"></i> Simpan Pengaturan
                     </button>
+                </div>
+
+                <!-- Tampilan & Aksesibilitas -->
+                <div class="ngx-admin-table-card mb-5">
+                    <p class="text-sm font-bold text-gray-800 mb-1">Tampilan & Aksesibilitas</p>
+                    <p class="text-xs text-gray-400 mb-2">Preferensi ini tersimpan di perangkat/browser ini saja.</p>
+
+                    <div class="ngx-a11y-row">
+                        <div><p class="ngx-a11y-label">Navigasi Desktop</p><p class="ngx-a11y-desc">Mobile tetap pakai navigasi bawah, tidak terpengaruh setting ini.</p></div>
+                        <div class="ngx-a11y-pill-group" data-pref="navDesktop">
+                            <button class="ngx-a11y-pill" data-val="top">Top Navigation</button>
+                            <button class="ngx-a11y-pill" data-val="sidebar">Sidebar Kiri</button>
+                        </div>
+                    </div>
+
+                    <div class="ngx-a11y-row">
+                        <div><p class="ngx-a11y-label">Mode Warna</p></div>
+                        <div class="ngx-a11y-pill-group" data-pref="darkMode">
+                            <button class="ngx-a11y-pill" data-val="light">Terang</button>
+                            <button class="ngx-a11y-pill" data-val="dark">Gelap</button>
+                        </div>
+                    </div>
+
+                    <div class="ngx-a11y-row">
+                        <div><p class="ngx-a11y-label">Warna Tema</p></div>
+                        <div class="flex gap-2" data-pref="aksenWarna">
+                            <button class="ngx-a11y-color-dot" data-val="teal" style="background:#0F766E;"></button>
+                            <button class="ngx-a11y-color-dot" data-val="biru" style="background:#2563EB;"></button>
+                            <button class="ngx-a11y-color-dot" data-val="ungu" style="background:#7C3AED;"></button>
+                            <button class="ngx-a11y-color-dot" data-val="amber" style="background:#D97706;"></button>
+                        </div>
+                    </div>
+
+                    <div class="ngx-a11y-row">
+                        <div><p class="ngx-a11y-label">Ukuran Teks</p></div>
+                        <div class="ngx-a11y-pill-group" data-pref="ukuranTeks">
+                            <button class="ngx-a11y-pill" data-val="kecil">Kecil</button>
+                            <button class="ngx-a11y-pill" data-val="normal">Normal</button>
+                            <button class="ngx-a11y-pill" data-val="besar">Besar</button>
+                        </div>
+                    </div>
+
+                    <div class="ngx-a11y-row">
+                        <div><p class="ngx-a11y-label">Ukuran Top Navigation</p><p class="ngx-a11y-desc">Cuma berlaku kalau Navigasi Desktop = Top Navigation.</p></div>
+                        <div class="ngx-a11y-pill-group" data-pref="ukuranTopnav">
+                            <button class="ngx-a11y-pill" data-val="kecil">Kecil</button>
+                            <button class="ngx-a11y-pill" data-val="normal">Normal</button>
+                            <button class="ngx-a11y-pill" data-val="besar">Besar</button>
+                        </div>
+                    </div>
+
+                    <div class="ngx-a11y-row">
+                        <div><p class="ngx-a11y-label">Layout</p></div>
+                        <div class="ngx-a11y-pill-group" data-pref="layoutCompact">
+                            <button class="ngx-a11y-pill" data-val="false">Nyaman</button>
+                            <button class="ngx-a11y-pill" data-val="true">Ringkas</button>
+                        </div>
+                    </div>
+
+                    <div class="ngx-a11y-row">
+                        <div><p class="ngx-a11y-label">Kontras Tinggi</p><p class="ngx-a11y-desc">Teks & garis dibuat lebih tegas.</p></div>
+                        <label class="ngx-toggle-switch"><input type="checkbox" id="a11yHighContrast"><span class="ngx-toggle-slider"></span></label>
+                    </div>
+
+                    <div class="ngx-a11y-row">
+                        <div><p class="ngx-a11y-label">Kurangi Animasi</p><p class="ngx-a11y-desc">Matikan transisi/animasi di seluruh panel.</p></div>
+                        <label class="ngx-toggle-switch"><input type="checkbox" id="a11yReduceMotion"><span class="ngx-toggle-slider"></span></label>
+                    </div>
+
+                    <div class="ngx-a11y-row">
+                        <div><p class="ngx-a11y-label">Logo Ikon Saja</p><p class="ngx-a11y-desc">Sembunyikan teks "KAS NGX", tampilkan ikon saja.</p></div>
+                        <label class="ngx-toggle-switch"><input type="checkbox" id="a11yLogoIkon"><span class="ngx-toggle-slider"></span></label>
+                    </div>
+
+                    <p class="text-[11px] text-gray-400 mt-3">Perubahan langsung diterapkan. Refresh halaman kalau ada tampilan yang belum berubah.</p>
                 </div>
 
                 <!-- Info Akun -->

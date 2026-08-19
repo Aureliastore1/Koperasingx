@@ -176,6 +176,81 @@
         });
     }
 
+    /* ===== Tampilan & Aksesibilitas ===== */
+
+    var prefsA11y = ngxAdminBacaPrefsA11y();
+
+    function nilaiDefault(pref) {
+        var d = { navDesktop: "top", darkMode: "light", aksenWarna: "teal", ukuranTeks: "normal", ukuranTopnav: "normal", layoutCompact: false };
+        return prefsA11y[pref] !== undefined ? prefsA11y[pref] : d[pref];
+    }
+
+    function perbaruiTampilanPill(kontainer) {
+        var pref = kontainer.getAttribute("data-pref");
+        var nilaiAktif = String(nilaiDefault(pref));
+        kontainer.querySelectorAll("[data-val]").forEach(function (btn) {
+            btn.classList.toggle("aktif", String(btn.getAttribute("data-val")) === nilaiAktif);
+        });
+    }
+
+    document.querySelectorAll(".ngx-a11y-pill-group[data-pref]").forEach(function (kontainer) {
+
+        perbaruiTampilanPill(kontainer);
+
+        kontainer.querySelectorAll(".ngx-a11y-pill").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+
+                var pref = kontainer.getAttribute("data-pref");
+                var val = btn.getAttribute("data-val");
+                prefsA11y[pref] = (val === "true") ? true : (val === "false" ? false : val);
+
+                ngxAdminSimpanPrefsA11y(prefsA11y);
+                ngxAdminTerapkanPrefsA11y(prefsA11y);
+                perbaruiTampilanPill(kontainer);
+
+            });
+        });
+
+    });
+
+    var kontainerWarna = document.querySelector('[data-pref="aksenWarna"]');
+    if (kontainerWarna) {
+
+        function perbaruiWarnaDot() {
+            var aktif = String(nilaiDefault("aksenWarna"));
+            kontainerWarna.querySelectorAll("[data-val]").forEach(function (dot) {
+                dot.classList.toggle("aktif", dot.getAttribute("data-val") === aktif);
+            });
+        }
+
+        perbaruiWarnaDot();
+
+        kontainerWarna.querySelectorAll(".ngx-a11y-color-dot").forEach(function (dot) {
+            dot.addEventListener("click", function () {
+                prefsA11y.aksenWarna = dot.getAttribute("data-val");
+                ngxAdminSimpanPrefsA11y(prefsA11y);
+                ngxAdminTerapkanPrefsA11y(prefsA11y);
+                perbaruiWarnaDot();
+            });
+        });
+
+    }
+
+    function wireToggleA11y(id, pref) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.checked = !!prefsA11y[pref];
+        el.addEventListener("change", function () {
+            prefsA11y[pref] = el.checked;
+            ngxAdminSimpanPrefsA11y(prefsA11y);
+            ngxAdminTerapkanPrefsA11y(prefsA11y);
+        });
+    }
+
+    wireToggleA11y("a11yHighContrast", "highContrast");
+    wireToggleA11y("a11yReduceMotion", "reduceMotion");
+    wireToggleA11y("a11yLogoIkon", "logoIkonSaja");
+
     ngxAdminCekSesi(function (token, user) {
         document.getElementById("infoNama").textContent = user.nama;
         document.getElementById("infoUsername").textContent = user.username;

@@ -4,6 +4,70 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
 if (window.lucide) lucide.createIcons();
 
 /* =========================================================
+   TAMPILAN & AKSESIBILITAS — preferensi TERSIMPAN PER-PERANGKAT
+   (localStorage), diterapkan seawal mungkin di setiap halaman
+   admin supaya minim "kedipan" tampilan sebelum preferensi aktif.
+   Dipakai bersama oleh semua halaman + halaman Settings sendiri
+   (untuk live preview & simpan).
+   ========================================================= */
+function ngxAdminBacaPrefsA11y() {
+    try {
+        var raw = localStorage.getItem("ngxAdminA11yPrefs");
+        return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+function ngxAdminSimpanPrefsA11y(p) {
+    try { localStorage.setItem("ngxAdminA11yPrefs", JSON.stringify(p)); } catch (e) {}
+}
+
+function ngxAdminTerapkanPrefsA11y(p) {
+
+    p = p || {};
+
+    var html = document.documentElement;
+    var body = document.body;
+    if (!body) return;
+
+    // Navigasi Desktop: "top" (default) atau "sidebar"
+    body.classList.toggle("ngx-nav-top", (p.navDesktop || "top") === "top");
+
+    // Dark mode
+    body.classList.toggle("ngx-dark", p.darkMode === "dark");
+
+    // Aksen warna
+    ["ngx-aksen-biru", "ngx-aksen-ungu", "ngx-aksen-amber"].forEach(function (c) { body.classList.remove(c); });
+    if (p.aksenWarna && p.aksenWarna !== "teal") body.classList.add("ngx-aksen-" + p.aksenWarna);
+
+    // Ukuran teks
+    html.classList.remove("ngx-text-kecil", "ngx-text-besar");
+    if (p.ukuranTeks === "kecil") html.classList.add("ngx-text-kecil");
+    if (p.ukuranTeks === "besar") html.classList.add("ngx-text-besar");
+
+    // High contrast
+    body.classList.toggle("ngx-high-contrast", !!p.highContrast);
+
+    // Reduce motion
+    body.classList.toggle("ngx-reduce-motion", !!p.reduceMotion);
+
+    // Compact / Comfortable layout
+    body.classList.toggle("ngx-layout-compact", !!p.layoutCompact);
+
+    // Ukuran Top Navigation Desktop
+    body.classList.remove("ngx-topnav-kecil", "ngx-topnav-besar");
+    if (p.ukuranTopnav === "kecil") body.classList.add("ngx-topnav-kecil");
+    if (p.ukuranTopnav === "besar") body.classList.add("ngx-topnav-besar");
+
+    // Tampilan logo (ikon saja / ikon+teks)
+    body.classList.toggle("ngx-logo-ikon-saja", !!p.logoIkonSaja);
+
+}
+
+ngxAdminTerapkanPrefsA11y(ngxAdminBacaPrefsA11y());
+
+/* =========================================================
    BOTTOM NAV MOBILE — otomatis disuntikkan di semua halaman
    admin (dideteksi dari adanya .ngx-admin-sidebar), supaya
    tidak perlu edit tiap file HTML satu-satu.
@@ -76,9 +140,93 @@ if (window.lucide) lucide.createIcons();
 })();
 
 /* =========================================================
-   PROTEKSI HALAMAN — semua halaman admin (kecuali /admin/login)
-   wajib punya sesi valid, kalau tidak otomatis dilempar ke login
+   TOP NAVIGATION DESKTOP — otomatis disuntikkan di semua
+   halaman admin, HANYA tampil (via CSS) kalau layar ≥1024px
+   DAN preferensi navigasi = "Top Navigation" (default).
+   Kalau preferensi = "Sidebar", CSS yang sudah ada tetap
+   dipakai apa adanya — blok ini cuma menyiapkan HTML-nya,
+   visibilitasnya 100% dikendalikan CSS supaya tidak ada
+   konflik JS. Mobile SAMA SEKALI tidak terpengaruh.
    ========================================================= */
+(function () {
+
+    var sidebar = document.querySelector(".ngx-admin-sidebar");
+    if (!sidebar) return; // bukan halaman admin
+
+    var halamanSekarang = window.location.pathname;
+    function aktifJika(path) { return halamanSekarang.indexOf(path) === 0 ? " aktif" : ""; }
+
+    var menuUtama = [
+        { href: "/admin/dashboard/", icon: "layout-dashboard", label: "Dashboard" },
+        { href: "/admin/anggota/", icon: "users", label: "Anggota" },
+        { href: "/admin/pinjaman/", icon: "banknote", label: "Pinjaman" },
+        { href: "/admin/simpanan/", icon: "piggy-bank", label: "Simpanan" },
+        { href: "/admin/log-aktivitas/", icon: "history", label: "Log Aktivitas" }
+    ];
+
+    var menuLainnya = [
+        { href: "/admin/pengeluaran/", icon: "receipt", label: "Catatan Bulanan" },
+        { href: "/admin/followup/", icon: "phone-call", label: "Follow Up" },
+        { href: "/admin/laporan/", icon: "file-bar-chart", label: "Laporan" },
+        { href: "/admin/users/", icon: "shield", label: "Kelola Admin" },
+        { href: "/admin/settings/", icon: "settings", label: "Settings" }
+    ];
+
+    var adaAktifDiLainnya = menuLainnya.some(function (m) { return halamanSekarang.indexOf(m.href) === 0; });
+
+    var linksHtml = menuUtama.map(function (m) {
+        return "<a href='" + m.href + "' class='ngx-topnav-link" + aktifJika(m.href) + "'><i data-lucide='" + m.icon + "' class='w-3.5 h-3.5'></i>" + m.label + "</a>";
+    }).join("");
+
+    var dropdownItemsHtml = menuLainnya.map(function (m) {
+        return "<a href='" + m.href + "'><i data-lucide='" + m.icon + "' class='w-3.5 h-3.5'></i>" + m.label + "</a>";
+    }).join("");
+
+    linksHtml += "<div class='ngx-topnav-more-wrap' id='ngxTopnavMoreWrap'>" +
+        "<button id='ngxBtnTopnavMore' class='ngx-topnav-link" + (adaAktifDiLainnya ? " aktif" : "") + "' style='background:none;border:none;cursor:pointer;'>Menu Lainnya <i data-lucide='chevron-down' class='w-3 h-3'></i></button>" +
+        "</div>";
+
+    var topnavHtml =
+        "<header class='ngx-admin-topnav'>" +
+            "<a href='/admin/dashboard/' class='ngx-topnav-brand'>" +
+                "<div class='ngx-topnav-brand-icon'><i data-lucide='landmark' class='w-4 h-4 text-white'></i></div>" +
+                "<span class='text-white font-bold text-sm'>KAS NGX</span>" +
+            "</a>" +
+            "<nav class='ngx-topnav-links'>" + linksHtml + "</nav>" +
+            "<div class='ngx-topnav-right' id='ngxTopnavRight'></div>" +
+        "</header>";
+
+    document.body.insertAdjacentHTML("afterbegin", topnavHtml);
+
+    // Pindahkan (BUKAN gandakan) cluster notifikasi+profil+logout dari topbar
+    // per-halaman ke Top Navigation — supaya semua fungsi JS yang sudah ada
+    // (bel notifikasi, logout, dll) tetap bekerja tanpa perlu ditulis ulang,
+    // dan tidak ada ID dobel di halaman yang sama.
+    var btnLogoutAwal = document.getElementById("btnLogout");
+    if (btnLogoutAwal && btnLogoutAwal.parentElement) {
+        document.getElementById("ngxTopnavRight").appendChild(btnLogoutAwal.parentElement);
+    }
+
+    if (window.lucide) lucide.createIcons();
+
+    document.getElementById("ngxBtnTopnavMore").addEventListener("click", function (e) {
+        e.stopPropagation();
+        var existing = document.getElementById("ngxTopnavMoreDropdown");
+        if (existing) { existing.remove(); return; }
+        document.getElementById("ngxTopnavMoreWrap").insertAdjacentHTML(
+            "beforeend",
+            "<div class='ngx-topnav-more-dropdown' id='ngxTopnavMoreDropdown'>" + dropdownItemsHtml + "</div>"
+        );
+        if (window.lucide) lucide.createIcons();
+    });
+
+    document.addEventListener("click", function (e) {
+        var dd = document.getElementById("ngxTopnavMoreDropdown");
+        var wrap = document.getElementById("ngxTopnavMoreWrap");
+        if (dd && wrap && !wrap.contains(e.target)) dd.remove();
+    });
+
+})();
 function ngxAdminGetToken() {
     return sessionStorage.getItem("ngxAdminToken");
 }
