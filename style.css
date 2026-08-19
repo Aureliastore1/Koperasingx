@@ -1509,3 +1509,82 @@ table.dataTable tbody tr:hover { background: rgba(15,118,110,0.03); }
     margin-left: 6px;
     font-size: 12.5px;
 }
+
+/* =========================================================
+   WIDGET CHAT AI — beranda publik, pojok kanan bawah
+   ========================================================= */
+.ngx-chatai-fab {
+    position: fixed; bottom: 20px; right: 20px; z-index: 200;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg, #0F766E, #134E4A);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px -4px rgba(15,118,110,0.5);
+    cursor: pointer; border: none; color: #fff;
+    transition: transform .2s;
+}
+.ngx-chatai-fab:hover { transform: scale(1.06); }
+.ngx-chatai-fab-badge {
+    position: absolute; top: -2px; right: -2px; width: 14px; height: 14px;
+    background: #F59E0B; border-radius: 50%; border: 2px solid #fff;
+}
+
+.ngx-chatai-panel {
+    position: fixed; bottom: 90px; right: 20px; z-index: 200;
+    width: 350px; max-width: calc(100vw - 32px);
+    height: 480px; max-height: calc(100vh - 130px);
+    background: #fff; border-radius: 20px;
+    box-shadow: 0 20px 50px -8px rgba(0,0,0,0.3);
+    display: none; flex-direction: column; overflow: hidden;
+    border: 1px solid #F3F4F6;
+}
+.ngx-chatai-panel.terbuka { display: flex; }
+
+.ngx-chatai-header {
+    background: linear-gradient(135deg, #0F766E, #134E4A);
+    padding: 16px 18px; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.ngx-chatai-header-icon {
+    width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.ngx-chatai-header-text { flex: 1; min-width: 0; }
+.ngx-chatai-header-text p:first-child { color: #fff; font-size: 13px; font-weight: 800; }
+.ngx-chatai-header-text p:last-child { color: rgba(255,255,255,0.65); font-size: 10.5px; }
+.ngx-chatai-close { color: rgba(255,255,255,0.7); cursor: pointer; flex-shrink: 0; background: none; border: none; }
+.ngx-chatai-close:hover { color: #fff; }
+
+.ngx-chatai-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; background: #F9FAFB; }
+
+.ngx-chatai-msg { max-width: 84%; font-size: 12.5px; line-height: 1.5; padding: 10px 13px; border-radius: 14px; white-space: pre-line; word-wrap: break-word; }
+.ngx-chatai-msg.dari-user { align-self: flex-end; background: #0F766E; color: #fff; border-bottom-right-radius: 4px; }
+.ngx-chatai-msg.dari-ai { align-self: flex-start; background: #fff; color: #1F2937; border: 1px solid #EEF2F1; border-bottom-left-radius: 4px; }
+.ngx-chatai-msg.dari-ai.error-msg { color: #B91C1C; background: #FEF2F2; border-color: #FEE2E2; }
+
+.ngx-chatai-typing { align-self: flex-start; display: flex; gap: 4px; padding: 12px 14px; background: #fff; border: 1px solid #EEF2F1; border-radius: 14px; border-bottom-left-radius: 4px; }
+.ngx-chatai-typing span { width: 6px; height: 6px; border-radius: 50%; background: #9CA3AF; animation: ngxTypingBounce 1.2s infinite ease-in-out; }
+.ngx-chatai-typing span:nth-child(2) { animation-delay: .15s; }
+.ngx-chatai-typing span:nth-child(3) { animation-delay: .3s; }
+@keyframes ngxTypingBounce { 0%, 60%, 100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+.ngx-chatai-suggest { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 12px 16px; background: #F9FAFB; flex-shrink: 0; }
+.ngx-chatai-suggest button {
+    font-size: 11px; font-weight: 600; color: #0F766E; background: #F0FDFA; border: 1px solid #CCFBF1;
+    padding: 6px 10px; border-radius: 999px; cursor: pointer;
+}
+.ngx-chatai-suggest button:hover { background: #CCFBF1; }
+
+.ngx-chatai-input-row { display: flex; gap: 8px; padding: 12px; border-top: 1px solid #F3F4F6; flex-shrink: 0; background: #fff; }
+.ngx-chatai-input-row input {
+    flex: 1; border: 1px solid #E5E7EB; border-radius: 999px; padding: 10px 16px; font-size: 12.5px; outline: none;
+}
+.ngx-chatai-input-row input:focus { border-color: #0F766E; }
+.ngx-chatai-send {
+    width: 38px; height: 38px; border-radius: 50%; background: #0F766E; color: #fff;
+    display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; flex-shrink: 0;
+}
+.ngx-chatai-send:disabled { opacity: .5; cursor: not-allowed; }
+
+@media (max-width: 480px) {
+    .ngx-chatai-panel { right: 16px; left: 16px; width: auto; bottom: 84px; }
+    .ngx-chatai-fab { bottom: 16px; right: 16px; }
+}

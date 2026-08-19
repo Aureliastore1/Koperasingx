@@ -598,6 +598,34 @@
     </div>
 
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Widget Chat AI -->
+    <button class="ngx-chatai-fab" id="ngxChatAiFab" aria-label="Tanya AI">
+        <span class="ngx-chatai-fab-badge" id="ngxChatAiBadge"></span>
+        <i data-lucide="message-circle" class="w-6 h-6"></i>
+    </button>
+
+    <div class="ngx-chatai-panel" id="ngxChatAiPanel">
+        <div class="ngx-chatai-header">
+            <div class="ngx-chatai-header-icon"><i data-lucide="sparkles" class="w-4 h-4 text-white"></i></div>
+            <div class="ngx-chatai-header-text">
+                <p>Tanya AI - KAS NGX</p>
+                <p>Bantuan seputar pinjaman & simpanan</p>
+            </div>
+            <button class="ngx-chatai-close" id="ngxChatAiClose"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="ngx-chatai-messages" id="ngxChatAiMessages"></div>
+        <div class="ngx-chatai-suggest" id="ngxChatAiSuggest">
+            <button data-q="Bagaimana cara mengajukan pinjaman?">Cara ajukan pinjaman</button>
+            <button data-q="Bagaimana cara setor simpanan?">Cara setor simpanan</button>
+            <button data-q="Bagaimana cara cek tagihan saya?">Cek tagihan</button>
+        </div>
+        <div class="ngx-chatai-input-row">
+            <input type="text" id="ngxChatAiInput" placeholder="Tulis pertanyaan..." maxlength="500">
+            <button class="ngx-chatai-send" id="ngxChatAiSend"><i data-lucide="send" class="w-4 h-4"></i></button>
+        </div>
+    </div>
+
     <script src="/script.js"></script>
+    <script src="/chat-ai-widget.js"></script>
 </body>
 </html>
