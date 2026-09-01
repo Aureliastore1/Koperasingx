@@ -1628,3 +1628,14 @@ table.dataTable tbody tr:hover { background: rgba(15,118,110,0.03); }
 .ngx-struk-footer-label { font-size: 10.5px; color: #9CA3AF; margin: 0 0 2px 0; }
 .ngx-struk-footer-value { font-size: 12.5px; font-weight: 700; margin: 0; }
 .ngx-struk-catatan { font-size: 10px; color: #9CA3AF; margin-top: 20px; text-align: center; line-height: 1.5; }
+
+/* =========================================================
+   FOLLOW UP V2 — kartu per nasabah
+   ========================================================= */
+.ngx-fu-card { background: #fff; border-radius: 16px; border: 1px solid #F3F4F6; padding: 16px; box-shadow: 0 2px 8px -4px rgba(0,0,0,0.06); }
+.ngx-fu-card.terpilih { border-color: #0F766E; background: #F0FDFA; }
+.ngx-fu-stat { text-align: center; }
+.ngx-fu-stat-label { font-size: 10px; color: #9CA3AF; }
+.ngx-fu-stat-value { font-size: 13px; font-weight: 800; color: #111827; }
+.ngx-fu-riwayat-item { display: flex; justify-content: space-between; align-items: center; padding: 7px 10px; border-radius: 9px; background: #F9FAFB; font-size: 12px; margin-bottom: 5px; }
+.ngx-fu-riwayat-item:last-child { margin-bottom: 0; }
