@@ -1361,10 +1361,41 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
 
         var nama = data.nama;
 
+        var totalPinjaman = 0, totalPelunasan = 0, totalSisa = 0;
+
+        data.pinjaman.forEach(function (p) {
+            totalPinjaman += p.nominal || 0;
+            totalPelunasan += p.pelunasan || 0;
+            totalSisa += p.sisa || 0;
+        });
+
+        function formatRp(n) {
+            return "Rp " + Math.round(n).toLocaleString("id-ID");
+        }
+
         var kartuHtml = data.pinjaman.map(function (p) { return kartuPinjaman(p, nama); }).join("");
+
+        var ringkasanHtml =
+            '<div class="ngx-hasil-card rounded-3xl p-5 sm:p-6 mb-1">' +
+                '<div class="grid grid-cols-3 gap-3 text-center">' +
+                    '<div>' +
+                        '<p class="text-[11px] text-gray-400 mb-1">Total Pinjaman</p>' +
+                        '<p class="text-sm sm:text-base font-bold text-gray-800">' + formatRp(totalPinjaman) + '</p>' +
+                    '</div>' +
+                    '<div class="border-x border-gray-100">' +
+                        '<p class="text-[11px] text-gray-400 mb-1">Sudah Dibayar</p>' +
+                        '<p class="text-sm sm:text-base font-bold text-emerald-600 ngx-total-pelunasan" data-nilai="' + totalPelunasan + '">' + formatRp(totalPelunasan) + '</p>' +
+                    '</div>' +
+                    '<div>' +
+                        '<p class="text-[11px] text-gray-400 mb-1">Sisa Belum Dibayar</p>' +
+                        '<p class="text-sm sm:text-base font-bold text-kop-800 ngx-total-sisa" data-nilai="' + totalSisa + '">' + formatRp(totalSisa) + '</p>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
 
         resultBox.innerHTML =
             '<div class="hasil-fade-in space-y-4">' +
+                ringkasanHtml +
                 '<div class="flex items-center justify-between px-1">' +
                     '<p class="text-sm font-bold text-gray-900">' + escapeHtml(nama) + '</p>' +
                     '<span class="ngx-badge-count">' + data.jumlahPinjaman + ' pinjaman</span>' +
@@ -1509,6 +1540,20 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
                 // Update kartu secara langsung tanpa reload
                 card.querySelector(".pelunasan-value").textContent = data.pelunasanFormat;
                 card.querySelector(".sisa-value").textContent = data.sisaFormat;
+
+                // Update juga ringkasan total di atas (Sudah Dibayar & Sisa keseluruhan)
+                var elTotalBayar = resultBox.querySelector(".ngx-total-pelunasan");
+                var elTotalSisa = resultBox.querySelector(".ngx-total-sisa");
+                if (elTotalBayar && elTotalSisa) {
+                    var totalBayarLama = Number(elTotalBayar.getAttribute("data-nilai")) || 0;
+                    var totalSisaLama = Number(elTotalSisa.getAttribute("data-nilai")) || 0;
+                    var totalBayarBaru = totalBayarLama + (data.jumlahDiterima || 0);
+                    var totalSisaBaru = Math.max(totalSisaLama - (data.jumlahDiterima || 0), 0);
+                    elTotalBayar.setAttribute("data-nilai", totalBayarBaru);
+                    elTotalSisa.setAttribute("data-nilai", totalSisaBaru);
+                    elTotalBayar.textContent = "Rp " + Math.round(totalBayarBaru).toLocaleString("id-ID");
+                    elTotalSisa.textContent = "Rp " + Math.round(totalSisaBaru).toLocaleString("id-ID");
+                }
 
                 var pesanLebih = data.kelebihan > 0
                     ? ('<p class="text-[11px] text-amber-600 mt-1">Catatan: kelebihan bayar Rp ' + data.kelebihan.toLocaleString("id-ID") + ' tidak diproses karena melebihi sisa tagihan.</p>')
