@@ -249,6 +249,39 @@
 
     }
 
+    var btnCetakStruk = document.getElementById("btnCetakStruk");
+    if (btnCetakStruk) {
+        btnCetakStruk.addEventListener("click", function () {
+
+            if (!detailData) return;
+
+            var d = detailData;
+            var namaAdmin = "-";
+            try {
+                var userTersimpan = JSON.parse(sessionStorage.getItem("ngxAdminUser") || "{}");
+                namaAdmin = userTersimpan.nama || "-";
+            } catch (e) {}
+
+            document.getElementById("sNama").textContent = d.nama;
+            document.getElementById("sAlasan").textContent = d.alasan || "-";
+            document.getElementById("sTglAjuan").textContent = d.timestampFormat || "-";
+            document.getElementById("sBankRek").textContent = (d.namaBank || "-") + " / " + (d.noRekening || "-");
+
+            document.getElementById("sNominal").textContent = d.nominalFormat;
+            document.getElementById("sPelunasan").textContent = d.pelunasanFormat;
+            document.getElementById("sSisa").textContent = d.sisaFormat;
+            document.getElementById("sStatus").textContent = d.status === "LUNAS" ? "LUNAS" : "BELUM LUNAS (Sisa " + d.sisaFormat + ")";
+
+            document.getElementById("sDicetakOleh").textContent = namaAdmin;
+            document.getElementById("sTglCetak").textContent = new Intl.DateTimeFormat("id-ID", {
+                timeZone: "Asia/Jakarta", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit"
+            }).format(new Date()) + " WIB";
+
+            window.print();
+
+        });
+    }
+
     ngxAdminCekSesi(function () { muatDetail(); });
 
 })();

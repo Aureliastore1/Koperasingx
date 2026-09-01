@@ -262,6 +262,12 @@ function ngxAdminCobaRememberToken(callback) {
         return "/admin/log-aktivitas/";
     }
 
+    function linkWa(noHp, pesanWa) {
+        var nomor = String(noHp || "").replace(/[^0-9]/g, "");
+        if (nomor.indexOf("0") === 0) nomor = "62" + nomor.slice(1);
+        return "https://wa.me/" + nomor + "?text=" + encodeURIComponent(pesanWa || "");
+    }
+
     function renderDropdown(data) {
 
         var existing = document.getElementById("ngxNotifDropdown");
@@ -270,12 +276,16 @@ function ngxAdminCobaRememberToken(callback) {
         var listHtml = (!data.notifikasi || data.notifikasi.length === 0)
             ? "<p class='text-xs text-gray-400 text-center py-8'>Belum ada notifikasi.</p>"
             : data.notifikasi.map(function (n) {
+
+                var adaWa = n.noHp && n.pesanWa;
+
                 return "<div class='ngx-notif-item" + (n.statusDibaca !== "Sudah" ? " belum-dibaca" : "") + "' data-id='" + escapeHtmlNotif(n.idAktivitas) + "' data-href='" + linkTujuan(n) + "'>" +
                     "<div class='ngx-notif-dot " + n.prioritas + "'></div>" +
                     "<div class='flex-1 min-w-0'>" +
                         "<p class='text-xs font-bold text-gray-800'>" + escapeHtmlNotif(n.jenisAktivitas) + " &middot; " + escapeHtmlNotif(n.jenisTransaksi) + "</p>" +
                         "<p class='text-[11px] text-gray-500 mt-0.5'>" + escapeHtmlNotif(n.keterangan) + "</p>" +
                         "<p class='text-[10px] text-gray-400 mt-1'>" + escapeHtmlNotif(waktuRelatif(n.waktuFormat)) + "</p>" +
+                        (adaWa ? "<a href='" + linkWa(n.noHp, n.pesanWa) + "' target='_blank' rel='noopener' class='ngx-notif-wa-btn' onclick='event.stopPropagation();'><i data-lucide='message-circle' class='w-3 h-3'></i> Kirim Konfirmasi WA</a>" : "") +
                     "</div>" +
                 "</div>";
             }).join("");

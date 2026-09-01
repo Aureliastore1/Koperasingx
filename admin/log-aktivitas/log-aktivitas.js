@@ -55,6 +55,12 @@
 
     }
 
+    function linkWaLog(noHp, pesanWa) {
+        var nomor = String(noHp || "").replace(/[^0-9]/g, "");
+        if (nomor.indexOf("0") === 0) nomor = "62" + nomor.slice(1);
+        return "https://wa.me/" + nomor + "?text=" + encodeURIComponent(pesanWa || "");
+    }
+
     function renderTabel() {
 
         var hasil = terapkanFilter();
@@ -67,6 +73,10 @@
                 ? (escapeHtml(l.dataSebelum || "-") + " <span class='text-gray-300'>&rarr;</span> <strong>" + escapeHtml(l.dataSesudah || "-") + "</strong>")
                 : "-";
 
+            var aksiHtml = (l.noHp && l.pesanWa)
+                ? "<a href='" + linkWaLog(l.noHp, l.pesanWa) + "' target='_blank' rel='noopener' class='ngx-notif-wa-btn'><i data-lucide='message-circle' class='w-3 h-3'></i> Kirim WA</a>"
+                : "<span class='text-gray-300 text-xs'>&mdash;</span>";
+
             return "<tr>" +
                 "<td class='whitespace-nowrap'>" + escapeHtml(l.waktuFormat) + "</td>" +
                 "<td class='font-semibold'>" + escapeHtml(l.userNama) + "</td>" +
@@ -76,6 +86,7 @@
                 "<td class='text-xs' style='white-space:normal;min-width:180px;'>" + perubahan + "</td>" +
                 "<td class='text-xs text-gray-500' style='white-space:normal;min-width:220px;'>" + escapeHtml(l.keterangan) + "</td>" +
                 "<td><span class='" + badgePrioritas(l.prioritas) + "'>" + escapeHtml(l.prioritas) + "</span></td>" +
+                "<td>" + aksiHtml + "</td>" +
             "</tr>";
 
         }).join("");

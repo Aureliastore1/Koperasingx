@@ -112,7 +112,10 @@
                                 <h2 class="text-lg font-extrabold text-gray-900" id="dNama">-</h2>
                                 <p class="text-xs text-gray-400" id="dTimestamp">-</p>
                             </div>
-                            <div class="flex gap-1.5 flex-wrap" id="dBadgeWrap"></div>
+                            <div class="flex gap-1.5 flex-wrap items-center">
+                                <div class="flex gap-1.5 flex-wrap" id="dBadgeWrap"></div>
+                                <button id="btnCetakStruk" class="ngx-admin-btn ngx-admin-btn-outline"><i data-lucide="printer" class="w-3.5 h-3.5"></i> Cetak Struk</button>
+                            </div>
                         </div>
                         <div class="grid grid-cols-3 gap-3 mb-5">
                             <div class="bg-kop-50 rounded-xl p-3 text-center"><p class="text-[10px] text-gray-400">Nominal</p><p class="font-bold text-gray-800" id="dNominal">-</p></div>
@@ -165,6 +168,44 @@
 
     <!-- Input file tersembunyi untuk upload dokumen -->
     <input type="file" id="inputFileDokumen" accept="image/*,.pdf" class="hidden">
+
+    <!-- Struk Pelunasan — hanya tampil saat Print (Ctrl+P), tersembunyi di layar biasa -->
+    <div id="strukPelunasan" class="ngx-struk">
+        <div class="ngx-struk-kop">
+            <div class="ngx-struk-kop-icon">🏦</div>
+            <div>
+                <p class="ngx-struk-kop-judul">KOPERASI SIMPAN PINJAM NGX</p>
+                <p class="ngx-struk-kop-sub">koperasingx.web.id &middot; Nyaman &mdash; Sejahtera</p>
+            </div>
+        </div>
+        <hr class="ngx-struk-garis-tebal">
+        <p class="ngx-struk-judul">STRUK PELUNASAN / KONFIRMASI PEMBAYARAN</p>
+        <table class="ngx-struk-tabel">
+            <tr><td>Nama Nasabah</td><td id="sNama">-</td></tr>
+            <tr><td>Alasan Pinjaman</td><td id="sAlasan">-</td></tr>
+            <tr><td>Tanggal Pengajuan</td><td id="sTglAjuan">-</td></tr>
+            <tr><td>Bank / No. Rekening</td><td id="sBankRek">-</td></tr>
+        </table>
+        <hr class="ngx-struk-garis">
+        <table class="ngx-struk-tabel">
+            <tr><td>Nominal Pinjaman</td><td id="sNominal">-</td></tr>
+            <tr><td>Total Sudah Dibayar</td><td id="sPelunasan">-</td></tr>
+            <tr class="ngx-struk-tabel-tegas"><td>Sisa Tagihan</td><td id="sSisa">-</td></tr>
+            <tr><td>Status</td><td id="sStatus">-</td></tr>
+        </table>
+        <hr class="ngx-struk-garis">
+        <div class="ngx-struk-footer">
+            <div>
+                <p class="ngx-struk-footer-label">Dicetak oleh</p>
+                <p class="ngx-struk-footer-value" id="sDicetakOleh">-</p>
+            </div>
+            <div>
+                <p class="ngx-struk-footer-label">Tanggal Cetak</p>
+                <p class="ngx-struk-footer-value" id="sTglCetak">-</p>
+            </div>
+        </div>
+        <p class="ngx-struk-catatan">Struk ini dicetak otomatis oleh sistem Koperasi Simpan Pinjam NGX sebagai bukti/konfirmasi status pembayaran, dan sah tanpa tanda tangan basah.</p>
+    </div>
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
