@@ -1639,3 +1639,10 @@ table.dataTable tbody tr:hover { background: rgba(15,118,110,0.03); }
 .ngx-fu-stat-value { font-size: 13px; font-weight: 800; color: #111827; }
 .ngx-fu-riwayat-item { display: flex; justify-content: space-between; align-items: center; padding: 7px 10px; border-radius: 9px; background: #F9FAFB; font-size: 12px; margin-bottom: 5px; }
 .ngx-fu-riwayat-item:last-child { margin-bottom: 0; }
+
+.ngx-admin-btn-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 8px; border: 1px solid #E5E7EB;
+    background: #fff; color: #4B5563; transition: all .15s;
+}
+.ngx-admin-btn-icon:hover { background: #F0FDFA; border-color: #0F766E; color: #0F766E; }
