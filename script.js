@@ -328,9 +328,19 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
                                     '<span class="ngx-riwayat-value">' + escapeHtml(r.jatuhTempoFormat) + '</span>' +
                                 '</div>' +
                                 '<div class="ngx-riwayat-detail-row">' +
-                                    '<span class="ngx-riwayat-label">Pelunasan</span>' +
+                                    '<span class="ngx-riwayat-label">Sudah Dibayar</span>' +
                                     '<span class="ngx-riwayat-value">' + r.pelunasanFormat + '</span>' +
                                 '</div>' +
+                                '<div class="ngx-riwayat-detail-row">' +
+                                    '<span class="ngx-riwayat-label">Kurang Bayar</span>' +
+                                    '<span class="ngx-riwayat-value" style="' + (r.statusBaris === "LUNAS" ? "" : "color:#B45309;font-weight:700;") + '">' + (r.sisaFormat || r.pelunasanFormat) + '</span>' +
+                                '</div>' +
+                                (r.sudahPernahBayar ? (
+                                '<div class="ngx-riwayat-detail-row">' +
+                                    '<span class="ngx-riwayat-label">Terakhir Bayar</span>' +
+                                    '<span class="ngx-riwayat-value">' + escapeHtml(r.tanggalBayarFormat) + '</span>' +
+                                '</div>'
+                                ) : '') +
                             '</div>' +
 
                             '<div class="mt-2">' +
@@ -1908,4 +1918,236 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
             }
         });
     });
+})();
+
+/* =========================================================
+   RIWAYAT SIMPANAN — cari nasabah, tampilkan riwayat simpanan.
+   Hanya aktif kalau elemen #riwayatSimpananForm ada di halaman
+   (/riwayat-simpanan). Mendukung buka langsung via link
+   ?nama=X (dipakai dari kolom LINK di sheet), auto-cari otomatis.
+   ========================================================= */
+(function () {
+
+    var form = document.getElementById("riwayatSimpananForm");
+    var input = document.getElementById("riwayatSimpananNama");
+    var btn = document.getElementById("riwayatSimpananBtn");
+    var errorMsg = document.getElementById("riwayatSimpananError");
+    var errorText = document.getElementById("riwayatSimpananErrorText");
+    var resultBox = document.getElementById("riwayatSimpananResult");
+    var suggestBox = document.getElementById("riwayatSimpananSuggest");
+
+    if (!form || !input || !resultBox) return;
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+    }
+
+    /* ---- Autocomplete nama (pola sama seperti Pelunasan/Cek Tagihan) ---- */
+    var daftarNama = [];
+    var daftarNamaSiap = false;
+    var suggestActiveIndex = -1;
+    var suggestItems = [];
+    var debounceTimer = null;
+
+    function muatDaftarNama() {
+        fetch(NGX_API_BASE_URL + "?action=daftarNama")
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data && data.success && Array.isArray(data.daftarNama)) {
+                    daftarNama = data.daftarNama;
+                }
+                daftarNamaSiap = true;
+            })
+            .catch(function () { daftarNamaSiap = true; });
+    }
+    muatDaftarNama();
+
+    function highlightMatch(nama, query) {
+        var idx = nama.toUpperCase().indexOf(query.toUpperCase());
+        if (idx === -1) return escapeHtml(nama);
+        return escapeHtml(nama.slice(0, idx)) + "<mark>" + escapeHtml(nama.slice(idx, idx + query.length)) + "</mark>" + escapeHtml(nama.slice(idx + query.length));
+    }
+
+    function closeSuggest() {
+        suggestBox.classList.add("hidden");
+        suggestBox.innerHTML = "";
+        suggestItems = [];
+        suggestActiveIndex = -1;
+    }
+
+    function pilihNama(nama) {
+        input.value = nama;
+        closeSuggest();
+        hideError();
+        input.focus();
+    }
+
+    function tampilkanSuggest(query) {
+        if (!query) { closeSuggest(); return; }
+
+        var hasil = daftarNama.filter(function (n) {
+            return n.toUpperCase().indexOf(query.toUpperCase()) !== -1;
+        }).slice(0, 8);
+
+        if (hasil.length === 0) {
+            suggestBox.innerHTML = daftarNamaSiap
+                ? '<div class="ngx-suggest-empty">Nama tidak ditemukan</div>'
+                : '<div class="ngx-suggest-empty">Memuat daftar nama...</div>';
+            suggestBox.classList.remove("hidden");
+            suggestItems = [];
+            suggestActiveIndex = -1;
+            return;
+        }
+
+        suggestBox.innerHTML = hasil.map(function (nama) {
+            return '<div class="ngx-suggest-item" data-nama="' + escapeHtml(nama) + '">' +
+                '<i data-lucide="user-round" class="w-3.5 h-3.5 text-kop-500 flex-shrink-0"></i>' +
+                '<span>' + highlightMatch(nama, query) + '</span>' +
+                '</div>';
+        }).join("");
+
+        suggestBox.classList.remove("hidden");
+        if (window.lucide) lucide.createIcons();
+
+        suggestItems = Array.prototype.slice.call(suggestBox.querySelectorAll(".ngx-suggest-item"));
+        suggestActiveIndex = -1;
+
+        suggestItems.forEach(function (el) {
+            el.addEventListener("mousedown", function (e) {
+                e.preventDefault();
+                pilihNama(el.getAttribute("data-nama"));
+            });
+        });
+    }
+
+    input.addEventListener("input", function () {
+        hideError();
+        var query = input.value.trim();
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function () { tampilkanSuggest(query); }, 120);
+    });
+
+    input.addEventListener("focus", function () {
+        var query = input.value.trim();
+        if (query) tampilkanSuggest(query);
+    });
+
+    document.addEventListener("click", function (e) {
+        if (!suggestBox.contains(e.target) && e.target !== input) closeSuggest();
+    });
+
+    function hideError() {
+        errorMsg.classList.add("hidden");
+    }
+
+    function tampilkanError(pesan) {
+        errorText.textContent = pesan;
+        errorMsg.classList.remove("hidden");
+    }
+
+    function badgeStatusSimpanan(status) {
+        if (status === "Disetujui") return "background:#D1FAE5;color:#047857;";
+        if (status === "Ditolak") return "background:#FEE2E2;color:#B91C1C;";
+        return "background:#FEF3C7;color:#B45309;";
+    }
+
+    function renderHasil(data) {
+
+        if (!data.riwayat || data.riwayat.length === 0) {
+            resultBox.innerHTML =
+                '<div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm text-center">' +
+                    '<i data-lucide="inbox" class="w-8 h-8 text-gray-300 mx-auto mb-3"></i>' +
+                    '<p class="text-sm font-semibold text-gray-700">Belum ada riwayat simpanan</p>' +
+                    '<p class="text-xs text-gray-400 mt-1">Nama "' + escapeHtml(data.nama) + '" belum tercatat melakukan simpanan.</p>' +
+                '</div>';
+            if (window.lucide) lucide.createIcons();
+            return;
+        }
+
+        var kartuList = data.riwayat.map(function (r) {
+            return (
+                '<div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm mb-3">' +
+                    '<div class="flex items-start justify-between gap-3 mb-2">' +
+                        '<div>' +
+                            '<p class="text-sm font-bold text-gray-800">' + escapeHtml(r.jenisSimpanan) + '</p>' +
+                            '<p class="text-xs text-gray-400 mt-0.5">' + escapeHtml(r.tanggal) + ' &middot; ' + escapeHtml(r.metodePembayaran) + '</p>' +
+                        '</div>' +
+                        '<span class="text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0" style="' + badgeStatusSimpanan(r.status) + '">' + escapeHtml(r.status) + '</span>' +
+                    '</div>' +
+                    '<p class="text-lg font-extrabold text-kop-700">' + escapeHtml(r.nominalFormat) + '</p>' +
+                    (r.keterangan && r.keterangan !== "-" ? '<p class="text-xs text-gray-500 mt-2">' + escapeHtml(r.keterangan) + '</p>' : '') +
+                '</div>'
+            );
+        }).join("");
+
+        resultBox.innerHTML =
+            '<div class="bg-kop-700 rounded-2xl p-5 mb-4 text-center">' +
+                '<p class="text-xs text-white/70 mb-1">Total Simpanan Disetujui &middot; ' + escapeHtml(data.nama) + '</p>' +
+                '<p class="text-2xl font-extrabold text-white">' + escapeHtml(data.totalDisetujuiFormat) + '</p>' +
+            '</div>' +
+            kartuList;
+
+        if (window.lucide) lucide.createIcons();
+
+    }
+
+    function cariRiwayat(nama) {
+
+        hideError();
+        nama = String(nama || "").trim();
+
+        if (!nama) {
+            tampilkanError("Nama tidak boleh kosong.");
+            return;
+        }
+
+        closeSuggest();
+        btn.disabled = true;
+        btn.innerHTML = '<span class="ngx-spinner" style="width:16px;height:16px;border-width:2px;"></span><span>Mencari...</span>';
+        resultBox.innerHTML = '';
+
+        fetch(NGX_API_BASE_URL + "?action=riwayatSimpanan&nama=" + encodeURIComponent(nama))
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="search-check" class="w-4 h-4"></i><span>Cari</span>';
+                if (window.lucide) lucide.createIcons();
+
+                if (!data || data.success !== true) {
+                    tampilkanError(data && data.message ? data.message : "Gagal memuat data, coba lagi.");
+                    return;
+                }
+
+                renderHasil(data);
+
+            })
+            .catch(function () {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="search-check" class="w-4 h-4"></i><span>Cari</span>';
+                tampilkanError("Gagal terhubung ke server, coba lagi.");
+                if (window.lucide) lucide.createIcons();
+            });
+
+    }
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        cariRiwayat(input.value);
+    });
+
+    // Dukung buka langsung via link ?nama=X (dipakai dari kolom LINK di
+    // sheet DATA TAGIHAN) — begitu halaman dibuka, otomatis terisi &
+    // langsung dicari, tanpa perlu ketik ulang.
+    (function () {
+        var params = new URLSearchParams(window.location.search);
+        var namaDariUrl = params.get("nama");
+        if (namaDariUrl) {
+            input.value = namaDariUrl;
+            cariRiwayat(namaDariUrl);
+        }
+    })();
+
 })();
