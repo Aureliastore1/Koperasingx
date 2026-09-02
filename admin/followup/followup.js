@@ -86,6 +86,7 @@
                 "<td class='text-[11px] text-gray-500'>" + fuInfo + "</td>" +
                 "<td class='whitespace-nowrap'>" +
                     "<button class='ngx-admin-btn-icon ngx-btn-detail-fu' data-nama='" + escapeHtml(n.nama) + "' title='Lihat Riwayat'><i data-lucide='eye' class='w-3.5 h-3.5'></i></button> " +
+                    "<button class='ngx-admin-btn-icon ngx-btn-unduh-fu' data-nama='" + escapeHtml(n.nama) + "' title='Unduh Laporan'><i data-lucide='file-down' class='w-3.5 h-3.5'></i></button> " +
                     "<button class='ngx-admin-btn-icon ngx-btn-kirim-fu' data-nama='" + escapeHtml(n.nama) + "' title='Follow Up'><i data-lucide='send' class='w-3.5 h-3.5'></i></button>" +
                 "</td>" +
             "</tr>"
@@ -116,6 +117,10 @@
 
         tbody.querySelectorAll(".ngx-btn-kirim-fu").forEach(function (btn) {
             btn.addEventListener("click", function () { konfirmasiKirim([btn.getAttribute("data-nama")]); });
+        });
+
+        tbody.querySelectorAll(".ngx-btn-unduh-fu").forEach(function (btn) {
+            btn.addEventListener("click", function () { pilihFormatUnduh(btn.getAttribute("data-nama")); });
         });
 
     }
@@ -266,6 +271,71 @@
                 terpilih = {};
                 perbaruiTombolMassal();
                 muatDataFollowUp(true);
+
+            })
+            .catch(function () {
+                Swal.fire("Gagal", "Gagal terhubung ke server.", "error");
+            });
+
+    }
+
+    /* ===== Unduh Laporan (PDF / Word) ===== */
+    function pilihFormatUnduh(nama) {
+
+        if (!window.Swal) return;
+
+        Swal.fire({
+            title: "Unduh Laporan " + nama,
+            text: "Pilih format dokumen yang mau diunduh:",
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: "📄 PDF",
+            denyButtonText: "📝 Word (.docx)",
+            cancelButtonText: "Batal",
+            confirmButtonColor: "#0F766E",
+            denyButtonColor: "#2563EB"
+        }).then(function (hasil) {
+            if (hasil.isConfirmed) unduhLaporan(nama, "pdf");
+            else if (hasil.isDenied) unduhLaporan(nama, "docx");
+        });
+
+    }
+
+    function unduhLaporan(nama, format) {
+
+        Swal.fire({ title: "Menyiapkan dokumen...", didOpen: function () { Swal.showLoading(); }, allowOutsideClick: false });
+
+        var body = new URLSearchParams();
+        body.append("action", "adminUnduhLaporanNasabah");
+        body.append("token", ngxAdminGetToken());
+        body.append("nama", nama);
+        body.append("format", format);
+
+        fetch(NGX_API_BASE_URL, { method: "POST", body: body })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+
+                if (!data || data.success !== true) {
+                    Swal.fire("Gagal", data && data.message ? data.message : "Gagal membuat laporan.", "error");
+                    return;
+                }
+
+                var byteChars = atob(data.base64);
+                var byteNumbers = new Array(byteChars.length);
+                for (var i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+                var byteArray = new Uint8Array(byteNumbers);
+                var blob = new Blob([byteArray], { type: data.mimeType });
+
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                a.href = url;
+                a.download = data.namaFile;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                Swal.close();
 
             })
             .catch(function () {
