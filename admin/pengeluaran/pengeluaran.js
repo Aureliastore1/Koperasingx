@@ -8,7 +8,6 @@
     var rekapLoading = document.getElementById("rekapLoading");
     var rekapError = document.getElementById("rekapError");
     var rekapErrorText = document.getElementById("rekapErrorText");
-    var rekapAccordion = document.getElementById("rekapAccordion");
 
     function escapeHtml(s) {
         return String(s).replace(/[&<>"']/g, function (c) {
@@ -108,55 +107,109 @@
 
     });
 
+    var rekapList = document.getElementById("rekapList");
+    var detailKosong = document.getElementById("detailBulanKosong");
+    var detailIsi = document.getElementById("detailBulanIsi");
+
+    var dataBulanTerakhir = [];
+    var bulanTerpilih = null;
+
     function capitalize(s) {
         s = String(s || "").toLowerCase();
         return s.charAt(0).toUpperCase() + s.slice(1);
     }
 
-    function renderBulan(bulan) {
+    // Keterangan disimpan dengan format "dd/MM - keterangan asli" (kalau
+    // dicatat lewat form ini). Dipisah lagi di sini supaya tampil rapi
+    // sebagai kolom Tanggal & Keterangan terpisah di tabel detail.
+    function pisahTanggalKeterangan(teks) {
+        var cocok = String(teks || "").match(/^(\d{2}\/\d{2})\s*-\s*(.+)$/);
+        return cocok ? { tanggal: cocok[1], keterangan: cocok[2] } : { tanggal: "-", keterangan: teks };
+    }
+
+    function renderItemRekap(bulan) {
 
         var isKosong = bulan.jumlahItem === 0;
-
-        var isiList = bulan.items.map(function (it) {
-
-            var chips = it.rincian.map(function (r) {
-                return '<span class="ngx-accordion-chip">' + escapeHtml(r.label) + ' ' + r.nominalFormat.replace("Rp ", "") + '</span>';
-            }).join("");
-
-            return (
-                '<div class="ngx-accordion-row">' +
-                    '<span class="ngx-accordion-row-nama">' + escapeHtml(it.item) + '</span>' +
-                    '<span class="ngx-accordion-row-nominal">' + chips + '<span class="ngx-accordion-total">' + it.totalFormat + '</span></span>' +
-                '</div>'
-            );
-        }).join("");
-
-        var body = isKosong
-            ? '<div class="ngx-accordion-empty">Belum ada data pengeluaran bulan ini</div>'
-            : '<div class="ngx-accordion-list">' + isiList + '</div>';
+        var aktif = bulanTerpilih === bulan.label;
 
         return (
-            '<div class="ngx-accordion-item' + (isKosong ? " kosong" : "") + '" data-bulan="' + escapeHtml(bulan.label) + '">' +
-                '<button type="button" class="ngx-accordion-header"' + (isKosong ? " disabled" : "") + '>' +
-                    '<div class="flex items-center gap-3 min-w-0">' +
-                        '<span class="font-bold text-gray-800 text-sm">' + escapeHtml(capitalize(bulan.label)) + '</span>' +
-                        '<span class="ngx-badge-count">' + bulan.jumlahItem + ' item</span>' +
-                    '</div>' +
-                    '<div class="flex items-center gap-3 flex-shrink-0">' +
-                        '<span class="font-bold text-kop-800 text-sm">' + bulan.totalFormat + '</span>' +
-                        (isKosong ? '' : '<i data-lucide="chevron-down" class="w-4 h-4 ngx-accordion-chevron"></i>') +
-                    '</div>' +
-                '</button>' +
-                '<div class="ngx-accordion-body">' + body + '</div>' +
-            '</div>'
+            '<button type="button" class="ngx-bulan-item' + (aktif ? " aktif" : "") + (isKosong ? " kosong" : "") + '" data-bulan="' + escapeHtml(bulan.label) + '"' + (isKosong ? " disabled" : "") + '>' +
+                '<div class="flex items-center gap-3 min-w-0">' +
+                    '<span class="font-bold text-gray-800 text-sm">' + escapeHtml(capitalize(bulan.label)) + '</span>' +
+                    '<span class="ngx-badge-count">' + bulan.jumlahItem + ' item</span>' +
+                '</div>' +
+                '<div class="flex items-center gap-2 flex-shrink-0">' +
+                    '<span class="font-bold text-kop-800 text-sm">' + bulan.totalFormat + '</span>' +
+                    (isKosong ? '' : '<i data-lucide="chevron-right" class="w-4 h-4 text-gray-300"></i>') +
+                '</div>' +
+            '</button>'
         );
+
+    }
+
+    function renderDetailBulan(bulan) {
+
+        if (!bulan || bulan.jumlahItem === 0) {
+            detailIsi.innerHTML = '<div class="ngx-accordion-empty">Belum ada data pengeluaran bulan ini</div>';
+            return;
+        }
+
+        var barisTabel = bulan.items.map(function (it, idx) {
+
+            var pisah = pisahTanggalKeterangan(it.item);
+            var pencatat = it.rincian.map(function (r) { return capitalize(r.label); }).join(", ") || "-";
+
+            return (
+                '<tr>' +
+                    '<td class="text-center text-gray-400">' + (idx + 1) + '</td>' +
+                    '<td class="whitespace-nowrap">' + escapeHtml(pisah.tanggal) + '</td>' +
+                    '<td>' + escapeHtml(pisah.keterangan) + '</td>' +
+                    '<td>' + escapeHtml(pencatat) + '</td>' +
+                    '<td class="text-right font-semibold">' + it.totalFormat + '</td>' +
+                '</tr>'
+            );
+
+        }).join("");
+
+        detailIsi.innerHTML =
+            '<div class="flex items-center justify-between mb-4">' +
+                '<div>' +
+                    '<p class="text-sm font-bold text-gray-800">' + escapeHtml(capitalize(bulan.label)) + '</p>' +
+                    '<p class="text-xs text-gray-400">' + bulan.jumlahItem + ' pengeluaran tercatat</p>' +
+                '</div>' +
+                '<p class="text-lg font-extrabold text-kop-700">' + bulan.totalFormat + '</p>' +
+            '</div>' +
+            '<div style="max-height:60vh; overflow:auto;">' +
+                '<table class="ngx-table-compact" style="width:100%;">' +
+                    '<thead><tr><th>No</th><th>Tanggal</th><th>Keterangan</th><th>Dicatat Oleh</th><th>Nominal</th></tr></thead>' +
+                    '<tbody>' + barisTabel + '</tbody>' +
+                '</table>' +
+            '</div>';
+
+    }
+
+    function pilihBulan(labelBulan) {
+
+        bulanTerpilih = labelBulan;
+
+        var bulan = dataBulanTerakhir.filter(function (b) { return b.label === labelBulan; })[0];
+        if (!bulan) return;
+
+        detailKosong.classList.add("hidden");
+        detailIsi.classList.remove("hidden");
+        renderDetailBulan(bulan);
+
+        rekapList.querySelectorAll(".ngx-bulan-item").forEach(function (el) {
+            el.classList.toggle("aktif", el.getAttribute("data-bulan") === labelBulan);
+        });
+
     }
 
     function muatRekap() {
 
         rekapLoading.classList.remove("hidden");
         rekapError.classList.add("hidden");
-        rekapAccordion.classList.add("hidden");
+        rekapList.classList.add("hidden");
 
         fetch(NGX_API_BASE_URL + "?action=rincianPengeluaran")
             .then(function (res) { return res.json(); })
@@ -170,16 +223,19 @@
                     return;
                 }
 
-                rekapAccordion.innerHTML = data.bulan.map(renderBulan).join("");
-                rekapAccordion.classList.remove("hidden");
+                dataBulanTerakhir = data.bulan;
+
+                rekapList.innerHTML = data.bulan.map(renderItemRekap).join("");
+                rekapList.classList.remove("hidden");
 
                 if (window.lucide) lucide.createIcons();
 
-                var items = rekapAccordion.querySelectorAll(".ngx-accordion-item:not(.kosong)");
-                items.forEach(function (el) {
-                    var header = el.querySelector(".ngx-accordion-header");
-                    header.addEventListener("click", function () { el.classList.toggle("open"); });
+                rekapList.querySelectorAll(".ngx-bulan-item:not(.kosong)").forEach(function (el) {
+                    el.addEventListener("click", function () { pilihBulan(el.getAttribute("data-bulan")); });
                 });
+
+                // Kalau ada bulan yang sebelumnya sedang dipilih (misal abis refresh), tampilkan lagi datanya yang baru
+                if (bulanTerpilih) pilihBulan(bulanTerpilih);
 
             })
             .catch(function () {

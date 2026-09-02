@@ -1655,3 +1655,16 @@ table.dataTable tbody tr:hover { background: rgba(15,118,110,0.03); }
     padding: 10px 16px; background: #F0FDFA; border-bottom: 1px solid #F3F4F6;
     color: #0F766E;
 }
+
+/* =========================================================
+   CATATAN BULANAN V2 — list ringkas bulan (kiri) + panel detail (kanan)
+   ========================================================= */
+.ngx-bulan-item {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; padding: 12px 16px; background: #fff; border: 1px solid #F3F4F6;
+    border-radius: 12px; cursor: pointer; transition: all .12s; text-align: left;
+}
+.ngx-bulan-item:hover { border-color: #99F6E4; background: #F0FDFA; }
+.ngx-bulan-item.aktif { border-color: #0F766E; background: #F0FDFA; box-shadow: 0 0 0 1px #0F766E; }
+.ngx-bulan-item.kosong { opacity: .5; cursor: not-allowed; }
+.ngx-bulan-item.kosong:hover { background: #fff; border-color: #F3F4F6; }
