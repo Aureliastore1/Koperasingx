@@ -290,18 +290,54 @@ function ngxAdminCobaRememberToken(callback) {
                 "</div>";
             }).join("");
 
+        var izinNotif = ("Notification" in window) ? Notification.permission : "unsupported";
+
+        var bannerIzin = "";
+        if (izinNotif === "default") {
+            bannerIzin =
+                "<div class='ngx-notif-izin-banner'>" +
+                    "<i data-lucide='bell-ring' class='w-4 h-4 flex-shrink-0'></i>" +
+                    "<div class='flex-1 min-w-0'>" +
+                        "<p class='text-[11.5px] font-semibold text-gray-700'>Aktifkan notifikasi browser?</p>" +
+                        "<p class='text-[10.5px] text-gray-400'>Dapat notif langsung meski tab ini di-minimize.</p>" +
+                    "</div>" +
+                    "<button id='ngxBtnAktifkanNotif' class='ngx-admin-btn' style='padding:6px 10px;font-size:11px;'>Aktifkan</button>" +
+                "</div>";
+        } else if (izinNotif === "denied") {
+            bannerIzin =
+                "<div class='ngx-notif-izin-banner' style='background:#FEF2F2;'>" +
+                    "<i data-lucide='bell-off' class='w-4 h-4 flex-shrink-0 text-red-400'></i>" +
+                    "<p class='text-[10.5px] text-red-500 flex-1'>Notifikasi browser diblokir. Aktifkan manual lewat ikon 🔒 di address bar browser.</p>" +
+                "</div>";
+        }
+
         var html =
             "<div class='ngx-notif-dropdown' id='ngxNotifDropdown'>" +
                 "<div class='ngx-notif-header'>" +
                     "<p class='text-sm font-bold text-gray-800'>Notifikasi</p>" +
                     "<button id='ngxBtnTandaiSemua' class='text-[11px] font-semibold text-kop-700 hover:underline'>Tandai semua dibaca</button>" +
                 "</div>" +
+                bannerIzin +
                 "<div class='ngx-notif-list'>" + listHtml + "</div>" +
                 "<a href='/admin/log-aktivitas/' class='block text-center text-xs font-semibold text-kop-700 py-3 border-t border-gray-100 hover:bg-gray-50'>Lihat semua log aktivitas</a>" +
             "</div>";
 
         document.getElementById("ngxNotifWrap").insertAdjacentHTML("beforeend", html);
         if (window.lucide) lucide.createIcons();
+
+        var btnAktifkanNotif = document.getElementById("ngxBtnAktifkanNotif");
+        if (btnAktifkanNotif) {
+            btnAktifkanNotif.addEventListener("click", function (e) {
+                e.stopPropagation();
+                Notification.requestPermission().then(function (hasil) {
+                    if (hasil === "granted") {
+                        new Notification("Notifikasi Aktif ✅", { body: "Kamu akan dapat notifikasi Follow Up, Pinjaman, dan Pembayaran baru di sini.", icon: "/favicon.png.png" });
+                        localStorage.setItem(KEY_LAST_NOTIF_ID, (window._ngxNotifTerakhir && window._ngxNotifTerakhir.notifikasi[0]) ? window._ngxNotifTerakhir.notifikasi[0].idAktivitas : "");
+                    }
+                    if (window._ngxNotifTerakhir) renderDropdown(window._ngxNotifTerakhir);
+                });
+            });
+        }
 
         document.querySelectorAll(".ngx-notif-item").forEach(function (item) {
             item.addEventListener("click", function () {
@@ -329,6 +365,59 @@ function ngxAdminCobaRememberToken(callback) {
         fetch(NGX_API_BASE_URL, { method: "POST", body: body }).finally(function () { if (callback) callback(); });
     }
 
+    /* ===== Notifikasi Browser Native (PC & mobile Chrome/Edge/dll) =====
+       Terpisah dari badge/dropdown di dalam web (yang tetap selalu jalan).
+       Ini TAMBAHAN: kalau admin sudah kasih izin, sistem akan memicu
+       notifikasi khas OS (muncul di pojok layar / notification tray)
+       setiap ada aktivitas BARU, selama tab admin ini masih terbuka
+       (boleh di-minimize/pindah tab lain, TIDAK perlu browser tertutup). */
+    var KEY_LAST_NOTIF_ID = "ngxAdminLastNotifId";
+
+    function tampilkanNotifikasiBrowser(item) {
+
+        if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+        try {
+
+            var notif = new Notification(item.jenisAktivitas + " · " + item.jenisTransaksi, {
+                body: item.keterangan,
+                icon: "/favicon.png.png",
+                tag: item.idAktivitas
+            });
+
+            notif.onclick = function () {
+                window.focus();
+                tandaiNotifDibaca(item.idAktivitas, function () { window.location.href = linkTujuan(item); });
+                notif.close();
+            };
+
+        } catch (e) { /* beberapa browser mobile tidak dukung constructor Notification langsung, lewati saja */ }
+
+    }
+
+    function prosesNotifikasiBrowser(data) {
+
+        if (!("Notification" in window) || Notification.permission !== "granted") return;
+        if (!data.notifikasi || data.notifikasi.length === 0) return;
+
+        var idTerbaruSaatIni = data.notifikasi[0].idAktivitas; // data[0] = paling baru (backend sudah urutkan)
+        var lastSeen = localStorage.getItem(KEY_LAST_NOTIF_ID);
+
+        if (!lastSeen) {
+            // Baseline pertama kali (baru aktifkan izin) — jangan tembak notifikasi LAMA sekaligus
+            localStorage.setItem(KEY_LAST_NOTIF_ID, idTerbaruSaatIni);
+            return;
+        }
+
+        var itemBaru = data.notifikasi.filter(function (n) { return n.idAktivitas > lastSeen; });
+
+        if (itemBaru.length > 0) {
+            itemBaru.slice().reverse().forEach(function (n) { tampilkanNotifikasiBrowser(n); });
+            localStorage.setItem(KEY_LAST_NOTIF_ID, idTerbaruSaatIni);
+        }
+
+    }
+
     function muatNotifikasi() {
 
         var token = ngxAdminGetToken();
@@ -349,6 +438,8 @@ function ngxAdminCobaRememberToken(callback) {
                 }
 
                 window._ngxNotifTerakhir = data;
+
+                prosesNotifikasiBrowser(data);
 
                 var dropdownTerbuka = document.getElementById("ngxNotifDropdown");
                 if (dropdownTerbuka) renderDropdown(data);

@@ -1646,3 +1646,12 @@ table.dataTable tbody tr:hover { background: rgba(15,118,110,0.03); }
     background: #fff; color: #4B5563; transition: all .15s;
 }
 .ngx-admin-btn-icon:hover { background: #F0FDFA; border-color: #0F766E; color: #0F766E; }
+
+/* =========================================================
+   BANNER IZIN NOTIFIKASI BROWSER — muncul di dropdown lonceng
+   ========================================================= */
+.ngx-notif-izin-banner {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px; background: #F0FDFA; border-bottom: 1px solid #F3F4F6;
+    color: #0F766E;
+}
