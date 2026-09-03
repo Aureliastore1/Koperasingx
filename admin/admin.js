@@ -79,6 +79,38 @@ function ngxAdminGetToken() {
     return sessionStorage.getItem("ngxAdminToken");
 }
 
+/*************************************************
+ * CACHE LOKAL BROWSER (stale-while-revalidate) — dipakai bareng
+ * di halaman-halaman yang datanya berat dihitung (Dashboard,
+ * Pinjaman, Follow Up, dll). Supaya buka halaman/klik menu terasa
+ * INSTAN: data terakhir yang berhasil dimuat disimpan di localStorage
+ * lalu ditampilkan LANGSUNG saat halaman dibuka lagi (walau mungkin
+ * agak basi beberapa menit), SAMBIL tetap diam-diam ambil data
+ * terbaru dari server di belakang layar dan update begitu datang.
+ * Ini tidak menggantikan cache di server (Apps Script) — melengkapi,
+ * karena jeda "bangun" Apps Script Web App tiap request tidak bisa
+ * dihilangkan sepenuhnya walau datanya sendiri sudah di-cache di sana.
+ *************************************************/
+function ngxAmbilCacheLokal(kunci, umurMaksimalMs) {
+    try {
+        var raw = localStorage.getItem("ngxCacheLokal_" + kunci);
+        if (!raw) return null;
+        var obj = JSON.parse(raw);
+        if (Date.now() - obj.waktu > umurMaksimalMs) return null;
+        return obj.data;
+    } catch (e) {
+        return null;
+    }
+}
+
+function ngxSimpanCacheLokal(kunci, data) {
+    try {
+        localStorage.setItem("ngxCacheLokal_" + kunci, JSON.stringify({ waktu: Date.now(), data: data }));
+    } catch (e) {
+        // localStorage penuh/tidak tersedia (mis. mode incognito) — lewati saja, tidak fatal
+    }
+}
+
 function ngxAdminLogoutLokal() {
     sessionStorage.removeItem("ngxAdminToken");
     sessionStorage.removeItem("ngxAdminUser");

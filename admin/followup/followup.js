@@ -354,7 +354,18 @@
 
         var token = ngxAdminGetToken();
 
-        if (!tanpaLoading) {
+        // Tampilkan versi cache browser dulu kalau ada (INSTAN), sambil
+        // tetap ambil data terbaru di belakang layar.
+        var cacheLokal = ngxAmbilCacheLokal("followUpNasabah", 5 * 60 * 1000);
+
+        if (cacheLokal && !tanpaLoading) {
+            dataNasabah = cacheLokal;
+            renderRingkasan();
+            renderTabel();
+            loadingBox.classList.add("hidden");
+            errorBox.classList.add("hidden");
+            content.classList.remove("hidden");
+        } else if (!tanpaLoading) {
             loadingBox.classList.remove("hidden");
             errorBox.classList.add("hidden");
             content.classList.add("hidden");
@@ -368,22 +379,28 @@
 
                 if (!data || data.success !== true) {
                     if (data && data.authError) { ngxAdminLogoutLokal(); window.location.href = "/admin/login/"; return; }
-                    errorText.textContent = data && data.message ? data.message : "Gagal memuat data.";
-                    errorBox.classList.remove("hidden");
+                    if (!cacheLokal) {
+                        errorText.textContent = data && data.message ? data.message : "Gagal memuat data.";
+                        errorBox.classList.remove("hidden");
+                    }
                     return;
                 }
 
                 dataNasabah = data.nasabah || [];
                 renderRingkasan();
                 renderTabel();
+                ngxSimpanCacheLokal("followUpNasabah", dataNasabah);
 
+                errorBox.classList.add("hidden");
                 content.classList.remove("hidden");
 
             })
             .catch(function () {
                 loadingBox.classList.add("hidden");
-                errorText.textContent = "Gagal terhubung ke server.";
-                errorBox.classList.remove("hidden");
+                if (!cacheLokal) {
+                    errorText.textContent = "Gagal terhubung ke server.";
+                    errorBox.classList.remove("hidden");
+                }
             });
 
     }

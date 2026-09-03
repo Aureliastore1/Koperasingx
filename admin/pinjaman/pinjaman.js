@@ -536,9 +536,22 @@
         var errorText = document.getElementById("pageErrorText");
         var content = document.getElementById("pageContent");
 
-        loadingBox.classList.remove("hidden");
-        errorBox.classList.add("hidden");
-        content.classList.add("hidden");
+        // Tampilkan versi cache browser dulu kalau ada (INSTAN, tanpa
+        // nunggu server), sambil tetap ambil data terbaru di belakang layar.
+        var cacheLokal = ngxAmbilCacheLokal("pinjamanList", 5 * 60 * 1000);
+
+        if (cacheLokal) {
+            dataPinjaman = cacheLokal;
+            renderSummary();
+            renderTabel();
+            loadingBox.classList.add("hidden");
+            errorBox.classList.add("hidden");
+            content.classList.remove("hidden");
+        } else {
+            loadingBox.classList.remove("hidden");
+            errorBox.classList.add("hidden");
+            content.classList.add("hidden");
+        }
 
         var token = ngxAdminGetToken();
 
@@ -550,22 +563,28 @@
 
                 if (!data || data.success !== true) {
                     if (data && data.authError) { ngxAdminLogoutLokal(); window.location.href = "/admin/login/"; return; }
-                    errorText.textContent = data && data.message ? data.message : "Gagal memuat data.";
-                    errorBox.classList.remove("hidden");
+                    if (!cacheLokal) { // kalau sudah ada cache yg tampil, jangan timpa dengan pesan error
+                        errorText.textContent = data && data.message ? data.message : "Gagal memuat data.";
+                        errorBox.classList.remove("hidden");
+                    }
                     return;
                 }
 
                 dataPinjaman = data.pinjaman;
                 renderSummary();
                 renderTabel();
+                ngxSimpanCacheLokal("pinjamanList", data.pinjaman);
 
+                errorBox.classList.add("hidden");
                 content.classList.remove("hidden");
 
             })
             .catch(function () {
                 loadingBox.classList.add("hidden");
-                errorText.textContent = "Gagal terhubung ke server.";
-                errorBox.classList.remove("hidden");
+                if (!cacheLokal) {
+                    errorText.textContent = "Gagal terhubung ke server.";
+                    errorBox.classList.remove("hidden");
+                }
             });
 
     }
