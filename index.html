@@ -573,33 +573,82 @@
         </div>
     </section>
 
-    <footer class="bg-kop-950 text-white py-10 px-4 sm:px-6">
+    <footer class="bg-kop-950 text-white pt-14 pb-8 px-4 sm:px-6">
         <div class="max-w-6xl mx-auto">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 bg-kop-700 rounded-xl flex items-center justify-center">
-                        <i data-lucide="landmark" class="w-5 h-5 text-white"></i>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 pb-10 border-b border-white/10">
+
+                <!-- Tentang -->
+                <div class="lg:col-span-2 pr-4">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-11 h-11 bg-kop-700 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="landmark" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold">SIMPAN PINJAM KAS NGX</h3>
+                            <p class="text-xs text-white/40">Nyaman &mdash; Sejahtera</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-sm font-bold">SIMPAN PINJAM KAS NGX</h3>
-                        <p class="text-xs text-white/40">Nyaman &mdash; Sejahtera</p>
-                    </div>
+                    <p class="text-xs text-white/50 leading-relaxed max-w-sm">Koperasi Simpan Pinjam NGX melayani anggota dengan sistem simpan pinjam digital yang transparan, cepat, dan terpercaya.</p>
+                    <span class="inline-flex items-center gap-1.5 bg-white/10 text-white/80 text-[11px] font-semibold px-3 py-1.5 rounded-full mt-4">
+                        <i data-lucide="badge-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                        Koperasi Terverifikasi
+                    </span>
                 </div>
-                <div class="flex flex-wrap items-center justify-center gap-4 text-xs text-white/60">
-                    <a href="#beranda" class="hover:text-white transition">Beranda</a>
-                    <a href="/cek-tagihan/" class="hover:text-white transition">Cek Tagihan</a>
-                    <a href="/informasi-kas/" class="hover:text-white transition">Info Kas</a>
-                    <a href="/pelunasan/" class="hover:text-white transition">Pelunasan</a>
-                    <a href="#visi-misi" class="hover:text-white transition">Visi & Misi</a>
-                    <a href="#motto" class="hover:text-white transition">Motto</a>
-                    <a href="#layanan" class="hover:text-white transition">Layanan</a>
-                    <a href="#sk" class="hover:text-white transition">S&K</a>
-                    <a href="#kontak" class="hover:text-white transition">Kontak</a>
+
+                <!-- Menu Cepat -->
+                <div>
+                    <h4 class="text-xs font-bold text-white/90 uppercase tracking-wider mb-4">Menu Cepat</h4>
+                    <ul class="space-y-2.5 text-xs text-white/50">
+                        <li><a href="#beranda" class="hover:text-white transition">Beranda</a></li>
+                        <li><a href="/cek-tagihan/" class="hover:text-white transition">Cek Tagihan</a></li>
+                        <li><a href="/informasi-kas/" class="hover:text-white transition">Info Kas</a></li>
+                        <li><a href="/pelunasan/" class="hover:text-white transition">Pelunasan</a></li>
+                        <li><a href="#visi-misi" class="hover:text-white transition">Visi & Misi</a></li>
+                        <li><a href="#motto" class="hover:text-white transition">Motto</a></li>
+                        <li><a href="#layanan" class="hover:text-white transition">Layanan</a></li>
+                        <li><a href="#sk" class="hover:text-white transition">Syarat & Ketentuan</a></li>
+                    </ul>
                 </div>
+
+                <!-- Kontak -->
+                <div>
+                    <h4 class="text-xs font-bold text-white/90 uppercase tracking-wider mb-4">Kontak Kami</h4>
+                    <ul class="space-y-3 text-xs text-white/50">
+                        <li>
+                            <a href="mailto:kas@koperasingx.web.id" class="flex items-start gap-2.5 hover:text-white transition">
+                                <i data-lucide="mail" class="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-kop-300"></i>
+                                <span class="break-all">kas@koperasingx.web.id</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://wa.me/6285735895522" target="_blank" rel="noopener" class="flex items-start gap-2.5 hover:text-white transition">
+                                <i data-lucide="message-circle" class="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-kop-300"></i>
+                                <span>0857-3589-5522</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="tel:0215556789" class="flex items-start gap-2.5 hover:text-white transition">
+                                <i data-lucide="phone" class="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-kop-300"></i>
+                                <span>(021) 555-6789</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://koperasingx.web.id/" class="flex items-start gap-2.5 hover:text-white transition">
+                                <i data-lucide="globe" class="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-kop-300"></i>
+                                <span class="break-all">koperasingx.web.id</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
             </div>
-            <div class="mt-8 pt-6 border-t border-white/10 text-center">
-                <p class="text-xs text-white/40">&copy; 2025 Simpan Pinjam KAS NGX. Bersama NGX &mdash; Kita Simpan, Kita Pinjam, Kita Sejahtera.</p>
+
+            <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <p class="text-xs text-white/40 text-center sm:text-left">&copy; 2025 Simpan Pinjam KAS NGX. Bersama NGX &mdash; Kita Simpan, Kita Pinjam, Kita Sejahtera.</p>
+                <a href="#kontak" class="text-xs text-white/40 hover:text-white transition">Kontak Resmi &rarr;</a>
             </div>
+
         </div>
     </footer>
 
