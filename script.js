@@ -796,44 +796,22 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
 
     var fileTerpilih = null; // { base64, mime, nama, size, isImage, dataUrl }
 
-    /* ---- Gerbang Tata Cara & S&K — form baru muncul setelah disetujui ---- */
+    /* ---- Gerbang Tata Cara & S&K — form baru muncul setelah disetujui.
+       Konten teksnya ada LANGSUNG di HTML (#isiTataCaraSk), gampang
+       diedit manual tanpa sentuh JS ini sama sekali. Dibuat expand/
+       collapse polos (bukan lewat SweetAlert2) supaya lebih sederhana
+       & tidak ada risiko konflik event dari modal pihak ketiga. ---- */
     var gerbangSk = document.getElementById("simpananGerbangSk");
     var btnBukaSk = document.getElementById("btnBukaSkSimpanan");
+    var isiSk = document.getElementById("isiTataCaraSk");
+    var iconChevronSk = document.getElementById("iconChevronSk");
     var checkSk = document.getElementById("checkSkSimpanan");
     var btnLanjutForm = document.getElementById("btnLanjutKeForm");
 
-    var isiTataCaraSk =
-        "<div style='text-align:left;font-size:13px;line-height:1.7;color:#374151;'>" +
-            "<p style='font-weight:700;margin:0 0 6px 0;color:#0F172A;'>📋 Tata Cara Simpanan</p>" +
-            "<ol style='margin:0 0 16px 18px;padding:0;'>" +
-                "<li>Pilih nama Anda dari daftar anggota (atau isi manual kalau belum terdaftar).</li>" +
-                "<li>Pilih jenis simpanan: Pokok, Wajib, atau Sukarela.</li>" +
-                "<li>Isi nominal, email, dan nomor WhatsApp aktif.</li>" +
-                "<li>Transfer ke rekening koperasi (atau catat sebagai setoran tunai), lalu upload bukti transfer.</li>" +
-                "<li>Simpanan Anda berstatus <em>Menunggu Verifikasi</em> sampai dicek Admin.</li>" +
-                "<li>Email konfirmasi otomatis berisi ID Transaksi &amp; Nomor Rekening Simpanan Anda akan terkirim.</li>" +
-                "<li>Setelah diverifikasi Admin, simpanan resmi tercatat di rekening simpanan Anda, dan Admin akan mengirim konfirmasi lewat WhatsApp.</li>" +
-            "</ol>" +
-            "<p style='font-weight:700;margin:0 0 6px 0;color:#0F172A;'>📜 Syarat & Ketentuan</p>" +
-            "<ul style='margin:0 0 0 18px;padding:0;'>" +
-                "<li>Data yang diisi harus benar dan sesuai identitas Anda sebagai anggota koperasi.</li>" +
-                "<li>Bukti transfer wajib jelas &amp; sesuai nominal yang diinput.</li>" +
-                "<li>Setiap transaksi memiliki ID Transaksi unik untuk keperluan pelacakan &amp; pengecekan.</li>" +
-                "<li>Verifikasi dilakukan oleh Admin dan dapat memakan waktu beberapa saat.</li>" +
-                "<li>Jika ada perbedaan data atau transaksi tidak kunjung terverifikasi, silakan hubungi Admin dengan menyertakan ID Transaksi Anda.</li>" +
-                "<li>Simpanan yang sudah disetujui tercatat resmi dan menjadi bagian dari rekening simpanan Anda di koperasi.</li>" +
-            "</ul>" +
-        "</div>";
-
-    if (btnBukaSk && window.Swal) {
+    if (btnBukaSk && isiSk) {
         btnBukaSk.addEventListener("click", function () {
-            Swal.fire({
-                title: "Tata Cara & S&K Simpanan",
-                html: isiTataCaraSk,
-                confirmButtonText: "Saya Mengerti",
-                confirmButtonColor: "#0F766E",
-                width: 520
-            });
+            isiSk.classList.toggle("hidden");
+            if (iconChevronSk) iconChevronSk.style.transform = isiSk.classList.contains("hidden") ? "rotate(0deg)" : "rotate(180deg)";
         });
     }
 

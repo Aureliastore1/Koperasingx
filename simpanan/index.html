@@ -83,11 +83,41 @@
                 <p class="text-xs text-gray-400 mt-1">Mohon baca dan pahami dulu tata cara serta ketentuan simpanan di koperasi kami.</p>
             </div>
 
-            <button type="button" id="btnBukaSkSimpanan" class="w-full inline-flex items-center justify-center gap-2 bg-kop-50 text-kop-700 text-sm font-bold py-3.5 rounded-xl hover:bg-kop-100 transition mb-4">
-                <i data-lucide="book-open" class="w-4 h-4"></i> Baca Tata Cara & S&K Simpanan
+            <button type="button" id="btnBukaSkSimpanan" class="w-full inline-flex items-center justify-between gap-2 bg-kop-50 text-kop-700 text-sm font-bold py-3.5 px-4 rounded-xl hover:bg-kop-100 transition mb-0">
+                <span class="inline-flex items-center gap-2"><i data-lucide="book-open" class="w-4 h-4"></i> Baca Tata Cara & S&K Simpanan</span>
+                <i data-lucide="chevron-down" class="w-4 h-4" id="iconChevronSk"></i>
             </button>
 
-            <label class="flex items-start gap-3 cursor-pointer select-none">
+            <!-- ===== KONTEN TATA CARA & S&K — EDIT TEKSNYA LANGSUNG DI SINI ===== -->
+            <!-- Boleh ubah/tambah/hapus kalimat di dalam <li> dan <p> bebas, -->
+            <!-- cukup jaga tag HTML-nya tetap utuh (jangan hapus <ul>, <li>, dst). -->
+            <div id="isiTataCaraSk" class="hidden mt-4 p-4 bg-gray-50 rounded-xl text-sm text-gray-700 leading-relaxed">
+
+                <p class="font-bold text-gray-900 mb-2">📋 Tata Cara Simpanan</p>
+                <ol class="list-decimal ml-5 space-y-1 mb-4">
+                    <li>Pilih nama Anda dari daftar anggota (atau isi manual kalau belum terdaftar).</li>
+                    <li>Pilih jenis simpanan: Pokok, Wajib, atau Sukarela.</li>
+                    <li>Isi nominal, email, dan nomor WhatsApp aktif.</li>
+                    <li>Transfer ke rekening koperasi (atau catat sebagai setoran tunai), lalu upload bukti transfer.</li>
+                    <li>Simpanan Anda berstatus <em>Menunggu Verifikasi</em> sampai dicek Admin.</li>
+                    <li>Email konfirmasi otomatis berisi ID Transaksi &amp; Nomor Rekening Simpanan Anda akan terkirim.</li>
+                    <li>Setelah diverifikasi Admin, simpanan resmi tercatat di rekening simpanan Anda, dan Admin akan mengirim konfirmasi lewat WhatsApp.</li>
+                </ol>
+
+                <p class="font-bold text-gray-900 mb-2">📜 Syarat & Ketentuan</p>
+                <ul class="list-disc ml-5 space-y-1">
+                    <li>Data yang diisi harus benar dan sesuai identitas Anda sebagai anggota koperasi.</li>
+                    <li>Bukti transfer wajib jelas dan sesuai nominal yang diinput.</li>
+                    <li>Setiap transaksi memiliki ID Transaksi unik untuk keperluan pelacakan dan pengecekan.</li>
+                    <li>Verifikasi dilakukan oleh Admin dan dapat memakan waktu beberapa saat.</li>
+                    <li>Jika ada perbedaan data atau transaksi tidak kunjung terverifikasi, silakan hubungi Admin dengan menyertakan ID Transaksi Anda.</li>
+                    <li>Simpanan yang sudah disetujui tercatat resmi dan menjadi bagian dari rekening simpanan Anda di koperasi.</li>
+                </ul>
+
+            </div>
+            <!-- ===== AKHIR KONTEN TATA CARA & S&K ===== -->
+
+            <label class="flex items-start gap-3 cursor-pointer select-none mt-4">
                 <input type="checkbox" id="checkSkSimpanan" class="w-5 h-5 mt-0.5 rounded border-gray-300 text-kop-700 flex-shrink-0">
                 <span class="text-sm text-gray-700">Saya telah membaca dan menyetujui Tata Cara & S&K Simpanan</span>
             </label>
