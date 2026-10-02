@@ -128,6 +128,12 @@
 
     });
 
+    function linkWa(noHp, pesan) {
+        var nomor = String(noHp || "").replace(/[^0-9]/g, "");
+        if (nomor.indexOf("0") === 0) nomor = "62" + nomor.slice(1);
+        return "https://wa.me/" + nomor + "?text=" + encodeURIComponent(pesan || "");
+    }
+
     function ubahStatus(id, status, nama) {
 
         var body = new URLSearchParams();
@@ -146,7 +152,21 @@
                 }
 
                 muatDataSimpanan();
-                if (window.Swal) Swal.fire({ title: status, text: "Simpanan " + nama + " ditandai " + status.toLowerCase() + ".", icon: "success", confirmButtonColor: "#0F766E", timer: 1800, showConfirmButton: false });
+
+                // Kalau disetujui dan ada nomor WA, kasih opsi kirim konfirmasi
+                // MANUAL (1 klik) — WA memang tidak dikirim otomatis untuk Simpanan.
+                if (status === "Disetujui" && data.pesanWa && data.noHp && data.noHp !== "-" && window.Swal) {
+                    Swal.fire({
+                        title: "Disetujui",
+                        html:
+                            "<p style='font-size:13px;color:#374151;margin-bottom:14px;'>Simpanan " + nama + " ditandai disetujui.</p>" +
+                            "<a href='" + linkWa(data.noHp, data.pesanWa) + "' target='_blank' rel='noopener' style='display:flex;align-items:center;justify-content:center;gap:6px;background:#F0FDFA;color:#0F766E;font-size:13px;font-weight:700;padding:10px;border-radius:8px;text-decoration:none;'>💬 Kirim Konfirmasi WA ke " + nama + "</a>",
+                        confirmButtonText: "Tutup",
+                        confirmButtonColor: "#0F766E"
+                    });
+                } else if (window.Swal) {
+                    Swal.fire({ title: status, text: "Simpanan " + nama + " ditandai " + status.toLowerCase() + ".", icon: "success", confirmButtonColor: "#0F766E", timer: 1800, showConfirmButton: false });
+                }
 
             })
             .catch(function () {
@@ -221,8 +241,12 @@
 
             return (
                 "<tr>" +
+                    "<td class='font-mono text-[11px] text-gray-500 whitespace-nowrap'>" + escapeHtml(s.id) + "</td>" +
                     "<td>" + escapeHtml(s.tanggal) + "</td>" +
                     "<td class='font-semibold'>" + escapeHtml(s.nama) + "</td>" +
+                    "<td class='whitespace-nowrap'>" + escapeHtml(s.noWhatsApp || "-") + "</td>" +
+                    "<td>" + escapeHtml(s.email || "-") + "</td>" +
+                    "<td class='font-mono text-[11px] text-gray-500 whitespace-nowrap'>" + escapeHtml(s.nomorRekening || "-") + "</td>" +
                     "<td>" + escapeHtml(s.jenisSimpanan) + "</td>" +
                     "<td>" + s.nominalFormat + "</td>" +
                     "<td>" + escapeHtml(s.metodePembayaran) + "</td>" +

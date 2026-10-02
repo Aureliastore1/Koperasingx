@@ -782,6 +782,7 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
     var nominalInput = document.getElementById("simpananNominal");
     var keteranganInput = document.getElementById("simpananKeterangan");
     var emailInput = document.getElementById("simpananEmail");
+    var noWhatsAppInput = document.getElementById("simpananNoWhatsApp");
     var metodeSelect = document.getElementById("simpananMetode");
     var rekeningCard = document.getElementById("simpananRekeningCard");
     var uploadSection = document.getElementById("simpananUploadSection");
@@ -795,13 +796,116 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
 
     var fileTerpilih = null; // { base64, mime, nama, size, isImage, dataUrl }
 
+    /* ---- Gerbang Tata Cara & S&K — form baru muncul setelah disetujui ---- */
+    var gerbangSk = document.getElementById("simpananGerbangSk");
+    var btnBukaSk = document.getElementById("btnBukaSkSimpanan");
+    var checkSk = document.getElementById("checkSkSimpanan");
+    var btnLanjutForm = document.getElementById("btnLanjutKeForm");
+
+    var isiTataCaraSk =
+        "<div style='text-align:left;font-size:13px;line-height:1.7;color:#374151;'>" +
+            "<p style='font-weight:700;margin:0 0 6px 0;color:#0F172A;'>📋 Tata Cara Simpanan</p>" +
+            "<ol style='margin:0 0 16px 18px;padding:0;'>" +
+                "<li>Pilih nama Anda dari daftar anggota (atau isi manual kalau belum terdaftar).</li>" +
+                "<li>Pilih jenis simpanan: Pokok, Wajib, atau Sukarela.</li>" +
+                "<li>Isi nominal, email, dan nomor WhatsApp aktif.</li>" +
+                "<li>Transfer ke rekening koperasi (atau catat sebagai setoran tunai), lalu upload bukti transfer.</li>" +
+                "<li>Simpanan Anda berstatus <em>Menunggu Verifikasi</em> sampai dicek Admin.</li>" +
+                "<li>Email konfirmasi otomatis berisi ID Transaksi &amp; Nomor Rekening Simpanan Anda akan terkirim.</li>" +
+                "<li>Setelah diverifikasi Admin, simpanan resmi tercatat di rekening simpanan Anda, dan Admin akan mengirim konfirmasi lewat WhatsApp.</li>" +
+            "</ol>" +
+            "<p style='font-weight:700;margin:0 0 6px 0;color:#0F172A;'>📜 Syarat & Ketentuan</p>" +
+            "<ul style='margin:0 0 0 18px;padding:0;'>" +
+                "<li>Data yang diisi harus benar dan sesuai identitas Anda sebagai anggota koperasi.</li>" +
+                "<li>Bukti transfer wajib jelas &amp; sesuai nominal yang diinput.</li>" +
+                "<li>Setiap transaksi memiliki ID Transaksi unik untuk keperluan pelacakan &amp; pengecekan.</li>" +
+                "<li>Verifikasi dilakukan oleh Admin dan dapat memakan waktu beberapa saat.</li>" +
+                "<li>Jika ada perbedaan data atau transaksi tidak kunjung terverifikasi, silakan hubungi Admin dengan menyertakan ID Transaksi Anda.</li>" +
+                "<li>Simpanan yang sudah disetujui tercatat resmi dan menjadi bagian dari rekening simpanan Anda di koperasi.</li>" +
+            "</ul>" +
+        "</div>";
+
+    if (btnBukaSk && window.Swal) {
+        btnBukaSk.addEventListener("click", function () {
+            Swal.fire({
+                title: "Tata Cara & S&K Simpanan",
+                html: isiTataCaraSk,
+                confirmButtonText: "Saya Mengerti",
+                confirmButtonColor: "#0F766E",
+                width: 520
+            });
+        });
+    }
+
+    if (checkSk && btnLanjutForm) {
+        checkSk.addEventListener("change", function () {
+            if (checkSk.checked) {
+                btnLanjutForm.disabled = false;
+                btnLanjutForm.classList.remove("bg-gray-200", "text-gray-400", "cursor-not-allowed");
+                btnLanjutForm.classList.add("bg-kop-700", "text-white", "hover:bg-kop-800");
+            } else {
+                btnLanjutForm.disabled = true;
+                btnLanjutForm.classList.add("bg-gray-200", "text-gray-400", "cursor-not-allowed");
+                btnLanjutForm.classList.remove("bg-kop-700", "text-white", "hover:bg-kop-800");
+            }
+        });
+    }
+
+    if (btnLanjutForm && gerbangSk) {
+        btnLanjutForm.addEventListener("click", function () {
+            if (btnLanjutForm.disabled) return;
+            gerbangSk.classList.add("hidden");
+            form.classList.remove("hidden");
+            form.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+    }
+
     function escapeHtml(s) {
         return String(s).replace(/[&<>"']/g, function (c) {
             return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
         });
     }
 
-    /* ---- Nama Anggota: dropdown + toggle "Lainnya..." ---- */
+    /* ---- Nama Anggota: dropdown diisi DINAMIS dari Data Anggota
+       (bukan di-hardcode lagi), + toggle "Lainnya..." + auto-isi
+       Panther Group begitu nama dipilih (ambil dari grup anggota itu
+       di Data Anggota, supaya konsisten & nasabah tidak perlu pilih
+       manual tiap kali). ---- */
+    var petaGrupAnggota = {}; // { NAMA: grup }
+
+    function muatDaftarNamaAnggota() {
+
+        if (!namaSelect) return;
+
+        fetch(NGX_API_BASE_URL + "?action=daftarNamaAnggota")
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+
+                var opsiLainnya = namaSelect.querySelector('option[value="__lainnya__"]');
+
+                namaSelect.innerHTML = '<option value="" disabled selected>Pilih nama anggota</option>';
+
+                if (data && data.success && Array.isArray(data.anggota)) {
+                    data.anggota.forEach(function (a) {
+                        petaGrupAnggota[a.nama] = a.grup || "";
+                        var opt = document.createElement("option");
+                        opt.value = a.nama;
+                        opt.textContent = a.nama;
+                        namaSelect.appendChild(opt);
+                    });
+                }
+
+                namaSelect.appendChild(opsiLainnya || Object.assign(document.createElement("option"), { value: "__lainnya__", textContent: "Lainnya..." }));
+
+            })
+            .catch(function () {
+                // Gagal memuat — tetap biarkan opsi "Lainnya..." supaya form masih bisa dipakai manual
+                namaSelect.innerHTML = '<option value="" disabled selected>Gagal memuat daftar, pilih "Lainnya..."</option><option value="__lainnya__">Lainnya...</option>';
+            });
+
+    }
+    muatDaftarNamaAnggota();
+
     function updateNamaLainnyaUI() {
         if (namaSelect.value === "__lainnya__") {
             namaLainnya.classList.remove("hidden");
@@ -810,6 +914,12 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
             namaLainnya.classList.add("hidden");
             namaLainnya.required = false;
             namaLainnya.value = "";
+
+            // Auto-isi Panther Group kalau nama ini punya data grup tercatat
+            var grupTerdeteksi = petaGrupAnggota[namaSelect.value];
+            if (grupTerdeteksi && pantherGroupSelect && pantherGroupSelect.querySelector('option[value="' + grupTerdeteksi + '"]')) {
+                pantherGroupSelect.value = grupTerdeteksi;
+            }
         }
     }
     if (namaSelect) {
@@ -1014,15 +1124,18 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
         var jenis = jenisSelect.value;
         var nominal = parseFloat(String(nominalInput.value).replace(/[^0-9.-]/g, ""));
         var email = emailInput.value.trim();
+        var noWhatsApp = noWhatsAppInput ? noWhatsAppInput.value.trim() : "";
         var metode = metodeSelect.value;
 
         var polaEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        var polaWa = /^(\+62|62|0)8[0-9]{8,11}$/;
 
         if (!nama) return tampilkanErrorForm("Nama anggota tidak boleh kosong.");
         if (!pantherGroup) return tampilkanErrorForm("Panther Group wajib dipilih.");
         if (!jenis) return tampilkanErrorForm("Pilih jenis simpanan terlebih dahulu.");
         if (!nominal || nominal <= 0) return tampilkanErrorForm("Nominal simpanan tidak valid.");
         if (!email || !polaEmail.test(email)) return tampilkanErrorForm("Email wajib diisi dengan format yang benar (contoh: nama@email.com).");
+        if (!noWhatsApp || !polaWa.test(noWhatsApp.replace(/[\s-]/g, ""))) return tampilkanErrorForm("Nomor WhatsApp wajib diisi dengan format yang benar (contoh: 081234567890).");
         if (metode === "Transfer Bank" && !fileTerpilih) return tampilkanErrorForm("Bukti transfer wajib diupload untuk metode Transfer Bank.");
 
         var body = new URLSearchParams();
@@ -1033,6 +1146,7 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
         body.append("nominal", nominal);
         body.append("keterangan", keteranganInput.value.trim());
         body.append("email", email);
+        body.append("noWhatsApp", noWhatsApp);
         body.append("metodePembayaran", metode);
 
         if (metode === "Transfer Bank" && fileTerpilih) {
@@ -1078,12 +1192,20 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
                 if (window.Swal) {
                     Swal.fire({
                         title: "Berhasil",
-                        text: "Terima kasih. Data simpanan berhasil dikirim dan akan diverifikasi oleh Admin terlebih dahulu.",
+                        html:
+                            "<p style='font-size:13.5px;color:#374151;margin-bottom:14px;'>Terima kasih. Data simpanan berhasil dikirim dan akan diverifikasi oleh Admin terlebih dahulu. Detail lengkap juga sudah dikirim ke email Anda.</p>" +
+                            "<div style='background:#F0FDFA;border:1px solid #CCFBF1;border-radius:12px;padding:14px;text-align:left;'>" +
+                                "<p style='font-size:10px;color:#6B7280;margin:0 0 2px 0;letter-spacing:0.05em;'>ID TRANSAKSI</p>" +
+                                "<p style='font-size:14px;font-weight:800;color:#0F766E;margin:0 0 10px 0;font-family:monospace;'>" + (data.idSimpanan || "-") + "</p>" +
+                                "<p style='font-size:10px;color:#6B7280;margin:0 0 2px 0;letter-spacing:0.05em;'>NOMOR REKENING SIMPANAN ANDA</p>" +
+                                "<p style='font-size:14px;font-weight:800;color:#0F766E;margin:0;font-family:monospace;'>" + (data.nomorRekening || "-") + "</p>" +
+                            "</div>",
                         icon: "success",
+                        confirmButtonText: "Oke, Mengerti",
                         confirmButtonColor: "#0F766E"
                     });
                 } else {
-                    alert("Berhasil! Data simpanan berhasil dikirim dan akan diverifikasi oleh Admin terlebih dahulu.");
+                    alert("Berhasil! ID Transaksi: " + (data.idSimpanan || "-") + " | Nomor Rekening: " + (data.nomorRekening || "-"));
                 }
 
             })
@@ -2122,6 +2244,7 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
                         '<span class="text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0" style="' + badgeStatusSimpanan(r.status) + '">' + escapeHtml(r.status) + '</span>' +
                     '</div>' +
                     '<p class="text-lg font-extrabold text-kop-700">' + escapeHtml(r.nominalFormat) + '</p>' +
+                    '<p class="text-[10.5px] text-gray-400 mt-1 font-mono">' + escapeHtml(r.idTransaksi || "-") + '</p>' +
                     (r.keterangan && r.keterangan !== "-" ? '<p class="text-xs text-gray-500 mt-2">' + escapeHtml(r.keterangan) + '</p>' : '') +
                 '</div>'
             );
@@ -2130,7 +2253,8 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
         resultBox.innerHTML =
             '<div class="bg-kop-700 rounded-2xl p-5 mb-4 text-center">' +
                 '<p class="text-xs text-white/70 mb-1">Total Simpanan Disetujui &middot; ' + escapeHtml(data.nama) + '</p>' +
-                '<p class="text-2xl font-extrabold text-white">' + escapeHtml(data.totalDisetujuiFormat) + '</p>' +
+                '<p class="text-2xl font-extrabold text-white mb-2">' + escapeHtml(data.totalDisetujuiFormat) + '</p>' +
+                (data.nomorRekening ? '<p class="text-[11px] text-white/60 font-mono">Rekening Simpanan: ' + escapeHtml(data.nomorRekening) + '</p>' : '') +
             '</div>' +
             kartuList;
 
