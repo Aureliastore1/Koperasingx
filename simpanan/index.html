@@ -153,6 +153,25 @@
                 </select>
             </div>
 
+            <!-- Data Rekening Bank Nasabah — auto-isi kalau sudah terdaftar admin -->
+            <div class="border border-gray-100 rounded-xl p-4 bg-gray-50/50 space-y-3">
+                <p id="simpananRekeningInfo" class="text-[11px] text-gray-400 hidden flex items-center gap-1.5">
+                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-500"></i> Data rekening otomatis terisi dari data terdaftar
+                </p>
+                <div>
+                    <label class="ngx-form-label">Nama Bank</label>
+                    <input type="text" id="simpananNamaBankNasabah" required placeholder="Contoh: BRI, BCA, MANDIRI" class="ngx-form-input">
+                </div>
+                <div>
+                    <label class="ngx-form-label">Nomor Rekening</label>
+                    <input type="text" id="simpananNoRekeningNasabah" required placeholder="Nomor rekening Anda" class="ngx-form-input">
+                </div>
+                <div>
+                    <label class="ngx-form-label">Atas Nama Rekening</label>
+                    <input type="text" id="simpananAtasNamaRekening" required placeholder="Nama pemilik rekening" class="ngx-form-input">
+                </div>
+            </div>
+
             <!-- Jenis Simpanan -->
             <div>
                 <label class="ngx-form-label">Jenis Simpanan</label>
