@@ -35,7 +35,7 @@
         formKop.reset();
 
         if (mode === "edit" && data) {
-            modalKopTitle.textContent = "Edit Rekening Koperasi";
+            modalKopTitle.textContent = "Edit Rekening Default";
             fKopRowNumber.value = data.rowNumber;
             fKopNamaBank.value = data.namaBank === "-" ? "" : data.namaBank;
             fKopNoRekening.value = data.noRekening === "-" ? "" : data.noRekening;
@@ -43,7 +43,7 @@
             fKopKeterangan.value = data.keterangan === "-" ? "" : data.keterangan;
             fKopStatus.value = data.statusAktif;
         } else {
-            modalKopTitle.textContent = "Tambah Rekening Koperasi";
+            modalKopTitle.textContent = "Tambah Rekening Default";
             fKopRowNumber.value = "";
         }
 
@@ -100,7 +100,7 @@
                 tutupModalKop();
                 muatDataRekKoperasi();
 
-                if (window.Swal) Swal.fire({ title: "Berhasil", text: "Rekening koperasi tersimpan.", icon: "success", confirmButtonColor: "#0F766E", timer: 1800, showConfirmButton: false });
+                if (window.Swal) Swal.fire({ title: "Berhasil", text: "Rekening default tersimpan.", icon: "success", confirmButtonColor: "#0F766E", timer: 1800, showConfirmButton: false });
 
             })
             .catch(function () {
@@ -143,7 +143,7 @@
         if (window.Swal) {
             Swal.fire({
                 title: "Hapus rekening ini?",
-                text: "Rekening " + namaBank + " akan dihapus. Nasabah yang ditugaskan ke rekening ini otomatis balik ke rekening default.",
+                text: "Rekening default " + namaBank + " akan dihapus.",
                 icon: "warning", showCancelButton: true,
                 confirmButtonText: "Ya, Hapus", cancelButtonText: "Batal", confirmButtonColor: "#DC2626"
             }).then(function (result) { if (result.isConfirmed) lanjutkan(); });
@@ -203,23 +203,6 @@
 
     }
 
-    function isiDropdownRekeningKoperasi() {
-
-        var select = document.getElementById("rekeningIdRekening");
-        if (!select) return;
-
-        var opsiPilih = '<option value="" disabled selected>Pilih rekening koperasi</option>';
-
-        var opsiRekening = dataRekKoperasiSaatIni
-            .filter(function (r) { return r.statusAktif === "Aktif"; })
-            .map(function (r) {
-                return '<option value="' + escapeHtml(r.idRekening) + '">' + escapeHtml(r.namaBank) + " \u00b7 " + escapeHtml(r.noRekening) + " (" + escapeHtml(r.atasNama) + ")</option>";
-            }).join("");
-
-        select.innerHTML = opsiPilih + opsiRekening;
-
-    }
-
     function muatDataRekKoperasi() {
 
         var token = ngxAdminGetToken();
@@ -235,7 +218,6 @@
 
                 dataRekKoperasiSaatIni = data.rekening;
                 renderTabelKop(dataRekKoperasiSaatIni);
-                isiDropdownRekeningKoperasi();
 
             });
 
@@ -255,26 +237,24 @@
 
     var fRowNumber = document.getElementById("rekeningRowNumber");
     var fNama = document.getElementById("rekeningNama");
-    var fIdRekening = document.getElementById("rekeningIdRekening");
+    var fNamaBank = document.getElementById("rekeningNamaBank");
+    var fNoRekening = document.getElementById("rekeningNoRekening");
+    var fAtasNama = document.getElementById("rekeningAtasNama");
 
     function bukaModal(mode, data) {
 
         modalError.classList.add("hidden");
         form.reset();
-        isiDropdownRekeningKoperasi();
-
-        if (dataRekKoperasiSaatIni.filter(function (r) { return r.statusAktif === "Aktif"; }).length === 0) {
-            modalError.textContent = "Belum ada Rekening Koperasi aktif. Tambahkan dulu di kartu \"Rekening Koperasi\" di atas.";
-            modalError.classList.remove("hidden");
-        }
 
         if (mode === "edit" && data) {
-            modalTitle.textContent = "Edit Penugasan Rekening";
+            modalTitle.textContent = "Edit Rekening Nasabah";
             fRowNumber.value = data.rowNumber;
             fNama.value = data.nama;
-            fIdRekening.value = data.idRekening;
+            fNamaBank.value = data.namaBank === "-" ? "" : data.namaBank;
+            fNoRekening.value = data.noRekening === "-" ? "" : data.noRekening;
+            fAtasNama.value = data.atasNama === "-" ? "" : data.atasNama;
         } else {
-            modalTitle.textContent = "Tetapkan Rekening untuk Nasabah";
+            modalTitle.textContent = "Tambah Rekening Nasabah";
             fRowNumber.value = "";
         }
 
@@ -294,16 +274,12 @@
         modalError.classList.add("hidden");
 
         var nama = fNama.value.trim();
-        var idRekening = fIdRekening.value;
+        var namaBank = fNamaBank.value.trim();
+        var noRekening = fNoRekening.value.trim();
+        var atasNama = fAtasNama.value.trim();
 
-        if (!nama) {
-            modalError.textContent = "Nama nasabah wajib diisi.";
-            modalError.classList.remove("hidden");
-            return;
-        }
-
-        if (!idRekening) {
-            modalError.textContent = "Rekening koperasi wajib dipilih.";
+        if (!nama || !namaBank || !noRekening || !atasNama) {
+            modalError.textContent = "Nama nasabah, nama bank, nomor rekening, dan atas nama wajib diisi.";
             modalError.classList.remove("hidden");
             return;
         }
@@ -316,7 +292,9 @@
         body.append("token", ngxAdminGetToken());
         body.append("rowNumber", fRowNumber.value);
         body.append("nama", nama);
-        body.append("idRekening", idRekening);
+        body.append("namaBank", namaBank);
+        body.append("noRekening", noRekening);
+        body.append("atasNama", atasNama);
 
         fetch(NGX_API_BASE_URL, { method: "POST", body: body })
             .then(function (res) { return res.json(); })
@@ -337,7 +315,7 @@
                 if (window.Swal) {
                     Swal.fire({
                         title: "Berhasil",
-                        text: data.diupdate ? "Nasabah ini sudah ada, penugasannya diperbarui." : "Penugasan rekening tersimpan.",
+                        text: data.diupdate ? "Nasabah ini sudah terdaftar, datanya diperbarui." : "Rekening nasabah tersimpan.",
                         icon: "success", confirmButtonColor: "#0F766E", timer: 1800, showConfirmButton: false
                     });
                 }
@@ -371,7 +349,7 @@
                     }
 
                     muatDataRekening();
-                    if (window.Swal) Swal.fire({ title: "Terhapus", text: nama + " kembali pakai rekening default.", icon: "success", confirmButtonColor: "#0F766E", timer: 1800, showConfirmButton: false });
+                    if (window.Swal) Swal.fire({ title: "Terhapus", text: "Rekening " + nama + " dihapus.", icon: "success", confirmButtonColor: "#0F766E", timer: 1800, showConfirmButton: false });
 
                 })
                 .catch(function () {
@@ -382,12 +360,12 @@
 
         if (window.Swal) {
             Swal.fire({
-                title: "Hapus penugasan ini?",
-                text: nama + " akan kembali memakai rekening koperasi default.",
+                title: "Hapus rekening ini?",
+                text: "Rekening milik " + nama + " akan dihapus. Nasabah ini nanti memakai rekening default (kalau ada).",
                 icon: "warning", showCancelButton: true,
                 confirmButtonText: "Ya, Hapus", cancelButtonText: "Batal", confirmButtonColor: "#DC2626"
             }).then(function (result) { if (result.isConfirmed) lanjutkan(); });
-        } else if (confirm("Hapus penugasan " + nama + "?")) {
+        } else if (confirm("Hapus rekening " + nama + "?")) {
             lanjutkan();
         }
 
@@ -403,10 +381,10 @@
             return (
                 "<tr>" +
                     "<td class='font-semibold'>" + escapeHtml(r.nama) + "</td>" +
-                    "<td>" + escapeHtml(r.namaBank) + " <span class='text-[10px] text-gray-400 font-mono'>(" + escapeHtml(r.idRekening) + ")</span></td>" +
+                    "<td>" + escapeHtml(r.namaBank) + "</td>" +
                     "<td class='font-mono'>" + escapeHtml(r.noRekening) + "</td>" +
                     "<td>" + escapeHtml(r.atasNama) + "</td>" +
-                    "<td class='text-xs text-gray-500'>" + escapeHtml(r.tanggalFormat) + "<br><span class='text-gray-400'>oleh " + escapeHtml(r.ditetapkanOleh) + "</span></td>" +
+                    "<td class='text-xs text-gray-500'>" + escapeHtml(r.tanggalFormat) + "<br><span class='text-gray-400'>oleh " + escapeHtml(r.didaftarkanOleh) + "</span></td>" +
                     "<td>" +
                         "<div class='flex gap-1.5'>" +
                             "<button class='ngx-admin-btn ngx-admin-btn-outline ngx-admin-btn-sm btn-edit-rekening' data-row='" + r.rowNumber + "'><i data-lucide='pencil' class='w-3 h-3'></i></button>" +
@@ -421,7 +399,7 @@
             pageLength: 10,
             language: {
                 search: "Cari:", lengthMenu: "Tampilkan _MENU_ data", info: "_START_-_END_ dari _TOTAL_ data",
-                paginate: { previous: "\u2039", next: "\u203a" }, zeroRecords: "Tidak ada data ditemukan", emptyTable: "Belum ada nasabah ditugaskan"
+                paginate: { previous: "\u2039", next: "\u203a" }, zeroRecords: "Tidak ada data ditemukan", emptyTable: "Belum ada rekening nasabah terdaftar"
             }
         });
 

@@ -889,31 +889,50 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
        ke Bank Jago), ditentukan admin lewat /admin/rekening-nasabah/.
        Kalau nasabah belum ditugaskan ke rekening tertentu, otomatis
        pakai rekening koperasi default (aktif pertama). ---- */
+    var judulRekEl = document.getElementById("simpananJudulRek");
     var labelRekEl = document.getElementById("simpananLabelRek");
     var nomorRekEl = document.getElementById("simpananNomorRek");
 
-    function tampilkanRekeningTujuan(data) {
+    // Dipakai untuk membuang respons lama kalau nasabah ganti nama cepat-cepat
+    var permintaanRekeningTerakhir = 0;
+
+    function tampilkanRekeningTujuan(data, namaDipilih) {
 
         if (!labelRekEl || !nomorRekEl) return;
 
         if (data && data.found) {
-            labelRekEl.textContent = (data.namaBank || "-") + " \u00b7 A/N " + (data.atasNama || "-");
+
+            // Nama bank, lalu atas nama (kalau ada isinya)
+            var atasNama = String(data.atasNama || "").trim();
+            labelRekEl.textContent = (data.namaBank || "-") + (atasNama ? " \u00b7 A/N " + atasNama : "");
             nomorRekEl.textContent = data.noRekening || "-";
+
+            // Judul kartu: kalau ini rekening milik nasabah itu sendiri, tampilkan namanya
+            if (judulRekEl) {
+                judulRekEl.textContent = data.ditugaskan && data.namaNasabah ? "Rekening untuk " + data.namaNasabah : "KAS NGANJUK";
+            }
+
         } else {
-            labelRekEl.textContent = "Rekening belum diatur, hubungi admin";
+
+            if (judulRekEl) judulRekEl.textContent = "KAS NGANJUK";
+
+            // Sebelum nama dipilih, pesannya netral. Sesudah nama dipilih tapi tidak ada rekening, baru "hubungi admin".
+            labelRekEl.textContent = namaDipilih ? "Rekening belum diatur, hubungi admin" : "Pilih nama anggota untuk melihat rekening tujuan";
             nomorRekEl.textContent = "-";
+
         }
 
     }
 
     function muatRekeningTujuan(nama) {
 
+        var urutan = ++permintaanRekeningTerakhir;
         var url = NGX_API_BASE_URL + "?action=rekeningNasabahByNama&nama=" + encodeURIComponent(nama || "");
 
         fetch(url)
             .then(function (res) { return res.json(); })
-            .then(function (data) { tampilkanRekeningTujuan(data); })
-            .catch(function () { tampilkanRekeningTujuan(null); });
+            .then(function (data) { if (urutan === permintaanRekeningTerakhir) tampilkanRekeningTujuan(data, nama); })
+            .catch(function () { if (urutan === permintaanRekeningTerakhir) tampilkanRekeningTujuan(null, nama); });
 
     }
 

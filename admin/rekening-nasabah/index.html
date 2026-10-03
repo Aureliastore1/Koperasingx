@@ -111,10 +111,10 @@
                     <div class="ngx-admin-table-card mb-5">
                         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                             <div>
-                                <p class="text-sm font-bold text-gray-800">Rekening Koperasi</p>
-                                <p class="text-xs text-gray-400">Daftar rekening TUJUAN transfer milik koperasi (misal BRI, Bank Jago — bisa lebih dari satu).</p>
+                                <p class="text-sm font-bold text-gray-800">Rekening Default (opsional)</p>
+                                <p class="text-xs text-gray-400">Dipakai untuk nasabah yang BELUM punya rekening sendiri di daftar bawah. Yang aktif pertama jadi default.</p>
                             </div>
-                            <button id="btnTambahRekKoperasi" class="ngx-admin-btn ngx-admin-btn-primary flex-shrink-0"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Rekening Koperasi</button>
+                            <button id="btnTambahRekKoperasi" class="ngx-admin-btn ngx-admin-btn-primary flex-shrink-0"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Rekening Default</button>
                         </div>
 
                         <div class="overflow-x-auto">
@@ -139,10 +139,10 @@
                     <div class="ngx-admin-table-card">
                         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                             <div>
-                                <p class="text-sm font-bold text-gray-800">Penugasan Nasabah ke Rekening</p>
-                                <p class="text-xs text-gray-400">Tentukan nasabah mana transfer ke rekening koperasi yang mana. Yang belum ditugaskan otomatis pakai rekening default (aktif pertama).</p>
+                                <p class="text-sm font-bold text-gray-800">Rekening per Nasabah</p>
+                                <p class="text-xs text-gray-400">Tiap nasabah punya rekening tujuan transfer sendiri (nomor boleh beda, atas nama boleh sama). Saat nasabah pilih namanya di Formulir Simpanan, kartu transfer otomatis menampilkan data di sini.</p>
                             </div>
-                            <button id="btnTambah" class="ngx-admin-btn ngx-admin-btn-primary flex-shrink-0"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Tetapkan Rekening</button>
+                            <button id="btnTambah" class="ngx-admin-btn ngx-admin-btn-primary flex-shrink-0"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Rekening Nasabah</button>
                         </div>
 
                         <div class="overflow-x-auto">
@@ -150,10 +150,10 @@
                                 <thead>
                                     <tr>
                                         <th>Nama Nasabah</th>
-                                        <th>Rekening Ditugaskan</th>
+                                        <th>Nama Bank</th>
                                         <th>Nomor Rekening</th>
                                         <th>Atas Nama</th>
-                                        <th>Ditetapkan</th>
+                                        <th>Didaftarkan</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -172,7 +172,7 @@
     <div id="modalRekKoperasi" class="ngx-modal-overlay hidden">
         <div class="ngx-modal-box">
             <div class="ngx-modal-header">
-                <h3 class="text-sm font-bold text-gray-900" id="modalRekKoperasiTitle">Tambah Rekening Koperasi</h3>
+                <h3 class="text-sm font-bold text-gray-900" id="modalRekKoperasiTitle">Tambah Rekening Default</h3>
                 <i data-lucide="x" class="w-5 h-5 ngx-modal-close" id="modalRekKoperasiClose"></i>
             </div>
             <form id="formRekKoperasi">
@@ -215,7 +215,7 @@
     <div id="modalRekening" class="ngx-modal-overlay hidden">
         <div class="ngx-modal-box">
             <div class="ngx-modal-header">
-                <h3 class="text-sm font-bold text-gray-900" id="modalRekeningTitle">Tetapkan Rekening untuk Nasabah</h3>
+                <h3 class="text-sm font-bold text-gray-900" id="modalRekeningTitle">Tambah Rekening Nasabah</h3>
                 <i data-lucide="x" class="w-5 h-5 ngx-modal-close" id="modalRekeningClose"></i>
             </div>
             <form id="formRekening">
@@ -227,11 +227,16 @@
                         <p class="text-[11px] text-gray-400 mt-1">Pastikan ejaan nama sama persis dengan yang nanti dipilih nasabah di Formulir Simpanan.</p>
                     </div>
                     <div>
-                        <label class="ngx-form-label">Rekening Koperasi Tujuan</label>
-                        <select id="rekeningIdRekening" required class="ngx-form-select">
-                            <option value="" disabled selected>Pilih rekening koperasi</option>
-                        </select>
-                        <p class="text-[11px] text-gray-400 mt-1">Belum ada pilihan? Tambahkan dulu di kartu "Rekening Koperasi" di atas.</p>
+                        <label class="ngx-form-label">Nama Bank</label>
+                        <input type="text" id="rekeningNamaBank" required class="ngx-form-input" placeholder="Contoh: BANK JAGO, BRI, BCA">
+                    </div>
+                    <div>
+                        <label class="ngx-form-label">Nomor Rekening</label>
+                        <input type="text" id="rekeningNoRekening" required class="ngx-form-input" placeholder="Nomor rekening tujuan transfer nasabah ini">
+                    </div>
+                    <div>
+                        <label class="ngx-form-label">Atas Nama Rekening</label>
+                        <input type="text" id="rekeningAtasNama" required class="ngx-form-input" placeholder="Contoh: TRIAS MARDIANTO">
                     </div>
                     <p id="modalRekeningError" class="hidden text-xs text-red-600"></p>
                 </div>
