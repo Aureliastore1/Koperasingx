@@ -153,24 +153,6 @@
                 </select>
             </div>
 
-            <!-- Data Rekening Bank Nasabah — auto-isi kalau sudah terdaftar admin -->
-            <div class="border border-gray-100 rounded-xl p-4 bg-gray-50/50 space-y-3">
-                <p id="simpananRekeningInfo" class="text-[11px] text-gray-400 hidden flex items-center gap-1.5">
-                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-500"></i> Data rekening otomatis terisi dari data terdaftar
-                </p>
-                <div>
-                    <label class="ngx-form-label">Nama Bank</label>
-                    <input type="text" id="simpananNamaBankNasabah" required placeholder="Contoh: BRI, BCA, MANDIRI" class="ngx-form-input">
-                </div>
-                <div>
-                    <label class="ngx-form-label">Nomor Rekening</label>
-                    <input type="text" id="simpananNoRekeningNasabah" required placeholder="Nomor rekening Anda" class="ngx-form-input">
-                </div>
-                <div>
-                    <label class="ngx-form-label">Atas Nama Rekening</label>
-                    <input type="text" id="simpananAtasNamaRekening" required placeholder="Nama pemilik rekening" class="ngx-form-input">
-                </div>
-            </div>
 
             <!-- Jenis Simpanan -->
             <div>
@@ -227,8 +209,8 @@
                 <p class="text-sm font-bold text-white mb-3">KAS NGANJUK</p>
                 <div class="flex items-end justify-between gap-3 flex-wrap">
                     <div>
-                        <p class="ngx-rekening-label">BRI &middot; A/N Trias Mardianto</p>
-                        <p class="ngx-rekening-nomor" id="simpananNomorRek">375301017541500</p>
+                        <p class="ngx-rekening-label" id="simpananLabelRek">Memuat data rekening...</p>
+                        <p class="ngx-rekening-nomor" id="simpananNomorRek">-</p>
                     </div>
                     <button type="button" id="simpananCopyRekening" class="ngx-rekening-copy">
                         <i data-lucide="copy" class="w-3 h-3"></i>

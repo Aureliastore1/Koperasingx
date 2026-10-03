@@ -107,10 +107,42 @@
 
                 <div id="pageContent" class="hidden">
 
+                    <!-- Kartu 1: Kelola Rekening Koperasi (daftar tujuan transfer) -->
+                    <div class="ngx-admin-table-card mb-5">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-gray-800">Rekening Koperasi</p>
+                                <p class="text-xs text-gray-400">Daftar rekening TUJUAN transfer milik koperasi (misal BRI, Bank Jago — bisa lebih dari satu).</p>
+                            </div>
+                            <button id="btnTambahRekKoperasi" class="ngx-admin-btn ngx-admin-btn-primary flex-shrink-0"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Rekening Koperasi</button>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table id="tabelRekKoperasi" class="display" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nama Bank</th>
+                                        <th>Nomor Rekening</th>
+                                        <th>Atas Nama</th>
+                                        <th>Keterangan</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Kartu 2: Penugasan Nasabah -> Rekening Koperasi -->
                     <div class="ngx-admin-table-card">
                         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                            <p class="text-xs text-gray-400">Nasabah yang sudah terdaftar di sini akan otomatis dapat data bank-nya terisi sendiri saat isi Formulir Simpanan.</p>
-                            <button id="btnTambah" class="ngx-admin-btn ngx-admin-btn-primary flex-shrink-0"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Rekening</button>
+                            <div>
+                                <p class="text-sm font-bold text-gray-800">Penugasan Nasabah ke Rekening</p>
+                                <p class="text-xs text-gray-400">Tentukan nasabah mana transfer ke rekening koperasi yang mana. Yang belum ditugaskan otomatis pakai rekening default (aktif pertama).</p>
+                            </div>
+                            <button id="btnTambah" class="ngx-admin-btn ngx-admin-btn-primary flex-shrink-0"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Tetapkan Rekening</button>
                         </div>
 
                         <div class="overflow-x-auto">
@@ -118,10 +150,10 @@
                                 <thead>
                                     <tr>
                                         <th>Nama Nasabah</th>
-                                        <th>Nama Bank</th>
+                                        <th>Rekening Ditugaskan</th>
                                         <th>Nomor Rekening</th>
                                         <th>Atas Nama</th>
-                                        <th>Didaftarkan</th>
+                                        <th>Ditetapkan</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -136,11 +168,54 @@
         </div>
     </div>
 
-    <!-- Modal Tambah/Edit Rekening -->
+    <!-- Modal Tambah/Edit Rekening Koperasi -->
+    <div id="modalRekKoperasi" class="ngx-modal-overlay hidden">
+        <div class="ngx-modal-box">
+            <div class="ngx-modal-header">
+                <h3 class="text-sm font-bold text-gray-900" id="modalRekKoperasiTitle">Tambah Rekening Koperasi</h3>
+                <i data-lucide="x" class="w-5 h-5 ngx-modal-close" id="modalRekKoperasiClose"></i>
+            </div>
+            <form id="formRekKoperasi">
+                <div class="ngx-modal-body space-y-4">
+                    <input type="hidden" id="rekKoperasiRowNumber">
+                    <div>
+                        <label class="ngx-form-label">Nama Bank</label>
+                        <input type="text" id="rekKoperasiNamaBank" required class="ngx-form-input" placeholder="Contoh: BRI, Bank Jago, BCA">
+                    </div>
+                    <div>
+                        <label class="ngx-form-label">Nomor Rekening</label>
+                        <input type="text" id="rekKoperasiNoRekening" required class="ngx-form-input" placeholder="Nomor rekening koperasi">
+                    </div>
+                    <div>
+                        <label class="ngx-form-label">Atas Nama</label>
+                        <input type="text" id="rekKoperasiAtasNama" required class="ngx-form-input" placeholder="Nama pemilik rekening">
+                    </div>
+                    <div>
+                        <label class="ngx-form-label">Keterangan (opsional)</label>
+                        <input type="text" id="rekKoperasiKeterangan" class="ngx-form-input" placeholder="Contoh: Khusus Panther Group BMX">
+                    </div>
+                    <div>
+                        <label class="ngx-form-label">Status</label>
+                        <select id="rekKoperasiStatus" class="ngx-form-select">
+                            <option value="Aktif">Aktif</option>
+                            <option value="Nonaktif">Nonaktif</option>
+                        </select>
+                    </div>
+                    <p id="modalRekKoperasiError" class="hidden text-xs text-red-600"></p>
+                </div>
+                <div class="ngx-modal-footer">
+                    <button type="button" id="btnBatalRekKoperasi" class="flex-1 bg-gray-100 text-gray-600 text-xs font-bold py-2.5 rounded-lg hover:bg-gray-200 transition">Batal</button>
+                    <button type="submit" id="btnSimpanRekKoperasi" class="flex-1 bg-kop-700 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-kop-800 transition">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Tetapkan Rekening untuk Nasabah -->
     <div id="modalRekening" class="ngx-modal-overlay hidden">
         <div class="ngx-modal-box">
             <div class="ngx-modal-header">
-                <h3 class="text-sm font-bold text-gray-900" id="modalRekeningTitle">Tambah Rekening Nasabah</h3>
+                <h3 class="text-sm font-bold text-gray-900" id="modalRekeningTitle">Tetapkan Rekening untuk Nasabah</h3>
                 <i data-lucide="x" class="w-5 h-5 ngx-modal-close" id="modalRekeningClose"></i>
             </div>
             <form id="formRekening">
@@ -152,16 +227,11 @@
                         <p class="text-[11px] text-gray-400 mt-1">Pastikan ejaan nama sama persis dengan yang nanti dipilih nasabah di Formulir Simpanan.</p>
                     </div>
                     <div>
-                        <label class="ngx-form-label">Nama Bank</label>
-                        <input type="text" id="rekeningNamaBank" required class="ngx-form-input" placeholder="Contoh: BRI, BCA, MANDIRI">
-                    </div>
-                    <div>
-                        <label class="ngx-form-label">Nomor Rekening</label>
-                        <input type="text" id="rekeningNoRekening" required class="ngx-form-input" placeholder="Nomor rekening nasabah">
-                    </div>
-                    <div>
-                        <label class="ngx-form-label">Atas Nama Rekening</label>
-                        <input type="text" id="rekeningAtasNama" required class="ngx-form-input" placeholder="Nama pemilik rekening bank">
+                        <label class="ngx-form-label">Rekening Koperasi Tujuan</label>
+                        <select id="rekeningIdRekening" required class="ngx-form-select">
+                            <option value="" disabled selected>Pilih rekening koperasi</option>
+                        </select>
+                        <p class="text-[11px] text-gray-400 mt-1">Belum ada pilihan? Tambahkan dulu di kartu "Rekening Koperasi" di atas.</p>
                     </div>
                     <p id="modalRekeningError" class="hidden text-xs text-red-600"></p>
                 </div>

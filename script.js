@@ -783,10 +783,6 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
     var keteranganInput = document.getElementById("simpananKeterangan");
     var emailInput = document.getElementById("simpananEmail");
     var noWhatsAppInput = document.getElementById("simpananNoWhatsApp");
-    var namaBankNasabahInput = document.getElementById("simpananNamaBankNasabah");
-    var noRekeningNasabahInput = document.getElementById("simpananNoRekeningNasabah");
-    var atasNamaRekeningInput = document.getElementById("simpananAtasNamaRekening");
-    var rekeningInfoLabel = document.getElementById("simpananRekeningInfo");
     var metodeSelect = document.getElementById("simpananMetode");
     var rekeningCard = document.getElementById("simpananRekeningCard");
     var uploadSection = document.getElementById("simpananUploadSection");
@@ -888,43 +884,48 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
     }
     muatDaftarNamaAnggota();
 
-    /* ---- Lookup data rekening bank nasabah (kalau admin sudah
-       daftarkan duluan) — isi otomatis 3 field Nama Bank/No Rekening/
-       Atas Nama, supaya nasabah tidak perlu ketik ulang tiap kali. ---- */
-    function kosongkanFieldRekening() {
-        if (namaBankNasabahInput) namaBankNasabahInput.value = "";
-        if (noRekeningNasabahInput) noRekeningNasabahInput.value = "";
-        if (atasNamaRekeningInput) atasNamaRekeningInput.value = "";
-        if (rekeningInfoLabel) rekeningInfoLabel.classList.add("hidden");
+    /* ---- Kartu "Transfer ke rekening koperasi" sekarang DINAMIS —
+       bisa beda rekening per nasabah (misal sebagian ke BRI, sebagian
+       ke Bank Jago), ditentukan admin lewat /admin/rekening-nasabah/.
+       Kalau nasabah belum ditugaskan ke rekening tertentu, otomatis
+       pakai rekening koperasi default (aktif pertama). ---- */
+    var labelRekEl = document.getElementById("simpananLabelRek");
+    var nomorRekEl = document.getElementById("simpananNomorRek");
+
+    function tampilkanRekeningTujuan(data) {
+
+        if (!labelRekEl || !nomorRekEl) return;
+
+        if (data && data.found) {
+            labelRekEl.textContent = (data.namaBank || "-") + " \u00b7 A/N " + (data.atasNama || "-");
+            nomorRekEl.textContent = data.noRekening || "-";
+        } else {
+            labelRekEl.textContent = "Rekening belum diatur, hubungi admin";
+            nomorRekEl.textContent = "-";
+        }
+
     }
 
-    function cariRekeningNasabah(nama) {
+    function muatRekeningTujuan(nama) {
 
-        if (!nama) { kosongkanFieldRekening(); return; }
+        var url = NGX_API_BASE_URL + "?action=rekeningNasabahByNama&nama=" + encodeURIComponent(nama || "");
 
-        fetch(NGX_API_BASE_URL + "?action=rekeningNasabahByNama&nama=" + encodeURIComponent(nama))
+        fetch(url)
             .then(function (res) { return res.json(); })
-            .then(function (data) {
-
-                if (data && data.success && data.found) {
-                    if (namaBankNasabahInput) namaBankNasabahInput.value = data.namaBank || "";
-                    if (noRekeningNasabahInput) noRekeningNasabahInput.value = data.noRekening || "";
-                    if (atasNamaRekeningInput) atasNamaRekeningInput.value = data.atasNama || "";
-                    if (rekeningInfoLabel) rekeningInfoLabel.classList.remove("hidden");
-                } else {
-                    kosongkanFieldRekening();
-                }
-
-            })
-            .catch(function () { kosongkanFieldRekening(); });
+            .then(function (data) { tampilkanRekeningTujuan(data); })
+            .catch(function () { tampilkanRekeningTujuan(null); });
 
     }
+
+    // Muat rekening DEFAULT begitu halaman dibuka (sebelum nama dipilih),
+    // supaya kartu tidak kosong/"Memuat..." terlalu lama.
+    muatRekeningTujuan("");
 
     function updateNamaLainnyaUI() {
         if (namaSelect.value === "__lainnya__") {
             namaLainnya.classList.remove("hidden");
             namaLainnya.required = true;
-            kosongkanFieldRekening();
+            muatRekeningTujuan(""); // belum ada nama pasti, tampilkan rekening default dulu
         } else {
             namaLainnya.classList.add("hidden");
             namaLainnya.required = false;
@@ -936,7 +937,7 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
                 pantherGroupSelect.value = grupTerdeteksi;
             }
 
-            cariRekeningNasabah(namaSelect.value);
+            muatRekeningTujuan(namaSelect.value);
         }
     }
     if (namaSelect) {
@@ -1153,12 +1154,6 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
         if (!nominal || nominal <= 0) return tampilkanErrorForm("Nominal simpanan tidak valid.");
         if (!email || !polaEmail.test(email)) return tampilkanErrorForm("Email wajib diisi dengan format yang benar (contoh: nama@email.com).");
         if (!noWhatsApp || !polaWa.test(noWhatsApp.replace(/[\s-]/g, ""))) return tampilkanErrorForm("Nomor WhatsApp wajib diisi dengan format yang benar (contoh: 081234567890).");
-        var namaBankNasabah = namaBankNasabahInput ? namaBankNasabahInput.value.trim() : "";
-        var noRekeningNasabah = noRekeningNasabahInput ? noRekeningNasabahInput.value.trim() : "";
-        var atasNamaRekening = atasNamaRekeningInput ? atasNamaRekeningInput.value.trim() : "";
-        if (!namaBankNasabah) return tampilkanErrorForm("Nama bank wajib diisi.");
-        if (!noRekeningNasabah) return tampilkanErrorForm("Nomor rekening wajib diisi.");
-        if (!atasNamaRekening) return tampilkanErrorForm("Atas nama rekening wajib diisi.");
         if (metode === "Transfer Bank" && !fileTerpilih) return tampilkanErrorForm("Bukti transfer wajib diupload untuk metode Transfer Bank.");
 
         var body = new URLSearchParams();
@@ -1170,9 +1165,6 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
         body.append("keterangan", keteranganInput.value.trim());
         body.append("email", email);
         body.append("noWhatsApp", noWhatsApp);
-        body.append("namaBankNasabah", namaBankNasabah);
-        body.append("noRekeningNasabah", noRekeningNasabah);
-        body.append("atasNamaRekening", atasNamaRekening);
         body.append("metodePembayaran", metode);
 
         if (metode === "Transfer Bank" && fileTerpilih) {
