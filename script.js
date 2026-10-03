@@ -889,7 +889,7 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
        ke Bank Jago), ditentukan admin lewat /admin/rekening-nasabah/.
        Kalau nasabah belum ditugaskan ke rekening tertentu, otomatis
        pakai rekening koperasi default (aktif pertama). ---- */
-    var judulRekEl = document.getElementById("simpananJudulRek");
+    var namaNasabahRekEl = document.getElementById("simpananNamaNasabahRek");
     var labelRekEl = document.getElementById("simpananLabelRek");
     var nomorRekEl = document.getElementById("simpananNomorRek");
 
@@ -907,14 +907,20 @@ var NGX_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwTetWJfA0huK9Ck
             labelRekEl.textContent = (data.namaBank || "-") + (atasNama ? " \u00b7 A/N " + atasNama : "");
             nomorRekEl.textContent = data.noRekening || "-";
 
-            // Judul kartu: kalau ini rekening milik nasabah itu sendiri, tampilkan namanya
-            if (judulRekEl) {
-                judulRekEl.textContent = data.ditugaskan && data.namaNasabah ? "Rekening untuk " + data.namaNasabah : "KAS NGANJUK";
+            // Nama nasabah cuma ditampilkan kalau ini rekening milik nasabah itu sendiri,
+            // bukan rekening default (yang berlaku umum untuk semua nasabah)
+            if (namaNasabahRekEl) {
+                if (data.ditugaskan) {
+                    namaNasabahRekEl.textContent = "Nasabah: " + (namaDipilih || data.namaNasabah || "");
+                    namaNasabahRekEl.classList.remove("hidden");
+                } else {
+                    namaNasabahRekEl.classList.add("hidden");
+                }
             }
 
         } else {
 
-            if (judulRekEl) judulRekEl.textContent = "KAS NGANJUK";
+            if (namaNasabahRekEl) namaNasabahRekEl.classList.add("hidden");
 
             // Sebelum nama dipilih, pesannya netral. Sesudah nama dipilih tapi tidak ada rekening, baru "hubungi admin".
             labelRekEl.textContent = namaDipilih ? "Rekening belum diatur, hubungi admin" : "Pilih nama anggota untuk melihat rekening tujuan";
